@@ -7,4 +7,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="SoBot/SorceryBot.csproj" />
+  <Project Path="SorceryBotTests/SorceryBotTests.csproj" Id="fba96531-0275-45f1-8cdd-f74c56c7cc75" />
 </Solution>
