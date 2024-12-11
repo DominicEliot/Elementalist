@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SorceryBot.Features.Card.Search;
-public class CardSearchSlashCommand : InteractionModuleBase
+public class CardSearchSlashCommand : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IMediator _mediator;
 
@@ -16,7 +16,7 @@ public class CardSearchSlashCommand : InteractionModuleBase
         _mediator = mediator;
     }
 
-    [SlashCommand("card", "Searches for and returns any matching sorcery cards")]
+    [SlashCommand("search", "Searches for and returns any matching sorcery cards")]
     public async Task CardSearch(string cardName)
     {
         var card = await _mediator.Send(new CardSearchQuery());
