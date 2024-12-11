@@ -1,4 +1,4 @@
-namespace SoBot;
+namespace SorceryBot;
 
 public class BotListenerService : BackgroundService
 {
@@ -14,7 +14,7 @@ public class BotListenerService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.Information("Worker running at: {time}", DateTimeOffset.Now);
-            
+
             await Task.Delay(1000, stoppingToken);
         }
     }

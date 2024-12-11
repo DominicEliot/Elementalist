@@ -3,7 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
-namespace SoBot;
+namespace SorceryBot;
 
 public class Program
 {
