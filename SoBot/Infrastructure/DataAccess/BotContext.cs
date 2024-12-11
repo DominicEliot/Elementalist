@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace SorceryBot.Infrastructure.DataAccess;
-internal class SettingsContext : DbContext
+internal class BotContext : DbContext
 {
 }
