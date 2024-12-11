@@ -365,3 +365,6 @@ FodyWeavers.xsd
 *.db
 *.db-shm
 *.db-wal
+
+# Private configuration
+*.Private.*
