@@ -20,6 +20,5 @@
   <ItemGroup>
     <Folder Include="Features\Guild\" />
     <Folder Include="Features\User\" />
-    <Folder Include="Infrastructure\" />
   </ItemGroup>
 </Project>
