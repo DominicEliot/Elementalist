@@ -6,9 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Events;
-using SorceryBot.Features.Card.Search;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Infrastructure.Logging;
+using static SorceryBot.Features.Card.GetCard;
 
 namespace SorceryBot;
 

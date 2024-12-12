@@ -65,7 +65,9 @@ public class FileCardRepository() : ICardRepository
         if (_cards.Count == 0)
         {
             var json = await File.ReadAllTextAsync(@"Infrastructure\DataAccess\CardData\cards.json");
-            var cards = JsonSerializer.Deserialize<List<Card>>(json);
+            var jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+
+            var cards = JsonSerializer.Deserialize<List<Card>>(json, jsonOptions);
             _cards = cards ?? [];
         }
     }
