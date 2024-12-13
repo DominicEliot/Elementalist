@@ -30,12 +30,22 @@ public class FaqRepoistory
             var cardName = node.SelectSingleNode("h3").InnerText.Trim();
             var faqs = new List<string>();
 
-            foreach(var faq in node.SelectNodes("div"))
+            foreach(var faq in node.SelectNodes("div/div"))
             {
+                var question = faq.GetAttributes("class")
+                    .FirstOrDefault(a => a?.Value?.Contains("curiosa-faq") == true && !a.Value.Contains("curiosa-faq-a"))?
+                    .OwnerNode;
+
+                var answer = faq.GetAttributes("class").FirstOrDefault(a => a?.Value?.Contains("curiosa-faq-a") == true)?.OwnerNode;
+
+                if (faq.Descendants("table").Any())
+                {
+                    Console.WriteLine("found a table");
+                }
                 faqs.Add(faq.InnerHtml);
             }
 
-            Console.WriteLine($"{cardName} has {faqs.Count} faqs");
+            //Console.WriteLine($"{cardName} has {faqs.Count} faqs");
         }
     }
 }
