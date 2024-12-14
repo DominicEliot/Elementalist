@@ -20,11 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Guild\" />
-    <Folder Include="Features\User\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Infrastructure\DataAccess\CardData\faq.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
