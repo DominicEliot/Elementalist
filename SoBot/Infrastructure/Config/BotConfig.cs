@@ -1,4 +1,4 @@
-﻿namespace SorceryBot.Features.Card;
+﻿namespace SorceryBot.Infrastructure.Config;
 
 public class BotConfig
 {

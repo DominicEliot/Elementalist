@@ -1,62 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Interactions;
-
-using Discord.Interactions;
-
+﻿using Discord;
 using MediatR;
-using Microsoft.Extensions.Options;
 using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Models;
 using SorceryBot.Shared;
-using static SorceryBot.Features.Card.GetCard;
+using static SorceryBot.Features.Card.GetCards;
 
 namespace SorceryBot.Features.Card;
 
-public static class GetCard
+public record CardByFullNameQuery(string CardFullName) : IQuery<Models.Card>;
+
+public class CardSearchQueryHandler(ICardRepository cardRepository) : IRequestHandler<CardByFullNameQuery, Models.Card>
 {
-    public record CardSearchQuery(string CardQuery) : IQuery<IEnumerable<Models.Card>>;
-    public record CardByFullNameQuery(string CardFullName) : IQuery<Models.Card>;
+    private readonly ICardRepository _cardRepository = cardRepository;
 
-    public class CardSearchQueryHandler(ICardRepository cardRepository) : IRequestHandler<CardSearchQuery, IEnumerable<Models.Card>>
+    public async Task<Models.Card> Handle(CardByFullNameQuery request, CancellationToken cancellationToken)
     {
-        private readonly ICardRepository _cardRepository = cardRepository;
+        var card = await _cardRepository.GetCardsMatching(c => c.Name == request.CardFullName).FirstOrDefaultAsync();
 
-        public async Task<IEnumerable<Models.Card>> Handle(CardSearchQuery request, CancellationToken cancellationToken)
-        {
-            var cards = await _cardRepository.GetCards();
-            var matches = _cardRepository.GetCardsMatching(c => c.Name.Contains(request.CardQuery, StringComparison.OrdinalIgnoreCase));
-
-            return await matches.ToListAsync();
-        }
+        return card;
     }
+}
 
-    public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : InteractionModuleBase<SocketInteractionContext>
+public static class CardDisplay
+{
+    internal static ComponentBuilder CardComponentBuilder(Models.Card card)
     {
-        private readonly IMediator _mediator = mediator;
-        private readonly BotConfig _config = config.Value;
+        var builder = new ComponentBuilder();
 
-        [SlashCommand("search", "Searches for and returns any matching sorcery cards")]
-        public async Task CardSearch(string cardName)
+        var variants = card.Sets.SelectMany(s => s.Variants);
+        if (variants.Count() > 1)
         {
-            var cards = await _mediator.Send(new CardSearchQuery(cardName));
+            var menuBuilder = new SelectMenuBuilder();
 
-            if (cards.Count() > _config.MaxCardEmbedsPerMessage)
+            foreach (var variant in variants)
             {
-                await RespondAsync($"Too many matches for {cardName}");
-                return;
+                menuBuilder.AddOption(variant.Product, $"variant-{variant.Slug}");
             }
 
-            var embeds = new List<Embed>();
-            foreach (var card in cards)
-            {
-                embeds.Add(new EmbedCardAdapter(card).Build());
-            }
+            builder.WithSelectMenu(menuBuilder);
         }
+
+        builder.WithButton("Faq", $"faq-{card.Name}");
+        builder.WithButton("Price", $"price-{card.Name}");
+
+        return builder;
     }
 }
 
@@ -96,29 +83,19 @@ internal class EmbedCardAdapter : EmbedBuilder
     private Color GetDiscordColor(string elements)
     {
         if (elements.Contains(","))
-        {
             return new Color(0xb28950);
-        }
 
         if (elements.Contains("Fire"))
-        {
             return new Color(0xfb671d);
-        }
 
         if (elements.Contains("Air"))
-        {
             return new Color(0x959cb8);
-        }
 
         if (elements.Contains("Earth"))
-        {
             return new Color(0x909090);
-        }
 
         if (elements.Contains("Water"))
-        {
             return new Color(0x19cce3);
-        }
 
         // Colorless
         return new Color(0xdcdcdc);
