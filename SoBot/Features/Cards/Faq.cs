@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord.Interactions;
 using MediatR;
 using SorceryBot.Infrastructure.DataAccess.CardData;
-using static SorceryBot.Features.Card.GetCard;
 
 namespace SorceryBot.Features.Card;
 public static class Faq

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static SorceryBot.Features.Card.GetCard;
 
 namespace SorceryBot.Features.Card.Search.Tests;
 
@@ -19,7 +18,7 @@ public class CardSearchQueryHandlerTests
     public async Task HandleTestAsync()
     {
         var query = new CardSearchQuery("Pudge");
-        var handler = new CardSearchQueryHandler(new FileCardRepository());
+        var handler = new CardsSearchQueryHandler(new FileCardRepository());
 
         var result = await handler.Handle(query, CancellationToken.None);
 

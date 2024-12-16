@@ -8,7 +8,6 @@ using Serilog;
 using Serilog.Events;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Infrastructure.Logging;
-using static SorceryBot.Features.Card.GetCard;
 
 namespace SorceryBot;
 
@@ -38,7 +37,7 @@ public class Program
         });
 
         builder.Services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssemblyContaining<CardSearchQuery>();
+            cfg.RegisterServicesFromAssemblyContaining<Program>();
             cfg.AddOpenBehavior(typeof(QueryLoggingPipeline<,>));
         });
 
