@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SorceryBot.Features.Card;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Models;
+using SorceryBot.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBot.DiscordUi;
 
@@ -14,13 +15,19 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     private readonly IMediator _mediator = mediator;
 
     [SlashCommand("search", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearch(string cardName)
+    public async Task CardSearch([Autocomplete<CardAutoCompleteHandler>()]string cardName)
     {
-        var cards = await _mediator.Send(new CardSearchQuery(cardName));
+        var cards = await _mediator.Send(new GetCardsQuery(cardName));
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            await RespondAsync($"Too many matches for {cardName}");
+            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
+            return;
+        }
+
+        if (cards.Count() == 0)
+        {
+            await RespondAsync($"Unknown card {cardName}", ephemeral: true);
             return;
         }
 
@@ -37,6 +44,24 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         }
 
         await RespondAsync(embeds: embeds.ToArray(), components: components);
+    }
+}
+
+public class CardAutoCompleteHandler(ICardRepository cardRepository) : AutocompleteHandler
+{
+    private readonly ICardRepository _cardRepository = cardRepository;
+
+    public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
+    {
+        var value = autocompleteInteraction.Data.Current.Value.ToString();
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return AutocompletionResult.FromSuccess();
+        }
+
+        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value));
+        return AutocompletionResult.FromSuccess(suggestions.Take(25).Select(c => new AutocompleteResult(c.Name, c.Name.ToLower())));
     }
 }
 
