@@ -17,7 +17,7 @@ public static class Faq
         [SlashCommand("search", "Searches for and returns any matching sorcery cards")]
         public async Task FaqCommand(string cardName)
         {
-            var cards = await _mediator.Send(new CardSearchQuery(cardName));
+            var cards = await _mediator.Send(new GetCardsQuery(cardName));
             var card = cards.FirstOrDefault();
 
             await RespondAsync($"{cardName}'s info should go here.");
