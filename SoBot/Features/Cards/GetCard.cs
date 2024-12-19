@@ -6,16 +6,16 @@ using SorceryBot.Shared;
 
 namespace SorceryBot.Features.Card;
 
-public record CardByFullNameQuery(string CardFullName) : IQuery<Models.Card>;
+public record CardByFullNameQuery(string CardFullName) : IQuery<Models.Card?>;
 
-public class CardSearchQueryHandler(ICardRepository cardRepository) : IRequestHandler<CardByFullNameQuery, Models.Card>
+public class CardSearchQueryHandler(ICardRepository cardRepository) : IRequestHandler<CardByFullNameQuery, Models.Card?>
 {
     private readonly ICardRepository _cardRepository = cardRepository;
 
-    public async Task<Models.Card> Handle(CardByFullNameQuery request, CancellationToken cancellationToken)
+    public async Task<Models.Card?> Handle(CardByFullNameQuery request, CancellationToken cancellationToken)
     {
-        var card = await _cardRepository.GetCardsMatching(c => c.Name == request.CardFullName).FirstOrDefaultAsync();
+        var cards = await _cardRepository.GetCardsMatching(c => c.Name == request.CardFullName);
 
-        return card;
+        return cards.FirstOrDefault();
     }
 }
