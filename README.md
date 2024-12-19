@@ -15,4 +15,5 @@ The code in this project is intentionally over-engineered. I did it this way to 
 It is using:
  * A version of the Vertical Slice Architecture, that I adapted to work a little better for a discord bot.
  * CQRS with MediatR
+ * FluentValidation
  * Discord.Net to facilitate communications with the discord API
