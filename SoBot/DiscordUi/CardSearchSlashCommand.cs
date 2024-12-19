@@ -9,62 +9,6 @@ using SorceryBot.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBot.DiscordUi;
 
-public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : InteractionModuleBase<SocketInteractionContext>
-{
-    private readonly BotConfig _config = config.Value;
-    private readonly IMediator _mediator = mediator;
-
-    [SlashCommand("search", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearch([Autocomplete<CardAutoCompleteHandler>()]string cardName)
-    {
-        var cards = await _mediator.Send(new GetCardsQuery(cardName));
-
-        if (cards.Count() > _config.MaxCardEmbedsPerMessage)
-        {
-            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
-            return;
-        }
-
-        if (cards.Count() == 0)
-        {
-            await RespondAsync($"Unknown card {cardName}", ephemeral: true);
-            return;
-        }
-
-        var embeds = new List<Embed>();
-        foreach (var card in cards)
-        {
-            embeds.Add(new EmbedCardAdapter(card).Build());
-        }
-
-        MessageComponent? components = null;
-        if (cards.Count() == 1)
-        {
-            components = CardDisplay.CardComponentBuilder(cards.First()).Build();
-        }
-
-        await RespondAsync(embeds: embeds.ToArray(), components: components);
-    }
-}
-
-public class CardAutoCompleteHandler(ICardRepository cardRepository) : AutocompleteHandler
-{
-    private readonly ICardRepository _cardRepository = cardRepository;
-
-    public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
-    {
-        var value = autocompleteInteraction.Data.Current.Value.ToString();
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return AutocompletionResult.FromSuccess();
-        }
-
-        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value));
-        return AutocompletionResult.FromSuccess(suggestions.Take(25).Select(c => new AutocompleteResult(c.Name, c.Name.ToLower())));
-    }
-}
-
 public static class CardDisplay
 {
     internal static ComponentBuilder CardComponentBuilder(Models.Card card)
@@ -91,11 +35,85 @@ public static class CardDisplay
     }
 }
 
+public class CardAutoCompleteHandler(ICardRepository cardRepository) : AutocompleteHandler
+{
+    private readonly ICardRepository _cardRepository = cardRepository;
+
+    public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
+    {
+        var value = autocompleteInteraction.Data.Current.Value as string;
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return AutocompletionResult.FromSuccess();
+        }
+
+        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value));
+        return AutocompletionResult.FromSuccess(suggestions.Take(25).Select(c => new AutocompleteResult(c.Name, c.Name)));
+    }
+}
+
+public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : InteractionModuleBase<SocketInteractionContext>
+{
+    private readonly BotConfig _config = config.Value;
+    private readonly IMediator _mediator = mediator;
+
+    [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
+    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName)
+    {
+        var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
+
+        await SendDiscordResponse(cardName, cards);
+    }
+
+    [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
+    public async Task CardSearchByRulesText(string cardText, string? element)
+    {
+        var query = new GetCardsQuery()
+        {
+            TextContains = cardText,
+            ElementsContain = element
+        };
+        var cards = await _mediator.Send(query);
+
+        await SendDiscordResponse(cardText, cards);
+    }
+
+    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards)
+    {
+        if (!cards.Any())
+        {
+            await RespondAsync($"Couldn't find match for '{cardName}'", ephemeral: true);
+            return;
+        }
+
+        if (cards.Count() > _config.MaxCardEmbedsPerMessage)
+        {
+            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
+            return;
+        }
+
+        var embeds = new List<Embed>();
+        foreach (var card in cards)
+        {
+            embeds.Add(new EmbedCardAdapter(card).Build());
+        }
+
+        MessageComponent? components = null;
+        if (cards.Count() == 1)
+        {
+            components = CardDisplay.CardComponentBuilder(cards.First()).Build();
+        }
+
+        await RespondAsync(embeds: embeds.ToArray(), components: components);
+    }
+}
+
 internal class EmbedCardAdapter : EmbedBuilder
 {
-    private Models.Card _card;
+    private Card _card;
 
-    public EmbedCardAdapter(Models.Card card, Variant? variant = null)
+    public EmbedCardAdapter(Card card, Variant? variant = null)
     {
         _card = card;
         variant ??= GetDefaultVariant(_card);
