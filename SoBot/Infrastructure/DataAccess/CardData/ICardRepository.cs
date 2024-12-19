@@ -8,7 +8,7 @@ namespace SorceryBot.Infrastructure.DataAccess.CardData;
 public interface ICardRepository
 {
     Task<IEnumerable<Card>> GetCards();
-    IAsyncEnumerable<Card> GetCardsMatching(Func<Card, bool> predicate);
+    Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 
 }
 
@@ -32,20 +32,10 @@ public class CuriosaApiCardRepository(HttpClient httpClient) : ICardRepository
         return _cards;
     }
 
-    public async Task<IEnumerable<Card>> GetCards(Func<IEnumerable<Card>, IEnumerable<Card>> filter)
+    public async Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate)
     {
-        return filter.Invoke(await GetCards());
-    }
-
-    public async IAsyncEnumerable<Card> GetCardsMatching(Func<Card, bool> predicate)
-    {
-        foreach (var card in await GetCards())
-        {
-            if (predicate(card))
-            {
-                yield return card;
-            }
-        }
+        IEnumerable<Card> filteredCards = (await GetCards()).Where(predicate);
+        return filteredCards;
     }
 }
 
@@ -72,13 +62,10 @@ public class FileCardRepository() : ICardRepository
         }
     }
 
-    public async IAsyncEnumerable<Card> GetCardsMatching(Func<Card, bool> predicate)
+    public async Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate)
     {
         await PopulateRepository();
 
-        foreach (var card in _cards)
-        {
-            if (predicate(card)) yield return card;
-        }
+        return _cards.Where(predicate);
     }
 }
