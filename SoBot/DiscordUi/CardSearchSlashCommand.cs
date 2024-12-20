@@ -96,7 +96,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         var embeds = new List<Embed>();
         foreach (var card in cards)
         {
-            embeds.Add(new EmbedCardAdapter(card).Build());
+            embeds.Add(new EmbedCardDetailAdapter(card).Build());
         }
 
         MessageComponent? components = null;
@@ -109,11 +109,70 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     }
 }
 
-internal class EmbedCardAdapter : EmbedBuilder
+internal static class DiscordLookups
+{
+    internal static Color GetDiscordColor(string elements)
+    {
+        if (elements.Contains(","))
+            return new Color(0xb28950);
+
+        if (elements.Contains("Fire"))
+            return new Color(0xfb671d);
+
+        if (elements.Contains("Air"))
+            return new Color(0x959cb8);
+
+        if (elements.Contains("Earth"))
+            return new Color(0x909090);
+
+        if (elements.Contains("Water"))
+            return new Color(0x19cce3);
+
+        // Colorless
+        return new Color(0xdcdcdc);
+    }
+}
+
+internal class EmbedCardDetailAdapter : EmbedBuilder
 {
     private Card _card;
 
-    public EmbedCardAdapter(Card card, Variant? variant = null)
+    public EmbedCardDetailAdapter(Card card, Variant? variant = null)
+    {
+        _card = card;
+        variant ??= GetDefaultVariant(_card);
+
+        //sample style: https://message.style/app/editor/share/KYfJ50a5
+        WithAuthor(_card.Name);
+        WithColor(DiscordLookups.GetDiscordColor(_card.Elements));
+        //WithThumbnailUrl("TODO");
+        WithDescription(variant.TypeText);
+        AddField("----", _card.Guardian.RulesText);
+        //WithFooter($"Art @ {variant.Artist}");
+    }
+
+    private Variant GetDefaultVariant(Models.Card card)
+    {
+        var sets = _card.Sets.OrderByDescending(s => s.ReleasedAt);
+
+        Variant? bestFitVariant = null;
+        foreach (var set in sets)
+        {
+            var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
+            if (variant?.Product == "Booster") return variant;
+
+            bestFitVariant ??= variant;
+        }
+
+        return bestFitVariant ?? sets.First().Variants.First();
+    }
+}
+
+internal class EmbedCardArtAdapter : EmbedBuilder
+{
+    private Card _card;
+
+    public EmbedCardArtAdapter(Card card, Variant? variant = null)
     {
         _card = card;
         variant ??= GetDefaultVariant(_card);
@@ -121,9 +180,8 @@ internal class EmbedCardAdapter : EmbedBuilder
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(_card.Name);
         WithColor(GetDiscordColor(_card.Elements));
-        WithDescription(variant.TypeText);
-        AddField("----", _card.Guardian.RulesText);
-        //WithFooter($"Art @ {variant.Artist}");
+        //WithImageUrl("TODO");
+        WithFooter($"Art @ {variant.Artist}");
     }
 
     private Variant GetDefaultVariant(Models.Card card)
