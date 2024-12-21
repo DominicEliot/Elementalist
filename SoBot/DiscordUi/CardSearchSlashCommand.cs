@@ -145,7 +145,7 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(_card.Name);
         WithColor(DiscordLookups.GetDiscordColor(_card.Elements));
-        //WithThumbnailUrl("TODO");
+        WithThumbnailUrl("https://fourcores.xyz/.netlify/images?url=/images/cards/965.png"); //TODO - actually do the real card image
         WithDescription(variant.TypeText);
         AddField("----", _card.Guardian.RulesText);
         //WithFooter($"Art @ {variant.Artist}");
@@ -180,7 +180,7 @@ internal class EmbedCardArtAdapter : EmbedBuilder
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(_card.Name);
         WithColor(GetDiscordColor(_card.Elements));
-        //WithImageUrl("TODO");
+        WithImageUrl("https://fourcores.xyz/.netlify/images?url=/images/cards/965.png"); //TODO - actually do the real card image
         WithFooter($"Art @ {variant.Artist}");
     }
 
