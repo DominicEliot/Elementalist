@@ -17,7 +17,7 @@ public class CardSearchQueryHandlerTests
     [Test()]
     public async Task HandleTestAsync()
     {
-        var query = new GetCardsQuery("Pudge");
+        var query = new GetCardsQuery() {CardNameContains = "Pudge" };
         var handler = new GetCardsQueryHandler(new FileCardRepository());
 
         var result = await handler.Handle(query, CancellationToken.None);
