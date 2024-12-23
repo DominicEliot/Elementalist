@@ -6,7 +6,10 @@ using SorceryBot.Shared;
 
 namespace SorceryBot.Features.Card;
 
-public record CardByFullNameQuery(string CardFullName) : IQuery<Models.Card?>;
+public record CardByFullNameQuery : IQuery<Models.Card?>
+{
+    public string CardFullName { get; set; }
+}
 
 public class CardSearchQueryHandler(ICardRepository cardRepository) : IRequestHandler<CardByFullNameQuery, Models.Card?>
 {
