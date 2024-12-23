@@ -42,8 +42,6 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
     {
         var cards = await _cardRepository.GetCards();
 
-        if (request.CardNameContains == null && request.CardNameContains == null && request.CardNameContains == null)
-
         if (request.CardNameContains != null)
         {
             cards = cards.Where(c => c.Name.Contains(request.CardNameContains, StringComparison.OrdinalIgnoreCase));
