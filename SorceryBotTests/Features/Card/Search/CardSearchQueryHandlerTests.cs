@@ -23,5 +23,6 @@ public class CardSearchQueryHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         Assert.That(result, Is.Not.Null);
+        Assert.That(result.First().Name, Is.EqualTo("Pudge Butcher"));
     }
 }

@@ -115,7 +115,7 @@ public class BotStartupService : BackgroundService
     {
         try
         {
-            //await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.RegisterCommandsGloballyAsync();
 
             _client.Ready -= clientReady;
         }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Events;
 using SorceryBot.Infrastructure.Config;
+using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Infrastructure.Logging;
 
 namespace SorceryBot;
@@ -24,6 +25,7 @@ public class Program
         builder.Services.AddSerilog(Log.Logger);
 
         builder.Services.AddHostedService<BotStartupService>();
+        builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
 
         var logLevel = (Log.Logger.IsEnabled(LogEventLevel.Debug)) ? LogSeverity.Debug : LogSeverity.Info;
         var clientConfig = new DiscordSocketConfig { MessageCacheSize = 5, LogLevel = logLevel, GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages | GatewayIntents.Guilds };
