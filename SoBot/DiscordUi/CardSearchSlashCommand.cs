@@ -22,9 +22,9 @@ public static class CardDisplay
 
             foreach (var variant in variants)
             {
-                menuBuilder.AddOption(variant.Product, $"variant-{variant.Slug}");
+                menuBuilder.AddOption(variant.Product, $"variant:{variant.Slug}");
             }
-
+            menuBuilder.WithCustomId($"variantSelect:{card.Name}");
             builder.WithSelectMenu(menuBuilder);
         }
 
@@ -48,7 +48,7 @@ public class CardAutoCompleteHandler(ICardRepository cardRepository) : Autocompl
             return AutocompletionResult.FromSuccess();
         }
 
-        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value));
+        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
         return AutocompletionResult.FromSuccess(suggestions.Take(25).Select(c => new AutocompleteResult(c.Name, c.Name)));
     }
 }
