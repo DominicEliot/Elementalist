@@ -6,7 +6,7 @@ using SorceryBot.Features.Card;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Models;
 using SorceryBot.Infrastructure.DataAccess.CardData;
-
+using System.Reflection.Emit;
 namespace SorceryBot.DiscordUi;
 
 public static class CardDisplay
@@ -15,23 +15,31 @@ public static class CardDisplay
     {
         var builder = new ComponentBuilder();
 
-        var variants = card.Sets.SelectMany(s => s.Variants);
-        if (variants.Count() > 1)
+        if (card.Sets.Count() > 1 || card.Sets.Any(s => s.Variants.Count() > 1))
         {
-            var menuBuilder = new SelectMenuBuilder();
-
-            foreach (var variant in variants)
-            {
-                menuBuilder.AddOption(variant.Product, $"variant:{variant.Slug}");
-            }
-            menuBuilder.WithCustomId($"variantSelect:{card.Name}");
-            builder.WithSelectMenu(menuBuilder);
+            AddVariantsMenu(card, builder);
         }
 
         builder.WithButton("Faq", $"faq-{card.Name}");
         builder.WithButton("Price", $"price-{card.Name}");
 
         return builder;
+    }
+
+    private static void AddVariantsMenu(Card card, ComponentBuilder builder)
+    {
+        var menuBuilder = new SelectMenuBuilder();
+        menuBuilder.WithCustomId($"variantSelect:{card.Name}");
+
+        foreach (var set in card.Sets)
+        {
+            foreach (var variant in set.Variants)
+            {
+                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"variant:{variant.Slug}");
+            }
+        }
+
+        builder.WithSelectMenu(menuBuilder);
     }
 }
 
@@ -109,30 +117,6 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     }
 }
 
-internal static class DiscordLookups
-{
-    internal static Color GetDiscordColor(string elements)
-    {
-        if (elements.Contains(","))
-            return new Color(0xb28950);
-
-        if (elements.Contains("Fire"))
-            return new Color(0xfb671d);
-
-        if (elements.Contains("Air"))
-            return new Color(0x959cb8);
-
-        if (elements.Contains("Earth"))
-            return new Color(0x909090);
-
-        if (elements.Contains("Water"))
-            return new Color(0x19cce3);
-
-        // Colorless
-        return new Color(0xdcdcdc);
-    }
-}
-
 internal class EmbedCardDetailAdapter : EmbedBuilder
 {
     private Card _card;
@@ -144,8 +128,8 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(_card.Name);
-        WithColor(DiscordLookups.GetDiscordColor(_card.Elements));
-        WithThumbnailUrl("https://fourcores.xyz/.netlify/images?url=/images/cards/965.png"); //TODO - actually do the real card image
+        WithColor(DiscordLookups.GetCardColor(_card.Elements));
+        WithThumbnailUrl("https://fourcores-home.netlify.app/images/cards/965.png"); //TODO - actually do the real card image
         WithDescription(variant.TypeText);
         AddField("----", _card.Guardian.RulesText);
         //WithFooter($"Art @ {variant.Artist}");
@@ -170,23 +154,23 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
 
 internal class EmbedCardArtAdapter : EmbedBuilder
 {
-    private Card _card;
-
-    public EmbedCardArtAdapter(Card card, Variant? variant = null)
+    public EmbedCardArtAdapter(Models.Card card, Variant? variant = null)
     {
-        _card = card;
-        variant ??= GetDefaultVariant(_card);
+        variant ??= CardLookups.GetDefaultVariant(card);
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
-        WithAuthor(_card.Name);
-        WithColor(GetDiscordColor(_card.Elements));
-        WithImageUrl("https://fourcores.xyz/.netlify/images?url=/images/cards/965.png"); //TODO - actually do the real card image
+        WithAuthor(card.Name);
+        WithColor(DiscordLookups.GetCardColor(card.Elements));
+        WithImageUrl("https://fourcores-home.netlify.app/images/cards/965.png"); //TODO - actually do the real card image
         WithFooter($"Art @ {variant.Artist}");
     }
+}
 
-    private Variant GetDefaultVariant(Models.Card card)
+internal static class CardLookups
+{
+    internal static Variant GetDefaultVariant(Models.Card card)
     {
-        var sets = _card.Sets.OrderByDescending(s => s.ReleasedAt);
+        var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
 
         Variant? bestFitVariant = null;
         foreach (var set in sets)
@@ -198,26 +182,5 @@ internal class EmbedCardArtAdapter : EmbedBuilder
         }
 
         return bestFitVariant ?? sets.First().Variants.First();
-    }
-
-    private Color GetDiscordColor(string elements)
-    {
-        if (elements.Contains(","))
-            return new Color(0xb28950);
-
-        if (elements.Contains("Fire"))
-            return new Color(0xfb671d);
-
-        if (elements.Contains("Air"))
-            return new Color(0x959cb8);
-
-        if (elements.Contains("Earth"))
-            return new Color(0x909090);
-
-        if (elements.Contains("Water"))
-            return new Color(0x19cce3);
-
-        // Colorless
-        return new Color(0xdcdcdc);
     }
 }
