@@ -14,39 +14,56 @@ namespace SorceryBot;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
-        builder.Configuration.AddJsonFile("BotToken.Private.json");
-        builder.Services.Configure<BotTokenSettings>(builder.Configuration.GetRequiredSection("BotTokenSettings"));
+        Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 
-        Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
-
-        builder.Services.AddSerilog(Log.Logger);
-
-        builder.Services.AddHostedService<BotStartupService>();
-        builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
-
-        var logLevel = (Log.Logger.IsEnabled(LogEventLevel.Debug)) ? LogSeverity.Debug : LogSeverity.Info;
-        var clientConfig = new DiscordSocketConfig { MessageCacheSize = 5, LogLevel = logLevel, GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages | GatewayIntents.Guilds };
-        builder.Services.AddSingleton(clientConfig);
-        builder.Services.AddSingleton<DiscordSocketClient>();
-        builder.Services.AddSingleton(services =>
+        try
         {
-            var client = services.GetRequiredService<DiscordSocketClient>();
-            var interactionServiceConfig = new InteractionServiceConfig() { UseCompiledLambda = true, LogLevel = LogSeverity.Info, AutoServiceScopes = true };
-            return new InteractionService(client.Rest, interactionServiceConfig);
-        });
+            var builder = Host.CreateApplicationBuilder(args);
+            builder.Configuration.AddJsonFile("BotToken.Private.json");
+            builder.Services.Configure<BotTokenSettings>(builder.Configuration.GetRequiredSection("BotTokenSettings"));
 
-        builder.Services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssemblyContaining<Program>();
-            cfg.AddOpenBehavior(typeof(QueryLoggingPipeline<,>));
-        });
+            builder.Services.AddSerilog((services, lc) => lc
+                .ReadFrom.Configuration(builder.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext());
 
-        var host = builder.Build();
+            builder.Services.AddHostedService<BotStartupService>();
+            builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
 
-        host.MapDiscord();
+            var logLevel = (Log.Logger.IsEnabled(LogEventLevel.Debug)) ? LogSeverity.Debug : LogSeverity.Info;
+            var clientConfig = new DiscordSocketConfig { MessageCacheSize = 5, LogLevel = logLevel, GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages | GatewayIntents.Guilds };
+            builder.Services.AddSingleton(clientConfig);
+            builder.Services.AddSingleton<DiscordSocketClient>();
+            builder.Services.AddSingleton(new InteractionServiceConfig() { LogLevel = LogSeverity.Info, AutoServiceScopes = true });
 
-        host.Run();
+            builder.Services.AddSingleton(services =>
+            {
+                var client = services.GetRequiredService<DiscordSocketClient>();
+                var interactionServiceConfig = new InteractionServiceConfig() { UseCompiledLambda = true, LogLevel = LogSeverity.Info, AutoServiceScopes = true };
+                return new InteractionService(client, interactionServiceConfig);
+            });
+
+            builder.Services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssemblyContaining<Program>();
+                cfg.AddOpenBehavior(typeof(QueryLoggingPipeline<,>));
+            });
+
+            var host = builder.Build();
+
+            host.MapDiscord();
+
+            await host.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Fatal(ex, "An unhandelded error occourred.");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 }
