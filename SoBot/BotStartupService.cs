@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Discord;
 using Discord.Interactions;
 using Discord.Rest;
@@ -35,19 +36,17 @@ public class BotStartupService : BackgroundService
             _client.Log += LogAsync;
             _interactionService.Log += LogAsync;
             _client.Ready += clientReady;
-            _client.InteractionCreated += interactionCreated;
-            _client.SlashCommandExecuted += slashCommandExecuted;
+            _client.InteractionCreated += _client_InteractionCreated;
 
             await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
 
             await _client.StartAsync();
             _logger.Information("Discord client started");
 
-
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
             await Task.Delay(-1, stoppingToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not TaskCanceledException)
         {
             _logger.Fatal(ex, "A fatal exception occourred.");
         }
@@ -57,12 +56,6 @@ public class BotStartupService : BackgroundService
         }
     }
 
-    private async Task interactionCreated(SocketInteraction interaction)
-    {
-        var ctx = new SocketInteractionContext(_client, interaction);
-        await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
-    }
-
     private async Task LogAsync(LogMessage message)
     {
         switch (message.Severity)
@@ -70,39 +63,45 @@ public class BotStartupService : BackgroundService
             case LogSeverity.Critical:
                 _logger.Fatal(message.Exception, message.ToString());
                 break;
+
             case LogSeverity.Error:
                 _logger.Error(message.Exception, message.ToString());
                 break;
+
             case LogSeverity.Warning:
                 _logger.Warning(message.ToString());
                 break;
+
             case LogSeverity.Info:
                 _logger.Information(message.ToString());
                 break;
+
             case LogSeverity.Verbose:
                 _logger.Debug(message.ToString());
                 break;
+
             case LogSeverity.Debug:
                 _logger.Debug(message.ToString());
                 break;
+
             default:
                 break;
         }
     }
 
-    private async Task slashCommandExecuted(SocketSlashCommand arg)
+    private async Task _client_InteractionCreated(SocketInteraction arg)
     {
-        var ctx = new SocketInteractionContext<SocketSlashCommand>(_client, arg);
+        var ctx = new SocketInteractionContext(_client, arg);
+
+        _logger.Debug("{user} is executing discord {type} interaction {Id}", arg.User.Username, arg.Type, arg.Id);
+
         try
         {
-            var withSubOptions = arg.Data.Options?.SelectMany(o => o.Options).Select(o => o.Value.ToString());
-            var options = withSubOptions?.Count() > 0 ? withSubOptions : arg.Data.Options?.Select(o => o.Value?.ToString()) ?? new List<string>();
-            _logger.Information($"{arg.User.Username} is executing Slash Command {arg.Data.Name} with value(s): '{string.Join(", ", options)}'.");
             await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Slash command {CommandName} failed", arg.CommandName);
+            _logger.Error(ex, "Discord {Type} interaction {Id} failed.", arg.Type, arg.Id);
 
             if (!ctx.Interaction.HasResponded)
             {
