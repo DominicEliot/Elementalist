@@ -67,16 +67,19 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     private readonly IMediator _mediator = mediator;
 
     [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName)
+    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool? ephemeral)
     {
+        ephemeral ??= false;
         var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 
-        await SendDiscordResponse(cardName, cards);
+        await SendDiscordResponse(cardName, cards, ephemeral.Value);
     }
 
     [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByRulesText(string cardText, string? element)
+    public async Task CardSearchByRulesText(string cardText, string? element, bool? ephemeral)
     {
+        ephemeral ??= false;
+
         var query = new GetCardsQuery()
         {
             TextContains = cardText,
@@ -84,10 +87,10 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         };
         var cards = await _mediator.Send(query);
 
-        await SendDiscordResponse(cardText, cards);
+        await SendDiscordResponse(cardText, cards, ephemeral: ephemeral.Value);
     }
 
-    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards)
+    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards, bool ephemeral)
     {
         if (!cards.Any())
         {
@@ -97,7 +100,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
+            await RespondAsync($"Too many matches for {cardName}", ephemeral: ephemeral);
             return;
         }
 
