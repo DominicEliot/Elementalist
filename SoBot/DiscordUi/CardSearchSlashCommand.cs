@@ -20,6 +20,7 @@ public static class CardDisplay
             AddVariantsMenu(card, builder);
         }
 
+        builder.WithButton("Art", $"art-{card.Name}");
         builder.WithButton("Faq", $"faq-{card.Name}");
         builder.WithButton("Price", $"price-{card.Name}");
 
