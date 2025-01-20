@@ -8,8 +8,8 @@ namespace SorceryBot.Infrastructure.DataAccess.CardData;
 public interface ICardRepository
 {
     Task<IEnumerable<Card>> GetCards();
-    Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 
+    Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 }
 
 public class CuriosaApiCardRepository(HttpClient httpClient) : ICardRepository
@@ -18,10 +18,9 @@ public class CuriosaApiCardRepository(HttpClient httpClient) : ICardRepository
     private List<Card> _cards = [];
     private DateTimeOffset _lastUpdated;
 
-
     public async Task<IEnumerable<Card>> GetCards()
     {
-        if (_lastUpdated < SystemClock.Now.AddHours(24))
+        if (_lastUpdated < SystemClock.Now.AddHours(48))
         {
             var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
             var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
@@ -41,7 +40,7 @@ public class CuriosaApiCardRepository(HttpClient httpClient) : ICardRepository
 
 public class FileCardRepository() : ICardRepository
 {
-    List<Card> _cards = [];
+    private List<Card> _cards = [];
 
     public async Task<IEnumerable<Card>> GetCards()
     {
