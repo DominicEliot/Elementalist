@@ -68,19 +68,16 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     private readonly IMediator _mediator = mediator;
 
     [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool? ephemeral)
+    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
     {
-        ephemeral ??= false;
         var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 
-        await SendDiscordResponse(cardName, cards, ephemeral.Value);
+        await SendDiscordResponse(cardName, cards, ephemeral);
     }
 
     [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByRulesText(string cardText, string? element, bool? ephemeral)
+    public async Task CardSearchByRulesText(string cardText, string? element = null, bool ephemeral = false)
     {
-        ephemeral ??= false;
-
         var query = new GetCardsQuery()
         {
             TextContains = cardText,
@@ -88,7 +85,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         };
         var cards = await _mediator.Send(query);
 
-        await SendDiscordResponse(cardText, cards, ephemeral: ephemeral.Value);
+        await SendDiscordResponse(cardText, cards, ephemeral: ephemeral);
     }
 
     private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards, bool ephemeral)
@@ -136,7 +133,6 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         WithThumbnailUrl("https://fourcores-home.netlify.app/images/cards/965.png"); //TODO - actually do the real card image
         WithDescription(variant.TypeText);
         AddField("----", _card.Guardian.RulesText);
-        //WithFooter($"Art @ {variant.Artist}");
     }
 
     private Variant GetDefaultVariant(Models.Card card)
