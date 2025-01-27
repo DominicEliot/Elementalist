@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using SorceryBot.Features.Card.Search;
+﻿using SorceryBot.Features.Card.Search;
 using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Models;
 using System;
@@ -8,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace SorceryBot.Features.Card.Search.Tests;
 
-[TestFixture()]
 public class CardSearchQueryHandlerTests
 {
-    [Test()]
+    [Fact]
     public async Task HandleTestAsync()
     {
         var query = new GetCardsQuery() {CardNameContains = "Pudge" };
@@ -22,7 +21,7 @@ public class CardSearchQueryHandlerTests
 
         var result = await handler.Handle(query, CancellationToken.None);
 
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.First().Name, Is.EqualTo("Pudge Butcher"));
+        Assert.NotNull(result);
+        Assert.Equal("Pudge Butcher", result.First().Name);
     }
 }
