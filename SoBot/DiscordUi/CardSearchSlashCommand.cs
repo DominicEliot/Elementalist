@@ -135,7 +135,7 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         AddField("----", _card.Guardian.RulesText);
     }
 
-    private Variant GetDefaultVariant(Models.Card card)
+    private Variant GetDefaultVariant(Card card)
     {
         var sets = _card.Sets.OrderByDescending(s => s.ReleasedAt);
 
