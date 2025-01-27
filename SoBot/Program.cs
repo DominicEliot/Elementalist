@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Events;
+using SorceryBot.Features.Cards;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Infrastructure.Logging;
@@ -23,6 +24,7 @@ public class Program
             var builder = Host.CreateApplicationBuilder(args);
             builder.Configuration.AddJsonFile("BotToken.Private.json");
             builder.Services.Configure<BotTokenSettings>(builder.Configuration.GetRequiredSection("BotTokenSettings"));
+            builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
 
             builder.Services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(builder.Configuration)
