@@ -7,6 +7,7 @@ using SorceryBot.Infrastructure.Config;
 using SorceryBot.Models;
 using SorceryBot.Infrastructure.DataAccess.CardData;
 using System.Reflection.Emit;
+
 namespace SorceryBot.DiscordUi;
 
 public static class CardDisplay
@@ -22,7 +23,7 @@ public static class CardDisplay
 
         builder.WithButton("Art", $"art-{card.Name}");
         builder.WithButton("Faq", $"faq-{card.Name}");
-        builder.WithButton("Price", $"price-{card.Name}");
+        builder.WithButton("Price", $"price-{card.Sets.First().Variants.First().Slug}");
 
         return builder;
     }
@@ -122,65 +123,96 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
 {
     private Card _card;
 
-    public EmbedCardDetailAdapter(Card card, Variant? variant = null)
+    public EmbedCardDetailAdapter(Card card, SetVariant? setVariant = null)
     {
         _card = card;
-        variant ??= GetDefaultVariant(_card);
+        setVariant ??= GetDefaultSetVariant(_card);
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(_card.Name);
         WithColor(DiscordLookups.GetCardColor(_card.Elements));
-        WithThumbnailUrl("https://fourcores-home.netlify.app/images/cards/965.png"); //TODO - actually do the real card image
-        WithDescription(variant.TypeText);
+        WithThumbnailUrl(CardArt.GetUrl(setVariant));
+        WithDescription(setVariant.Variant.TypeText);
         AddField("----", _card.Guardian.RulesText);
     }
 
-    private Variant GetDefaultVariant(Card card)
+    private SetVariant GetDefaultSetVariant(Card card)
     {
         var sets = _card.Sets.OrderByDescending(s => s.ReleasedAt);
 
-        Variant? bestFitVariant = null;
+        SetVariant setVariant = new();
+
         foreach (var set in sets)
         {
             var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
-            if (variant?.Product == "Booster") return variant;
+            if (variant?.Product == "Booster") return new SetVariant { Variant = variant, Set = set };
 
-            bestFitVariant ??= variant;
+            setVariant.Variant ??= variant;
+            setVariant.Set = set;
         }
 
-        return bestFitVariant ?? sets.First().Variants.First();
+        if (setVariant.Variant == null)
+        {
+            setVariant.Variant = sets.First().Variants.First();
+            setVariant.Set = sets.First();
+        }
+
+        return setVariant;
+    }
+}
+
+public class SetVariant
+{
+    public Set Set { get; set; }
+    public Variant Variant { get; set; }
+}
+
+public static class CardArt
+{
+    public static string GetUrl(SetVariant setVariant)
+    {
+        var cardSlug = setVariant.Variant.Slug.Substring(4); //slugs are in the format set_image-slug, for now...
+        return $"https://github.com/XenotropicDev/SorceryBot/raw/refs/heads/main/SoBot/Images/{setVariant.Set.Name}/{cardSlug}.png";
     }
 }
 
 internal class EmbedCardArtAdapter : EmbedBuilder
 {
-    public EmbedCardArtAdapter(Models.Card card, Variant? variant = null)
+    public EmbedCardArtAdapter(Models.Card card, SetVariant? setVariant = null)
     {
-        variant ??= CardLookups.GetDefaultVariant(card);
+        setVariant ??= CardLookups.GetDefaultVariant(card);
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(card.Name);
         WithColor(DiscordLookups.GetCardColor(card.Elements));
-        WithImageUrl("https://fourcores-home.netlify.app/images/cards/965.png"); //TODO - actually do the real card image
-        WithFooter($"Art @ {variant.Artist}");
+        WithThumbnailUrl(CardArt.GetUrl(setVariant));
+        WithFooter($"Art @ {setVariant.Variant.Artist}");
     }
 }
 
 internal static class CardLookups
 {
-    internal static Variant GetDefaultVariant(Models.Card card)
+    internal static SetVariant GetDefaultVariant(Models.Card card)
     {
         var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
 
-        Variant? bestFitVariant = null;
+        SetVariant setVariant = new();
+
         foreach (var set in sets)
         {
             var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
-            if (variant?.Product == "Booster") return variant;
+            if (variant?.Product == "Booster") return new SetVariant { Variant = variant, Set = set };
 
-            bestFitVariant ??= variant;
+            setVariant.Variant ??= variant;
+            setVariant.Set = set;
         }
 
-        return bestFitVariant ?? sets.First().Variants.First();
+        if (setVariant.Variant == null)
+        {
+            setVariant.Variant = sets.First().Variants.First();
+            setVariant.Set = sets.First();
+        }
+
+        return setVariant;
     }
 }
