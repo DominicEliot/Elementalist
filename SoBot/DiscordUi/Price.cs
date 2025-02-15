@@ -2,26 +2,28 @@
 using Discord.Interactions;
 using MediatR;
 using SorceryBot.Features.Card;
+using SorceryBot.Features.Cards;
+using SorceryBot.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBot.DiscordUi;
 
-internal class PriceUi(IMediator mediator) : InteractionModuleBase<SocketInteractionContext>
+public class PriceUi(IMediator mediator, ICardRepository cardRepository) : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IMediator _mediator = mediator;
 
-    [ComponentInteraction("price-{card}")]
-    public async Task ShowPrice(string card)
+    [ComponentInteraction("price-*")]
+    public async Task ShowPrice(string cardSlug)
     {
+        var priceQuery = new Prices.CardPriceQuery(cardSlug);
     }
 
     [SlashCommand("price", "Shows the price of the specified card.")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
+    public async Task CardPriceByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
     {
         var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 
         var builder = new EmbedBuilder()
             .WithTitle($"{cardName} Price")
-            .w
             .AddField("Mid", "$ TODO", inline: true)
             .AddField("Low", "$ TODO", inline: true);
 

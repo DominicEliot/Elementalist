@@ -8,15 +8,15 @@ namespace SorceryBot.Features.Cards;
 
 public static class Prices
 {
-    public record CardPriceQuery(Models.Card card) : IQuery<PriceData>;
+    public record CardPriceQuery(string cardSlug) : IQuery<Result<PriceData>>;
 
-    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, PriceData>
+    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, Result<PriceData>>
     {
         private readonly TcgPlayerDataProvider _priceProvider = priceProvider;
 
-        public async Task<PriceData> Handle(CardPriceQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PriceData>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
         {
-            var prices = await _priceProvider.GetPriceData(request.card);
+            var prices = await _priceProvider.GetPriceData(request.cardSlug);
 
             return prices;
         }
@@ -28,15 +28,20 @@ public static class Prices
         private readonly IMemoryCache _cache = cache;
         private readonly HttpClient _httpClient = httpClient;
 
-        public async Task<PriceData> GetPriceData(Models.Card card)
+        public async Task<Result<PriceData>> GetPriceData(string cardSlug)
         {
-            var cardId = (await GetCardIds()).FirstOrDefault(c => c.CardName == card.Name);
+            var cardId = (await GetCardIds()).FirstOrDefault(c => c.CardSlug == cardSlug);
+
+            if (cardId == null)
+            {
+                return new Result<PriceData>(new NotFoundError());
+            }
 
             var result = await _httpClient.GetAsync(_settings.Value.GetPriceUrl(cardId.TcgPlayerCardId));
 
             var tcgPlayerPriceData = JsonSerializer.Deserialize<PriceData>(await result.Content.ReadAsStringAsync());
 
-            return tcgPlayerPriceData;
+            return new Result<PriceData>(tcgPlayerPriceData);
         }
 
         public async Task<Dictionary<string, int>> GetSetsIdsAsync()
@@ -90,6 +95,7 @@ public class TcgPriceListItem
 {
     public int TcgPlayerCardId { get; set; }
     public string CardName { get; set; }
+    public string CardSlug { get; set; }
 }
 
 public class TcgPlayerSettings

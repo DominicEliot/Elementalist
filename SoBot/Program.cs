@@ -10,6 +10,7 @@ using SorceryBot.Features.Cards;
 using SorceryBot.Infrastructure.Config;
 using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Infrastructure.Logging;
+using static SorceryBot.Features.Cards.Prices;
 
 namespace SorceryBot;
 
@@ -31,8 +32,12 @@ public class Program
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext());
 
+            builder.Services.AddHttpClient();
+            builder.Services.AddMemoryCache();
+
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
+            builder.Services.AddSingleton<TcgPlayerDataProvider>();
 
             var logLevel = (Log.Logger.IsEnabled(LogEventLevel.Debug)) ? LogSeverity.Debug : LogSeverity.Info;
             var clientConfig = new DiscordSocketConfig { MessageCacheSize = 5, LogLevel = logLevel, GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages | GatewayIntents.Guilds };
