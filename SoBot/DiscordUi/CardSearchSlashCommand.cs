@@ -172,7 +172,7 @@ public static class CardArt
     public static string GetUrl(SetVariant setVariant)
     {
         var cardSlug = setVariant.Variant.Slug.Substring(4); //slugs are in the format set_image-slug, for now...
-        return $"https://github.com/XenotropicDev/SorceryBot/raw/refs/heads/main/SoBot/Images/{setVariant.Set.Name}/{cardSlug}.png";
+        return $"http://wrexial.com/images/{setVariant.Set.Name}/{cardSlug}.png";
     }
 }
 
