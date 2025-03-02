@@ -12,7 +12,7 @@ namespace SorceryBot.DiscordUi;
 
 public static class CardDisplay
 {
-    internal static ComponentBuilder CardComponentBuilder(Models.Card card)
+    internal static ComponentBuilder CardComponentBuilder(Card card)
     {
         var builder = new ComponentBuilder();
 
@@ -23,7 +23,7 @@ public static class CardDisplay
 
         builder.WithButton("Art", $"art-{card.Name}");
         builder.WithButton("Faq", $"faq-{card.Name}");
-        builder.WithButton("Price", $"price-{card.Sets.First().Variants.First().Slug}");
+        builder.WithButton("Price", $"price-{card.Name}");
 
         return builder;
     }
@@ -31,13 +31,16 @@ public static class CardDisplay
     private static void AddVariantsMenu(Card card, ComponentBuilder builder)
     {
         var menuBuilder = new SelectMenuBuilder();
-        menuBuilder.WithCustomId($"variantSelect:{card.Name}");
+        menuBuilder.WithCustomId($"variantSelect");
+
+        var defaultVariant = CardLookups.GetDefaultVariant(card);
 
         foreach (var set in card.Sets)
         {
             foreach (var variant in set.Variants)
             {
-                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"variant:{variant.Slug}");
+                var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
+                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"variant:{variant.Slug}", isDefault: isDefault);
             }
         }
 
@@ -121,43 +124,16 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
 internal class EmbedCardDetailAdapter : EmbedBuilder
 {
-    private Card _card;
-
     public EmbedCardDetailAdapter(Card card, SetVariant? setVariant = null)
     {
-        _card = card;
-        setVariant ??= GetDefaultSetVariant(_card);
+        setVariant ??= CardLookups.GetDefaultVariant(card);
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
-        WithAuthor(_card.Name);
-        WithColor(DiscordLookups.GetCardColor(_card.Elements));
+        WithAuthor(card.Name);
+        WithColor(DiscordLookups.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithDescription(setVariant.Variant.TypeText);
-        AddField("----", _card.Guardian.RulesText);
-    }
-
-    private SetVariant GetDefaultSetVariant(Card card)
-    {
-        var sets = _card.Sets.OrderByDescending(s => s.ReleasedAt);
-
-        SetVariant setVariant = new();
-
-        foreach (var set in sets)
-        {
-            var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
-            if (variant?.Product == "Booster") return new SetVariant { Variant = variant, Set = set };
-
-            setVariant.Variant ??= variant;
-            setVariant.Set = set;
-        }
-
-        if (setVariant.Variant == null)
-        {
-            setVariant.Variant = sets.First().Variants.First();
-            setVariant.Set = sets.First();
-        }
-
-        return setVariant;
+        AddField("----", card.Guardian.RulesText);
     }
 }
 
