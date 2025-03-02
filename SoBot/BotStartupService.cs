@@ -92,8 +92,9 @@ public class BotStartupService : BackgroundService
     private async Task _client_InteractionCreated(SocketInteraction arg)
     {
         var ctx = new SocketInteractionContext(_client, arg);
+        var component = arg as SocketMessageComponent;
 
-        _logger.Debug("{user} is executing discord {type} interaction {Id}", arg.User.Username, arg.Type, arg.Id);
+        _logger.Debug("{user} is executing discord {type} id {Id}. Interaction {customId}", arg.User.Username, arg.Type, arg.Id, component?.Data.CustomId);
 
         try
         {
