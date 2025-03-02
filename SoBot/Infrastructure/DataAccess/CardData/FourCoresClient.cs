@@ -193,7 +193,7 @@ public partial class Content
 /// A single Sorcery: Contested Realm card.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-public partial class Card
+public partial class FourCoresCard
 {
     /// <summary>
     /// The unique identifier of the card, as defined by fourcores.xyz
@@ -442,7 +442,7 @@ public partial class BoosterCard
 
     [System.Text.Json.Serialization.JsonPropertyName("details")]
     [System.ComponentModel.DataAnnotations.Required]
-    public Card Details { get; set; } = new Card();
+    public FourCoresCard Details { get; set; } = new FourCoresCard();
 
     private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
