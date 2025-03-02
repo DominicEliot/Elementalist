@@ -1,8 +1,10 @@
 using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Serilog.Events;

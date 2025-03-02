@@ -4,7 +4,9 @@ public class TcgPlayerSet
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public List<TcgPlayerCard> Cards { get; set; } = [];
+    public int Count { get; set; }
+    public int Total { get; set; }
+    public List<TcgPlayerCard> Result { get; set; } = [];
 }
 
 public class TcgPlayerCard
@@ -24,4 +26,23 @@ public class TcgPlayerCard
     public string? Set { get; set; }
     public string? SetAbbrv { get; set; }
     public string? Type { get; set; }
+}
+
+public class TcgPlayerSetResult
+{
+    public int SetNameId { get; set; }
+    public int CategoryId { get; set; }
+    public string Name { get; set; }
+    public string CleanSetName { get; set; }
+    public string UrlName { get; set; }
+    public string Abbreviation { get; set; }
+    public DateTime ReleaseDate { get; set; }
+    public bool IsSupplemental { get; set; }
+    public bool Active { get; set; }
+}
+
+public class TcgPlayerGameSets
+{
+    public List<object> Errors { get; set; } = [];
+    public List<TcgPlayerSetResult> Results { get; set; } = [];
 }

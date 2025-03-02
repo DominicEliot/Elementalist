@@ -2,13 +2,14 @@
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using SorceryBot.Models;
 using SorceryBot.Shared;
 
 namespace SorceryBot.Features.Cards;
 
 public static class Prices
 {
-    public record CardPriceQuery(string cardSlug) : IQuery<Result<PriceData>>;
+    public record CardPriceQuery(string CardName, string Set, string CardFinish) : IQuery<Result<PriceData>>;
 
     public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, Result<PriceData>>
     {
@@ -16,7 +17,7 @@ public static class Prices
 
         public async Task<Result<PriceData>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
         {
-            var prices = await _priceProvider.GetPriceData(request.cardSlug);
+            var prices = await _priceProvider.GetPriceData(request.CardName, request.Set, request.CardFinish);
 
             return prices;
         }
@@ -28,50 +29,48 @@ public static class Prices
         private readonly IMemoryCache _cache = cache;
         private readonly HttpClient _httpClient = httpClient;
 
-        public async Task<Result<PriceData>> GetPriceData(string cardSlug)
+        public async Task<Result<PriceData>> GetPriceData(string cardName, string set, string cardFinish)
         {
-            var cardId = (await GetCardIds()).FirstOrDefault(c => c.CardSlug == cardSlug);
+            var tcgPlayerCardData = (await GetTcgPlayerCards()).FirstOrDefault(c => c.ProductName.Contains(cardName) && c.Set == set && c.Printing == cardFinish);
 
-            if (cardId == null)
+            if (tcgPlayerCardData == null)
             {
                 return new Result<PriceData>(new NotFoundError());
             }
 
-            var result = await _httpClient.GetAsync(_settings.Value.GetPriceUrl(cardId.TcgPlayerCardId));
+            var priceData = new PriceData() { Low = tcgPlayerCardData.LowPrice, Mid = tcgPlayerCardData.MarketPrice };
 
-            var tcgPlayerPriceData = JsonSerializer.Deserialize<PriceData>(await result.Content.ReadAsStringAsync());
-
-            return new Result<PriceData>(tcgPlayerPriceData);
+            return new Result<PriceData>(priceData);
         }
 
-        public async Task<Dictionary<string, int>> GetSetsIdsAsync()
+        public async Task<List<TcgPlayerSetResult>> GetSetsIdsAsync()
         {
-            var sets = await _cache.GetOrCreateAsync<Dictionary<string, int>>("tcgPlayerSets", async cacheItem =>
+            var sets = await _cache.GetOrCreateAsync<List<TcgPlayerSetResult>>("tcgPlayerSets", async cacheItem =>
             {
                 var reply = await _httpClient.GetAsync(_settings.Value.FormattedSetsUrl);
 
-                var items = JsonSerializer.Deserialize<Dictionary<string, int>>(await reply.Content.ReadAsStringAsync());
+                var items = JsonSerializer.Deserialize<TcgPlayerGameSets>(await reply.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
                 cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(12))
-                .SetValue(items);
+                .SetValue(items.Results);
 
-                return items!;
+                return items.Results!;
             });
             return sets;
         }
 
-        public async Task<List<TcgPriceListItem>> GetCardIds()
+        public async Task<List<TcgPlayerCard>> GetTcgPlayerCards()
         {
-            List<TcgPriceListItem>? cards = await _cache.GetOrCreateAsync("cardIds", async cacheItem =>
+            List<TcgPlayerCard>? cards = await _cache.GetOrCreateAsync("cardIds", async cacheItem =>
             {
-                var cardsList = new List<TcgPriceListItem>();
+                var cardsList = new List<TcgPlayerCard>();
                 foreach (var set in await GetSetsIdsAsync())
                 {
-                    var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set));
+                    var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set.SetNameId));
 
-                    var cardIds = JsonSerializer.Deserialize<List<TcgPriceListItem>>(await cardIdsResult.Content.ReadAsStringAsync());
+                    var tcgPlayerSet = JsonSerializer.Deserialize<TcgPlayerSet>(await cardIdsResult.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-                    cardsList.AddRange(cardIds ?? []);
+                    cardsList.AddRange(tcgPlayerSet?.Result ?? []);
                 }
 
                 cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(12))
@@ -100,13 +99,12 @@ public class TcgPriceListItem
 
 public class TcgPlayerSettings
 {
-    public int SorceryProductId { get; set; }
-    public string SorceryUrlValue { get; set; }
-    private string CardPriceUrl { get; set; }
-    public string SetsUrl { get; set; }
-    public string CardIdsUrl { get; set; }
-
+    public int SorceryProductId { get; set; } = 77;
+    public string SorceryUrlValue { get; set; } = "sorcery-contested-realm";
+    private string CardPriceUrl { get; set; } = "https://mpapi.tcgplayer.com/v2/product/{0}/pricepoints"; //0 = CardId
+    public string SetsUrl { get; set; } = "https://mpapi.tcgplayer.com/v2/Catalog/SetNames?categoryId={0}&active=true&mpfev=3118"; //0 = SorceryProductId
+    public string CardIdsUrl { get; set; } = "https://infinite-api.tcgplayer.com/priceguide/set/{0}/cards/?rows=5000&productTypeID=128"; //0 = SetId
     public string GetPriceGuideUrl(int setId) => string.Format(CardIdsUrl, setId);
-    public string GetPriceUrl(int cardId) => string.Format(CardIdsUrl, cardId);
-    public string FormattedSetsUrl => string.Format(SetsUrl, SorceryProductId);
+    public string GetPriceUrl(int cardId) => string.Format(CardPriceUrl, cardId);
+    public string FormattedSetsUrl => string.Format(SetsUrl, SorceryProductId.ToString());
 }

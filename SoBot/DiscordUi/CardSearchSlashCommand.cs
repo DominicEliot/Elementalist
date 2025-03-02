@@ -40,7 +40,7 @@ public static class CardDisplay
             foreach (var variant in set.Variants)
             {
                 var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
-                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"variant:{variant.Slug}", isDefault: isDefault);
+                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"{variant.Slug}", isDefault: isDefault);
             }
         }
 
