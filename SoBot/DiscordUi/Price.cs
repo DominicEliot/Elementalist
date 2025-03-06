@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Text.Json;
+using Discord;
 using Discord.Interactions;
 using MediatR;
 using SorceryBot.Features.Card;
@@ -20,14 +21,17 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
         var components = message.Components;
 
         var selectedMenus = components.OfType<ActionRowComponent>().SelectMany(ar => ar.Components.OfType<SelectMenuComponent>()); //?.Options.FirstOrDefault(o => o.IsDefault == true)?.Value;
-        var selectedSlug = selectedMenus.FirstOrDefault()?.Options.FirstOrDefault(o => o.IsDefault == true)?.Value;
+        var uniqueCardJson = selectedMenus.First().Options.First(o => o.IsDefault == true).Value;
+        var uniqueCardId = JsonSerializer.Deserialize<UniqueCardIdentifier>(uniqueCardJson);
 
         var card = (await _cardRepository.GetCardsMatching(c => c.Name == cardName)).FirstOrDefault();
 
-        if (card != null)
+        if (card is not null && uniqueCardId is not null)
         {
-            var set = card.Sets.First(s => s.Variants.Any(v => v.Slug == selectedSlug));
-            var variant = set.Variants.First(v => v.Slug == selectedSlug);
+            var set = card.Sets.First(s => s.Name == uniqueCardId.Set);
+            var variant = set.Variants.First(v => v.Finish == uniqueCardId.Finish && v.Product == uniqueCardId.Product);
+
+            //Tcgplayer uses different finish names than Curiosa.io
             var finish = variant.Finish == "Standard" ? "Normal" : variant.Finish;
 
             var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, finish);
@@ -35,7 +39,9 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
 
             if (priceResponse.IsValid())
             {
-                await RespondAsync($"Price for {selectedSlug}: {priceResponse.Value.Mid}");
+                var embed = CardPriceEmbed(cardName, priceResponse.Value);
+
+                await RespondAsync(embed: embed.Build());
                 return;
             }
         }
@@ -48,11 +54,29 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
     {
         var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 
-        var builder = new EmbedBuilder()
-            .WithTitle($"{cardName} Price")
-            .AddField("Mid", "$ TODO", inline: true)
-            .AddField("Low", "$ TODO", inline: true);
+        var priceQuery = new Prices.CardPriceQuery(cardName);
+        var priceResponse = await _mediator.Send(priceQuery);
 
-        await RespondAsync(embed: builder.Build());
+        if (priceResponse.IsError())
+        {
+            await RespondAsync($"Couldn't find prices for card {cardName}", ephemeral: true);
+        }
+
+        var embed = CardPriceEmbed(cardName, priceResponse.Value);
+        await RespondAsync(embed: embed.Build());
+    }
+
+    private static EmbedBuilder CardPriceEmbed(string cardName, IEnumerable<Prices.PriceData> prices)
+    {
+        var builder = new EmbedBuilder()
+            .WithTitle($"{cardName} Prices")
+            .WithCurrentTimestamp();
+
+        foreach (var item in prices)
+        {
+            builder.AddField(item.Card.ToNamelessString(), $"Low: {item.Low:C2}, Mid: {item.Mid:C2}");
+        }
+
+        return builder;
     }
 }

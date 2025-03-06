@@ -11,6 +11,8 @@ public class TcgPlayerSet
 
 public class TcgPlayerCard
 {
+    private string _printing;
+
     public int ProductID { get; set; }
     public int ProductConditionID { get; set; }
     public string? Condition { get; set; }
@@ -19,7 +21,7 @@ public class TcgPlayerCard
     public float LowPrice { get; set; }
     public float MarketPrice { get; set; }
     public string? Number { get; set; }
-    public string Printing { get; set; }
+    public string Printing { get => _printing; set => _printing = (value == "Normal") ? "Standard" : value; }
     public string ProductName { get; set; }
     public string? Rarity { get; set; }
     public int Sales { get; set; }

@@ -1,12 +1,12 @@
-﻿using Discord.Interactions;
+﻿using System.Text.Json;
 using Discord;
+using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.Options;
 using SorceryBot.Features.Card;
 using SorceryBot.Infrastructure.Config;
-using SorceryBot.Models;
 using SorceryBot.Infrastructure.DataAccess.CardData;
-using System.Reflection.Emit;
+using SorceryBot.Models;
 
 namespace SorceryBot.DiscordUi;
 
@@ -40,7 +40,8 @@ public static class CardDisplay
             foreach (var variant in set.Variants)
             {
                 var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
-                menuBuilder.AddOption($"{set.Name} - {variant.Product} - {variant.Finish}", $"{variant.Slug}", isDefault: isDefault);
+                var uniqueCardId = new UniqueCardIdentifier(card.Name, set.Name, variant.Product, variant.Finish);
+                menuBuilder.AddOption(uniqueCardId.ToNamelessString(), JsonSerializer.Serialize(uniqueCardId), isDefault: isDefault);
             }
         }
 

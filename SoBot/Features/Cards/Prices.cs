@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using SorceryBot.DiscordUi;
 using SorceryBot.Models;
 using SorceryBot.Shared;
 
@@ -9,13 +10,13 @@ namespace SorceryBot.Features.Cards;
 
 public static class Prices
 {
-    public record CardPriceQuery(string CardName, string Set, string CardFinish) : IQuery<Result<PriceData>>;
+    public record CardPriceQuery(string CardName, string? Set = null, string? CardFinish = null) : IQuery<Result<IEnumerable<PriceData>>>;
 
-    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, Result<PriceData>>
+    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, Result<IEnumerable<PriceData>>>
     {
         private readonly TcgPlayerDataProvider _priceProvider = priceProvider;
 
-        public async Task<Result<PriceData>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<PriceData>>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
         {
             var prices = await _priceProvider.GetPriceData(request.CardName, request.Set, request.CardFinish);
 
@@ -29,34 +30,44 @@ public static class Prices
         private readonly IMemoryCache _cache = cache;
         private readonly HttpClient _httpClient = httpClient;
 
-        public async Task<Result<PriceData>> GetPriceData(string cardName, string set, string cardFinish)
+        public async Task<Result<IEnumerable<PriceData>>> GetPriceData(string cardName, string? set, string? cardFinish)
         {
-            var tcgPlayerCardData = (await GetTcgPlayerCards()).FirstOrDefault(c => c.ProductName.Contains(cardName) && c.Set == set && c.Printing == cardFinish);
+            var tcgPlayerCardData = (await GetTcgPlayerCards()).Where(c => c.ProductName.Contains(cardName));
 
-            if (tcgPlayerCardData == null)
+            if (set is not null)
             {
-                return new Result<PriceData>(new NotFoundError());
+                tcgPlayerCardData = tcgPlayerCardData.Where(c => c.Set == set);
+            }
+            if (cardFinish is not null)
+            {
+                tcgPlayerCardData = tcgPlayerCardData.Where(c => c.Printing == cardFinish);
             }
 
-            var priceData = new PriceData() { Low = tcgPlayerCardData.LowPrice, Mid = tcgPlayerCardData.MarketPrice };
+            List<PriceData> priceData = [];
 
-            return new Result<PriceData>(priceData);
+            foreach (var tcgPlayerCard in tcgPlayerCardData)
+            {
+                var uniqueCard = new UniqueCardIdentifier(cardName, tcgPlayerCard.Set, tcgPlayerCard.ProductName, tcgPlayerCard.Printing);
+                var data = new PriceData() { Card = uniqueCard, Low = tcgPlayerCard.LowPrice, Mid = tcgPlayerCard.MarketPrice };
+            }
+
+            return new Result<IEnumerable<PriceData>>(priceData);
         }
 
         public async Task<List<TcgPlayerSetResult>> GetSetsIdsAsync()
         {
-            var sets = await _cache.GetOrCreateAsync<List<TcgPlayerSetResult>>("tcgPlayerSets", async cacheItem =>
+            var sets = await _cache.GetOrCreateAsync("tcgPlayerSets", async cacheItem =>
             {
                 var reply = await _httpClient.GetAsync(_settings.Value.FormattedSetsUrl);
 
                 var items = JsonSerializer.Deserialize<TcgPlayerGameSets>(await reply.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
                 cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(12))
-                .SetValue(items.Results);
+                .SetValue(items!.Results);
 
                 return items.Results!;
             });
-            return sets;
+            return sets!;
         }
 
         public async Task<List<TcgPlayerCard>> GetTcgPlayerCards()
@@ -85,16 +96,10 @@ public static class Prices
 
     public record PriceData
     {
+        public required UniqueCardIdentifier Card { get; set; }
         public Double Mid { get; set; }
         public Double Low { get; set; }
     }
-}
-
-public class TcgPriceListItem
-{
-    public int TcgPlayerCardId { get; set; }
-    public string CardName { get; set; }
-    public string CardSlug { get; set; }
 }
 
 public class TcgPlayerSettings
