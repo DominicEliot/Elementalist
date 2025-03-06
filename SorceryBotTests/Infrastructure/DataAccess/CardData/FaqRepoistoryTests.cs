@@ -1,10 +1,4 @@
-﻿using SorceryBot.Infrastructure.DataAccess.CardData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace SorceryBot.Infrastructure.DataAccess.CardData.Tests;
 
@@ -14,6 +8,15 @@ public class FaqRepoistoryTests
     public async Task FaqRepoistoryTestAsync()
     {
         var repo = new FaqRepoistory();
-        await repo.LoadAsync();
+        var faqs = await repo.GetFaqs();
+
+        var abundanceFaqs = faqs["Abundance"];
+
+        Assert.Equal(3, abundanceFaqs.Count());
+
+        foreach (var faq in abundanceFaqs)
+        {
+            Console.WriteLine(faq);
+        }
     }
 }

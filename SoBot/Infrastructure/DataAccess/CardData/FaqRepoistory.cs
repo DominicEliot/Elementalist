@@ -1,51 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
 namespace SorceryBot.Infrastructure.DataAccess.CardData;
+
 public class FaqRepoistory
 {
-    public FaqRepoistory()
-    {
-        
-    }
+    private Dictionary<string, List<CardFaq>> _faqs = [];
 
-    public async Task LoadAsync()
+    public async Task<Dictionary<string, List<CardFaq>>> GetFaqs()
     {
-        var html = @"https://curiosa.io/faqs";
+        if (_faqs.Count() > 0)
+        {
+            return _faqs;
+        }
+
         var web = new HtmlWeb();
+        //var html = @"https://curiosa.io/faqs";
         //var htmlDoc = await web.LoadFromWebAsync(html);
         var htmlDoc = new HtmlDocument();
 
         htmlDoc.Load(Path.Combine("Infrastructure", "DataAccess", "CardData", "faq.html"));
 
-        var nodes = htmlDoc.DocumentNode
+        var cardNodes = htmlDoc.DocumentNode
             .SelectNodes("/html[1]/body[1]/div[1]/main[1]/div[1]/div[1]/div[1]/div");
 
-        foreach (var node in nodes)
+        foreach (var singleCardNode in cardNodes)
         {
-            var cardName = node.SelectSingleNode("h3").InnerText.Trim();
-            var faqs = new List<string>();
+            var cardName = singleCardNode.SelectSingleNode("h3").InnerText.Trim();
+            List<CardFaq> cardFaqs = ParseHtmlFaqsForSingleCard(singleCardNode);
 
-            foreach(var faq in node.SelectNodes("div/div"))
-            {
-                var question = faq.GetAttributes("class")
-                    .FirstOrDefault(a => a?.Value?.Contains("curiosa-faq") == true && !a.Value.Contains("curiosa-faq-a"))?
-                    .OwnerNode;
-
-                var answer = faq.GetAttributes("class").FirstOrDefault(a => a?.Value?.Contains("curiosa-faq-a") == true)?.OwnerNode;
-
-                if (faq.Descendants("table").Any())
-                {
-                    Console.WriteLine("found a table");
-                }
-                faqs.Add(faq.InnerHtml);
-            }
-
-            //Console.WriteLine($"{cardName} has {faqs.Count} faqs");
+            _faqs.Add(cardName, cardFaqs);
         }
+
+        return _faqs;
+    }
+
+    private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode? singleCardNode)
+    {
+        var cardFaqs = new List<CardFaq>();
+
+        foreach (var faq in singleCardNode.SelectNodes("div/div"))
+        {
+            var question = faq.GetAttributes("class")
+                .FirstOrDefault(a => a?.Value?.Contains("curiosa-faq") == true && !a.Value.Contains("curiosa-faq-a"))?
+                .OwnerNode;
+
+            var cardFaq = new CardFaq { Html = faq.InnerHtml };
+            cardFaq.HasTable = faq.Descendants("table").Any();
+            cardFaq.QuestionText = Regex.Replace(faq.SelectSingleNode("p[1]").InnerText, @"(\s|\n)+", " ");
+            cardFaq.AnswerText = Regex.Replace(faq.SelectSingleNode("p[2]").InnerText, @"(\s|\n)+", " ");
+
+            cardFaqs.Add(cardFaq);
+        }
+
+        return cardFaqs;
+    }
+}
+
+public class CardFaq
+{
+    public string QuestionText { get; set; }
+    public string AnswerText { get; set; }
+    public string? Html { get; init; }
+    public bool HasTable { get; set; }
+
+    public override string ToString()
+    {
+        return QuestionText + "\n" + AnswerText;
     }
 }
