@@ -5,7 +5,7 @@ using SorceryBot.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBot.DiscordUi;
 
-public class FaqUi(IMediator mediator, FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
+public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IMediator _mediator = mediator;
     private readonly FaqRepoistory _faqRepository = faqRepository;
