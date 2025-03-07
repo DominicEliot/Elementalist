@@ -48,7 +48,9 @@ public static class Prices
             foreach (var tcgPlayerCard in tcgPlayerCardData)
             {
                 var uniqueCard = new UniqueCardIdentifier(cardName, tcgPlayerCard.Set, tcgPlayerCard.ProductName, tcgPlayerCard.Printing);
-                var data = new PriceData() { Card = uniqueCard, Low = tcgPlayerCard.LowPrice, Mid = tcgPlayerCard.MarketPrice };
+                var data = new PriceData() { Card = uniqueCard, Low = tcgPlayerCard.LowPrice, Mid = tcgPlayerCard.MarketPrice, Condition = tcgPlayerCard.Condition };
+
+                priceData.Add(data);
             }
 
             return new Result<IEnumerable<PriceData>>(priceData);
@@ -99,6 +101,7 @@ public static class Prices
         public required UniqueCardIdentifier Card { get; set; }
         public Double Mid { get; set; }
         public Double Low { get; set; }
+        public string? Condition { get; internal set; }
     }
 }
 
