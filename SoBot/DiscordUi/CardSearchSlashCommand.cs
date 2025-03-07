@@ -129,12 +129,14 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
     {
         setVariant ??= CardLookups.GetDefaultVariant(card);
 
-        //sample style: https://message.style/app/editor/share/KYfJ50a5
-        WithAuthor(card.Name);
-        WithColor(DiscordLookups.GetCardColor(card.Elements));
+        var cardCostSymbols = DiscordHelpers.GetManaEmojis(card);
+        var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Guardian.Thresholds);
+
+        WithAuthor($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
+        WithColor(DiscordHelpers.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithDescription(setVariant.Variant.TypeText);
-        AddField("----", card.Guardian.RulesText);
+        AddField("----", DiscordHelpers.ReplaceManaTokensWithEmojis(card.Guardian.RulesText));
     }
 }
 
@@ -161,7 +163,7 @@ internal class EmbedCardArtAdapter : EmbedBuilder
 
         //sample style: https://message.style/app/editor/share/KYfJ50a5
         WithAuthor(card.Name);
-        WithColor(DiscordLookups.GetCardColor(card.Elements));
+        WithColor(DiscordHelpers.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithFooter($"Art @ {setVariant.Variant.Artist}");
     }

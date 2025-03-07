@@ -1,5 +1,4 @@
-﻿using SorceryBot.DiscordUi;
-using Xunit;
+﻿using Xunit;
 
 namespace SorceryBotTests.DiscordUi;
 
@@ -12,7 +11,7 @@ public class DiscordLookupsTests
         var earthToken = "(E)";
         var testString = $"{earthToken}{earthToken}{extraText}";
 
-        var convertedText = DiscordLookups.ReplaceManaTokensWithEmojis(testString);
+        var convertedText = DiscordHelpers.ReplaceManaTokensWithEmojis(testString);
 
         Assert.Contains(extraText, convertedText);
     }
@@ -21,7 +20,7 @@ public class DiscordLookupsTests
     public void StringTokenUnicodeReplacement()
     {
         var unicodeToken = "①";
-        var convertedText = DiscordLookups.ReplaceManaTokensWithEmojis(unicodeToken);
+        var convertedText = DiscordHelpers.ReplaceManaTokensWithEmojis(unicodeToken);
         Assert.DoesNotContain(unicodeToken, convertedText);
     }
 
@@ -36,7 +35,7 @@ public class DiscordLookupsTests
         var manaToken = "(1)";
         var testString = $"{earthToken}{waterToken}{airToken}{fireToken}{manaToken}{extraText}";
 
-        var convertedText = DiscordLookups.ReplaceManaTokensWithEmojis(testString);
+        var convertedText = DiscordHelpers.ReplaceManaTokensWithEmojis(testString);
 
         Assert.DoesNotContain(earthToken, convertedText);
         Assert.DoesNotContain(waterToken, convertedText);
