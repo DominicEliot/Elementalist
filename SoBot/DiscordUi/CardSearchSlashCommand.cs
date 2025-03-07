@@ -103,7 +103,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            await RespondAsync($"Too many matches for {cardName}", ephemeral: ephemeral);
+            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
             return;
         }
 
@@ -119,7 +119,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
             components = CardDisplay.CardComponentBuilder(cards.First()).Build();
         }
 
-        await RespondAsync(embeds: embeds.ToArray(), components: components);
+        await RespondAsync(embeds: embeds.ToArray(), components: components, ephemeral: ephemeral);
     }
 }
 
@@ -149,7 +149,8 @@ public static class CardArt
     public static string GetUrl(SetVariant setVariant)
     {
         var cardSlug = setVariant.Variant.Slug.Substring(4); //slugs are in the format set_image-slug, for now...
-        return $"http://wrexial.com/images/{setVariant.Set.Name}/{cardSlug}.png";
+        var escapedSet = Uri.EscapeDataString(setVariant.Set.Name);
+        return $"http://wrexial.com/images/{escapedSet}/{cardSlug}.png";
     }
 }
 
