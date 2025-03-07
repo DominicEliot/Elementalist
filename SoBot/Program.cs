@@ -46,6 +46,7 @@ public class Program
             builder.Services.AddSingleton(clientConfig);
             builder.Services.AddSingleton<DiscordSocketClient>();
             builder.Services.AddSingleton(new InteractionServiceConfig() { LogLevel = LogSeverity.Info, AutoServiceScopes = true });
+            builder.Services.AddSingleton<FaqRepoistory>();
 
             builder.Services.AddSingleton(services =>
             {
@@ -61,6 +62,7 @@ public class Program
             });
 
             var host = builder.Build();
+            await PrecacheTcgPrices(host);
 
             host.MapDiscord();
 
@@ -74,5 +76,14 @@ public class Program
         {
             Log.CloseAndFlush();
         }
+    }
+
+    private static async Task PrecacheTcgPrices(IHost host)
+    {
+        Log.Information("Fetching tcg player price data.");
+        var tcgPlayerData = host.Services.GetRequiredService<TcgPlayerDataProvider>();
+        var cards = await tcgPlayerData.GetTcgPlayerCards();
+        Log.Information("Loaded {count} cards.", cards.Count);
+
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace SorceryBot.DiscordUi;
+﻿using System.Text.Json.Serialization;
+
+namespace SorceryBot.DiscordUi;
 
 public class UniqueCardIdentifier
 {
@@ -7,6 +9,7 @@ public class UniqueCardIdentifier
     public string Product { get; }
     public string Finish { get; }
 
+    [JsonConstructor]
     public UniqueCardIdentifier(string cardName, string set, string product, string finish)
     {
         CardName = cardName;

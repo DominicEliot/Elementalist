@@ -5,9 +5,8 @@ using SorceryBot.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBot.DiscordUi;
 
-public class FaqUi(IMediator mediator, FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
+public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
 {
-    private readonly IMediator _mediator = mediator;
     private readonly FaqRepoistory _faqRepository = faqRepository;
 
     [ComponentInteraction("faq-*")]
@@ -16,7 +15,7 @@ public class FaqUi(IMediator mediator, FaqRepoistory faqRepository) : Interactio
         var faqs = await _faqRepository.GetFaqs();
         if (faqs.TryGetValue(cardName, out var cardFaqs) is not true)
         {
-            await RespondAsync($"No FAQ entries found for {cardName}");
+            await RespondAsync($"No FAQ entries found for {cardName}", ephemeral: true);
             return;
         }
 

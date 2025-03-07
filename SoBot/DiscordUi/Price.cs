@@ -31,14 +31,17 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
             var set = card.Sets.First(s => s.Name == uniqueCardId.Set);
             var variant = set.Variants.First(v => v.Finish == uniqueCardId.Finish && v.Product == uniqueCardId.Product);
 
-            //Tcgplayer uses different finish names than Curiosa.io
-            var finish = variant.Finish == "Standard" ? "Normal" : variant.Finish;
-
-            var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, finish);
+            var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, variant.Finish);
             var priceResponse = await _mediator.Send(priceQuery);
 
             if (priceResponse.IsValid())
             {
+                if (priceResponse.Value.Count() == 0)
+                {
+                    await RespondAsync($"No prices for {uniqueCardId}", ephemeral: true);
+                    return;
+                }
+
                 var embed = CardPriceEmbed(cardName, priceResponse.Value);
 
                 await RespondAsync(embed: embed.Build());
@@ -46,7 +49,7 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
             }
         }
 
-        await RespondAsync($"Couldn't find a price for {cardName}");
+        await RespondAsync($"Couldn't find a price for {cardName}", ephemeral: true);
     }
 
     [SlashCommand("price", "Shows the price of the specified card.")]
@@ -69,12 +72,11 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
     private static EmbedBuilder CardPriceEmbed(string cardName, IEnumerable<Prices.PriceData> prices)
     {
         var builder = new EmbedBuilder()
-            .WithTitle($"{cardName} Prices")
-            .WithCurrentTimestamp();
+            .WithTitle($"{cardName} Prices");
 
         foreach (var item in prices)
         {
-            builder.AddField(item.Card.ToNamelessString(), $"Low: {item.Low:C2}, Mid: {item.Mid:C2}");
+            builder.AddField(item.Card.ToNamelessString(), $"{item.Condition} Low: {item.Low:C2}, Mid: {item.Mid:C2}".Trim());
         }
 
         return builder;

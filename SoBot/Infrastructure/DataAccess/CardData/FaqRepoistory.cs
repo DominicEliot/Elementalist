@@ -26,7 +26,7 @@ public class FaqRepoistory
 
         foreach (var singleCardNode in cardNodes)
         {
-            var cardName = singleCardNode.SelectSingleNode("h3").InnerText.Trim();
+            var cardName = Regex.Replace(singleCardNode.SelectSingleNode("h3").InnerText, @"(\s|\n)+", " ").Trim();
             List<CardFaq> cardFaqs = ParseHtmlFaqsForSingleCard(singleCardNode);
 
             _faqs.Add(cardName, cardFaqs);
