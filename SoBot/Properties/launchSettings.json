@@ -1,12 +1,15 @@
 ﻿{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
-  "profiles": {
-    "SoBot": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    }
-  }
+    "profiles": {
+        "SoBot": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        "Container (Dockerfile)": {
+            "commandName": "Docker"
+        }
+    },
+    "$schema": "https://json.schemastore.org/launchsettings.json"
 }
