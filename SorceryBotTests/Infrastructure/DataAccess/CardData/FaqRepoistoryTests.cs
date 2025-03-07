@@ -10,11 +10,11 @@ public class FaqRepoistoryTests
         var repo = new FaqRepoistory();
         var faqs = await repo.GetFaqs();
 
-        var abundanceFaqs = faqs["Abundance"];
+        var wallOfIceFaq = faqs["Wall of Ice"];
 
-        Assert.Equal(3, abundanceFaqs.Count());
+        Assert.Equal(4, wallOfIceFaq.Count());
 
-        foreach (var faq in abundanceFaqs)
+        foreach (var faq in wallOfIceFaq)
         {
             Console.WriteLine(faq);
         }
