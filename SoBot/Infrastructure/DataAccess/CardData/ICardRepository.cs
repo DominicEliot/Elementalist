@@ -8,7 +8,6 @@ namespace SorceryBot.Infrastructure.DataAccess.CardData;
 public interface ICardRepository
 {
     Task<IEnumerable<Card>> GetCards();
-
     Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 }
 

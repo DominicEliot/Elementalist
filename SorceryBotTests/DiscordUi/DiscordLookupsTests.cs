@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using SorceryBot.DiscordUi;
+using Xunit;
 
 namespace SorceryBotTests.DiscordUi;
 

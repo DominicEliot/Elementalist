@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -41,7 +40,7 @@ public static class CardDisplay
             {
                 var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
                 var uniqueCardId = new UniqueCardIdentifier(card.Name, set.Name, variant.Product, variant.Finish);
-                menuBuilder.AddOption(uniqueCardId.ToNamelessString(), JsonSerializer.Serialize(uniqueCardId), isDefault: isDefault);
+                menuBuilder.AddOption(uniqueCardId.ToNamelessString(), uniqueCardId.ToJson(), isDefault: isDefault);
             }
         }
 
@@ -150,23 +149,14 @@ public static class CardArt
 {
     public static string GetUrl(SetVariant setVariant)
     {
-        var cardSlug = setVariant.Variant.Slug.Substring(4); //slugs are in the format set_image-slug, for now...
-        var escapedSet = Uri.EscapeDataString(setVariant.Set.Name);
-        return $"http://wrexial.com/images/{escapedSet}/{cardSlug}.png";
+        return GetUrl(setVariant.Variant.Slug, setVariant.Set.Name);
     }
-}
 
-internal class EmbedCardArtAdapter : EmbedBuilder
-{
-    public EmbedCardArtAdapter(Models.Card card, SetVariant? setVariant = null)
+    public static string GetUrl(string cardSlug, string setName)
     {
-        setVariant ??= CardLookups.GetDefaultVariant(card);
-
-        //sample style: https://message.style/app/editor/share/KYfJ50a5
-        WithAuthor(card.Name);
-        WithColor(DiscordHelpers.GetCardColor(card.Elements));
-        WithThumbnailUrl(CardArt.GetUrl(setVariant));
-        WithFooter($"Art @ {setVariant.Variant.Artist}");
+        cardSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
+        var escapedSet = Uri.EscapeDataString(setName);
+        return $"http://wrexial.com/images/{escapedSet}/{cardSlug}.png";
     }
 }
 
