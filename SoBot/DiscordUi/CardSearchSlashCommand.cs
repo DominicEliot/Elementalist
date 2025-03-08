@@ -131,7 +131,7 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         var cardCostSymbols = DiscordHelpers.GetManaEmojis(card);
         var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Guardian.Thresholds);
 
-        WithAuthor($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
+        WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
         WithColor(DiscordHelpers.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithDescription(setVariant.Variant.TypeText);
