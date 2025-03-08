@@ -2,5 +2,5 @@
 
 public class BotConfig
 {
-    public int MaxCardEmbedsPerMessage { get; internal set; } = 2;
+    public int MaxCardEmbedsPerMessage { get; internal set; } = 3;
 }
