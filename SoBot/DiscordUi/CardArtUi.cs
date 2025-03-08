@@ -40,6 +40,8 @@ public class CardArtUi(ICardRepository cardRepository) : InteractionModuleBase<S
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
         var embedBuilder = new EmbedCardArtAdapter(card, setVariant);
+
+        await RespondAsync(embed: embedBuilder.Build());
     }
 
     internal class EmbedCardArtAdapter : EmbedBuilder
@@ -51,7 +53,7 @@ public class CardArtUi(ICardRepository cardRepository) : InteractionModuleBase<S
             //sample style: https://message.style/app/editor/share/KYfJ50a5
             WithAuthor(card.Name);
             WithColor(DiscordHelpers.GetCardColor(card.Elements));
-            WithThumbnailUrl(CardArt.GetUrl(setVariant));
+            WithImageUrl(CardArt.GetUrl(setVariant));
             WithFooter($"Art @ {setVariant.Variant.Artist}");
         }
     }
