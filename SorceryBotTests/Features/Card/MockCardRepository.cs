@@ -4,16 +4,16 @@ namespace SorceryBotTests.Features.Card;
 
 internal class MockCardRepository : ICardRepository
 {
-    private List<Models.Card> _cards = [
+    private List<SorceryBot.Models.Card> _cards = [
         new() { Name = "Pudge Butcher"}
         ];
 
-    public Task<IEnumerable<Models.Card>> GetCards()
+    public Task<IEnumerable<SorceryBot.Models.Card>> GetCards()
     {
         return Task.FromResult(_cards.AsEnumerable());
     }
 
-    public Task<IEnumerable<Models.Card>> GetCardsMatching(Func<Models.Card, bool> predicate)
+    public Task<IEnumerable<SorceryBot.Models.Card>> GetCardsMatching(Func<SorceryBot.Models.Card, bool> predicate)
     {
         return Task.FromResult(_cards.Where(predicate));
     }

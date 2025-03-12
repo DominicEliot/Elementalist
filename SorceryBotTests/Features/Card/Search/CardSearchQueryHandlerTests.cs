@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using SorceryBotTests.Features.Card;
+using Xunit;
 
 namespace SorceryBot.Features.Card.Search.Tests;
 
