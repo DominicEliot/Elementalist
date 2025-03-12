@@ -118,6 +118,7 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Guardian.Thresholds);
 
         WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
+        WithUrl($"https://curiosa.io/cards/{card.Name.ToLower().Replace(' ', '_')}");
         WithColor(DiscordHelpers.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithDescription(setVariant.Variant.TypeText);
@@ -125,7 +126,10 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         var powerText = (card.Guardian.Attack > 0) ? $"Attack: {card.Guardian.Attack} " : string.Empty;
         var defenseText = (card.Guardian.Defence > 0 && card.Guardian.Defence != card.Guardian.Attack) ? $"Defence: {card.Guardian.Defence} " : string.Empty;
         var rulesTextField = $"{powerText}{defenseText}\n{DiscordHelpers.ReplaceManaTokensWithEmojis(card.Guardian.RulesText)}".Trim();
-        AddField(card.SubTypes, rulesTextField);
+
+        var subtypeText = (!string.IsNullOrEmpty(card.SubTypes)) ? $" - {card.SubTypes}" : string.Empty;
+
+        AddField(card.Guardian.Type + subtypeText, rulesTextField);
     }
 }
 
