@@ -80,10 +80,10 @@ public class Program
 
     private static async Task PrecacheTcgPrices(IHost host)
     {
-        Log.Information("Fetching tcg player price data.");
+        Log.Information("Fetching TcgPlayer price data.");
         var tcgPlayerData = host.Services.GetRequiredService<TcgPlayerDataProvider>();
         var cards = await tcgPlayerData.GetTcgPlayerCards();
-        Log.Information("Loaded {count} cards.", cards.Count);
+        Log.Information("Loaded {count} card prices from TcgPlayer.", cards.Count);
 
     }
 }

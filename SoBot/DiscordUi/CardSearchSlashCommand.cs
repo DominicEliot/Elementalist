@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using SorceryBot.Features.Card;
 using SorceryBot.Infrastructure.Config;
-using SorceryBot.Infrastructure.DataAccess.CardData;
 using SorceryBot.Models;
 
 namespace SorceryBot.DiscordUi;
@@ -48,24 +47,6 @@ public static class CardDisplay
     }
 }
 
-public class CardAutoCompleteHandler(ICardRepository cardRepository) : AutocompleteHandler
-{
-    private readonly ICardRepository _cardRepository = cardRepository;
-
-    public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
-    {
-        var value = autocompleteInteraction.Data.Current.Value as string;
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return AutocompletionResult.FromSuccess();
-        }
-
-        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
-        return AutocompletionResult.FromSuccess(suggestions.Take(25).Select(c => new AutocompleteResult(c.Name, c.Name)));
-    }
-}
-
 public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly BotConfig _config = config.Value;
@@ -89,10 +70,10 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         };
         var cards = await _mediator.Send(query);
 
-        await SendDiscordResponse(cardText, cards, ephemeral: ephemeral);
+        await SendDiscordResponse(cardText, cards, ephemeral: ephemeral, query);
     }
 
-    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards, bool ephemeral)
+    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery? query = null)
     {
         if (!cards.Any())
         {
@@ -118,7 +99,12 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
             components = CardDisplay.CardComponentBuilder(cards.First()).Build();
         }
 
-        await RespondAsync(embeds: embeds.ToArray(), components: components, ephemeral: ephemeral);
+        var searchParamters = (query is not null) ? $"Search Criteria: " : string.Empty;
+        if (query?.CardNameContains is not null) searchParamters += $"Name: {query.CardNameContains} ";
+        if (query?.TextContains is not null) searchParamters += $"Card Text: {query.TextContains} ";
+        if (query?.ElementsContain is not null) searchParamters += $"Element: {query.ElementsContain}";
+
+        await RespondAsync(searchParamters, embeds: embeds.ToArray(), components: components, ephemeral: ephemeral);
     }
 }
 
@@ -131,11 +117,19 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         var cardCostSymbols = DiscordHelpers.GetManaEmojis(card);
         var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Guardian.Thresholds);
 
-        WithAuthor($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
+        WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
+        WithUrl($"https://curiosa.io/cards/{card.Name.ToLower().Replace(' ', '_')}");
         WithColor(DiscordHelpers.GetCardColor(card.Elements));
         WithThumbnailUrl(CardArt.GetUrl(setVariant));
         WithDescription(setVariant.Variant.TypeText);
-        AddField("----", DiscordHelpers.ReplaceManaTokensWithEmojis(card.Guardian.RulesText));
+
+        var powerText = (card.Guardian.Attack > 0) ? $"Attack: {card.Guardian.Attack} " : string.Empty;
+        var defenseText = (card.Guardian.Defence > 0 && card.Guardian.Defence != card.Guardian.Attack) ? $"Defence: {card.Guardian.Defence} " : string.Empty;
+        var rulesTextField = $"{powerText}{defenseText}\n{DiscordHelpers.ReplaceManaTokensWithEmojis(card.Guardian.RulesText)}".Trim();
+
+        var subtypeText = (!string.IsNullOrEmpty(card.SubTypes)) ? $" - {card.SubTypes}" : string.Empty;
+
+        AddField(card.Guardian.Type + subtypeText, rulesTextField);
     }
 }
 

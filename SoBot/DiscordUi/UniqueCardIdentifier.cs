@@ -6,18 +6,27 @@ namespace SorceryBot.DiscordUi;
 public class UniqueCardIdentifier
 {
     [JsonPropertyName("C")]
-    public string Name { get; }
+    [JsonInclude]
+    public string Name { get; private set; }
 
     [JsonPropertyName("S")]
-    public string Set { get; }
+    [JsonInclude]
+    public string Set { get; private set; }
 
     [JsonPropertyName("P")]
-    public string Product { get; }
+    [JsonInclude]
+    public string Product { get; private set; }
 
     [JsonPropertyName("F")]
-    public string Finish { get; }
+    [JsonInclude]
+    public string Finish { get; private set; }
 
     [JsonConstructor]
+    private UniqueCardIdentifier()
+    {
+        
+    }
+
     public UniqueCardIdentifier(string cardName, string set, string product, string finish)
     {
         Name = cardName;

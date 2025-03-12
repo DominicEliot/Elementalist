@@ -41,6 +41,7 @@ public class BotStartupService : BackgroundService
             await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
 
             await _client.StartAsync();
+            await _client.SetCustomStatusAsync("Looking for a measuring stick...");
             _logger.Information("Discord client started");
 
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
