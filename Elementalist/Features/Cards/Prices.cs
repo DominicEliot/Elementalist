@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
-using MediatR;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using Elementalist.DiscordUi;
 using Elementalist.Models;
 using Elementalist.Shared;
+using MediatR;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace Elementalist.Features.Cards;
 
@@ -32,7 +32,8 @@ public static class Prices
 
         public async Task<Result<IEnumerable<PriceData>>> GetPriceData(string cardName, string? set, string? cardFinish)
         {
-            var tcgPlayerCardData = (await GetTcgPlayerCards()).Where(c => c.ProductName.Contains(cardName));
+            var cts = new CancellationTokenSource();
+            var tcgPlayerCardData = (await GetTcgPlayerCards(cts.Token)).Where(c => c.ProductName.Contains(cardName));
 
             if (set is not null)
             {
@@ -72,7 +73,7 @@ public static class Prices
             return sets!;
         }
 
-        public async Task<List<TcgPlayerCard>> GetTcgPlayerCards()
+        public async Task<List<TcgPlayerCard>> GetTcgPlayerCards(CancellationToken cancellationToken)
         {
             List<TcgPlayerCard>? cards = await _cache.GetOrCreateAsync("cardIds", async cacheItem =>
             {
