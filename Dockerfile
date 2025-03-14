@@ -25,7 +25,7 @@ RUN dotnet publish "./ElementalistBot.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV BOT_TOKEN 
-ENV BOT_TOKEN_TYPE
-ENV BOT_CLIENT_ID
+ENV BOT_TOKEN=
+ENV BOT_TOKEN_TYPE=
+ENV BOT_CLIENT_ID=
 ENTRYPOINT ["dotnet", "ElementalistBot.dll"]
