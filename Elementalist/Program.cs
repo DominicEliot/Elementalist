@@ -33,6 +33,7 @@ public class Program
             builder.Services.AddMemoryCache();
 
             builder.Services.AddHostedService<BotStartupService>();
+            builder.Services.AddHostedService<CardPriceService>();
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
 
@@ -58,8 +59,6 @@ public class Program
 
             var host = builder.Build();
 
-            await PrecacheTcgPrices(host);
-
             host.MapDiscord();
 
             await host.RunAsync();
@@ -72,14 +71,5 @@ public class Program
         {
             Log.CloseAndFlush();
         }
-    }
-
-    private static async Task PrecacheTcgPrices(IHost host)
-    {
-        Log.Information("Fetching TcgPlayer price data.");
-        var tcgPlayerData = host.Services.GetRequiredService<TcgPlayerDataProvider>();
-        var cards = await tcgPlayerData.GetTcgPlayerCards();
-        Log.Information("Loaded {count} card prices from TcgPlayer.", cards.Count);
-
     }
 }
