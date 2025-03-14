@@ -8,6 +8,7 @@ namespace Elementalist.Infrastructure.DataAccess.CardData;
 public interface ICardRepository
 {
     Task<IEnumerable<Card>> GetCards();
+
     Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 }
 
@@ -52,7 +53,7 @@ public class FileCardRepository() : ICardRepository
     {
         if (_cards.Count == 0)
         {
-            var json = await File.ReadAllTextAsync(@"Infrastructure\DataAccess\CardData\cards.json");
+            var json = await File.ReadAllTextAsync(Path.Combine("Infrastructure", "DataAccess", "CardData", "cards.json"));
             var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
             var cards = JsonSerializer.Deserialize<List<Card>>(json, jsonOptions);
