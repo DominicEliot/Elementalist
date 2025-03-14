@@ -96,7 +96,7 @@ public class BotStartupService : BackgroundService
         var ctx = new SocketInteractionContext(_client, arg);
         var component = arg as SocketMessageComponent;
 
-        _logger.Debug("{user} is executing discord {type} id {Id}. Interaction {customId}", arg.User.Username, arg.Type, arg.Id, component?.Data.CustomId);
+        _logger.Information("{user} is executing discord {type} id {Id}. Interaction {customId}", arg.User.Username, arg.Type, arg.Id, component?.Data.CustomId);
 
         try
         {
