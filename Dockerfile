@@ -23,6 +23,15 @@ RUN dotnet publish "./ElementalistBot.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
+
+# Set the locale to en_US
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
+RUN apt-get -y install locales
+
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV BOT_TOKEN=

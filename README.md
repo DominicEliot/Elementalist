@@ -10,7 +10,7 @@ Get the docker container from docker hub, or run the Dockerfile after cloning th
 ```
 docker pull 2masgllrpxbruv/elementalist-bot:latest
 ```
-Set the `BOT_TOKEN` environment variable with `docker run -e BOT_TOKEN='your-token-from-discord'`
+Set the `BOT_TOKEN` environment variable with `docker run -e BOT_TOKEN='your-token-from-discord' -e BOT_TOKEN_TYPE='Bot' image-name`
 
 ## Building
 The bot is written in c# and uses .Net 9. The main solution is the SLNX file. Visual Studio 2022 requires that you enable preview feature to get this to work.
