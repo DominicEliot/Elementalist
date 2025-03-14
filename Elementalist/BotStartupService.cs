@@ -29,6 +29,11 @@ public class BotStartupService : BackgroundService
     {
         try
         {
+            if (string.IsNullOrEmpty(_options.Value.Token))
+            {
+                throw new ApplicationException("The BOT_TOKEN environment variable must be initialized.");
+            }
+
             _client.Log += LogAsync;
             _interactionService.Log += LogAsync;
             _client.Ready += clientReady;
@@ -37,7 +42,7 @@ public class BotStartupService : BackgroundService
             await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
 
             await _client.StartAsync();
-            await _client.SetCustomStatusAsync("Looking for a measuring stick...");
+            await _client.SetCustomStatusAsync("Looking for a one foot ruler...");
             _logger.Information("Discord client started");
 
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
@@ -45,7 +50,7 @@ public class BotStartupService : BackgroundService
         }
         catch (Exception ex) when (ex is not TaskCanceledException)
         {
-            _logger.Fatal(ex, "A fatal exception occourred.");
+            _logger.Fatal(ex, "A fatal exception occurred.");
         }
         finally
         {

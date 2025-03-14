@@ -20,8 +20,8 @@ public class Program
         try
         {
             var builder = Host.CreateApplicationBuilder(args);
-            builder.Configuration.AddJsonFile("BotToken.Private.json");
-            builder.Services.Configure<BotTokenSettings>(builder.Configuration.GetRequiredSection("BotTokenSettings"));
+            builder.Configuration.AddEnvironmentVariables();
+            builder.Services.Configure<BotTokenSettings>(builder.Configuration);
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
 
             builder.Services.AddSerilog((services, lc) => lc
@@ -57,6 +57,7 @@ public class Program
             });
 
             var host = builder.Build();
+
             await PrecacheTcgPrices(host);
 
             host.MapDiscord();
