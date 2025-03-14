@@ -2,11 +2,11 @@
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using SorceryBot.DiscordUi;
-using SorceryBot.Models;
-using SorceryBot.Shared;
+using Elementalist.DiscordUi;
+using Elementalist.Models;
+using Elementalist.Shared;
 
-namespace SorceryBot.Features.Cards;
+namespace Elementalist.Features.Cards;
 
 public static class Prices
 {

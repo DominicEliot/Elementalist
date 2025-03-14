@@ -1,15 +1,15 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Elementalist.Features.Cards;
+using Elementalist.Infrastructure.Config;
+using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Infrastructure.Logging;
 using Serilog;
 using Serilog.Events;
-using SorceryBot.Features.Cards;
-using SorceryBot.Infrastructure.Config;
-using SorceryBot.Infrastructure.DataAccess.CardData;
-using SorceryBot.Infrastructure.Logging;
-using static SorceryBot.Features.Cards.Prices;
+using static Elementalist.Features.Cards.Prices;
 
-namespace SorceryBot;
+namespace Elementalist;
 
 public class Program
 {

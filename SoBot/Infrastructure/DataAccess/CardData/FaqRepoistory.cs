@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
-namespace SorceryBot.Infrastructure.DataAccess.CardData;
+namespace Elementalist.Infrastructure.DataAccess.CardData;
 
 public class FaqRepoistory
 {

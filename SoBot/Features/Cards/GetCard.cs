@@ -1,10 +1,10 @@
 ﻿using Discord;
 using MediatR;
-using SorceryBot.Infrastructure.DataAccess.CardData;
-using SorceryBot.Models;
-using SorceryBot.Shared;
+using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Models;
+using Elementalist.Shared;
 
-namespace SorceryBot.Features.Card;
+namespace Elementalist.Features.Card;
 
 public record CardByFullNameQuery : IQuery<Models.Card?>
 {

@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using Discord;
 using Discord.Interactions;
-using SorceryBot.Infrastructure.DataAccess.CardData;
+using Elementalist.Infrastructure.DataAccess.CardData;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public class CardArtUi(ICardRepository cardRepository) : InteractionModuleBase<SocketInteractionContext>
 {

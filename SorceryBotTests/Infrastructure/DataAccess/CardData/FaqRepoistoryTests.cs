@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace SorceryBot.Infrastructure.DataAccess.CardData.Tests;
+namespace Elementalist.Infrastructure.DataAccess.CardData.Tests;
 
 public class FaqRepoistoryTests
 {

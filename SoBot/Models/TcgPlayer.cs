@@ -1,4 +1,4 @@
-﻿namespace SorceryBot.Models;
+﻿namespace Elementalist.Models;
 
 public class TcgPlayerSet
 {

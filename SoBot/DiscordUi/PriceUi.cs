@@ -2,11 +2,11 @@
 using Discord;
 using Discord.Interactions;
 using MediatR;
-using SorceryBot.Features.Card;
-using SorceryBot.Features.Cards;
-using SorceryBot.Infrastructure.DataAccess.CardData;
+using Elementalist.Features.Card;
+using Elementalist.Features.Cards;
+using Elementalist.Infrastructure.DataAccess.CardData;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public class PriceUi(IMediator mediator, ICardRepository cardRepository) : InteractionModuleBase<SocketInteractionContext>
 {

@@ -1,4 +1,4 @@
-﻿using SorceryBot.DiscordUi;
+﻿using Elementalist.DiscordUi;
 using Xunit;
 
 namespace SorceryBotTests.DiscordUi;

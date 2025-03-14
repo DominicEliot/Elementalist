@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using Discord;
-using SorceryBot.Models;
+using Elementalist.Models;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public static class DiscordHelpers
 {

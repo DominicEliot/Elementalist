@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SorceryBot.Features.Users;
+namespace Elementalist.Features.Users;
 internal class GetUsers
 {
 }

@@ -1,4 +1,4 @@
-﻿namespace SorceryBot.Infrastructure.Config;
+﻿namespace Elementalist.Infrastructure.Config;
 
 public class BotConfig
 {

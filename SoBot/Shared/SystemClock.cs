@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SorceryBot.Shared;
+namespace Elementalist.Shared;
 public static class SystemClock
 {
     private static DateTimeOffset? _customDate;

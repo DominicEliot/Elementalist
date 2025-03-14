@@ -1,6 +1,6 @@
 ﻿{
     "profiles": {
-        "SoBot": {
+        "Console": {
             "commandName": "Project",
             "dotnetRunMessages": true,
             "environmentVariables": {

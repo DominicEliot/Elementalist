@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace SorceryBot.Shared;
+namespace Elementalist.Shared;
 public interface IQuery<TResult> : IRequest<TResult>
 {
 }

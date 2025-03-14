@@ -1,19 +1,19 @@
-﻿using SorceryBot.Infrastructure.DataAccess.CardData;
+﻿using Elementalist.Infrastructure.DataAccess.CardData;
 
 namespace SorceryBotTests.Features.Card;
 
 internal class MockCardRepository : ICardRepository
 {
-    private List<SorceryBot.Models.Card> _cards = [
+    private List<Elementalist.Models.Card> _cards = [
         new() { Name = "Pudge Butcher"}
         ];
 
-    public Task<IEnumerable<SorceryBot.Models.Card>> GetCards()
+    public Task<IEnumerable<Elementalist.Models.Card>> GetCards()
     {
         return Task.FromResult(_cards.AsEnumerable());
     }
 
-    public Task<IEnumerable<SorceryBot.Models.Card>> GetCardsMatching(Func<SorceryBot.Models.Card, bool> predicate)
+    public Task<IEnumerable<Elementalist.Models.Card>> GetCardsMatching(Func<Elementalist.Models.Card, bool> predicate)
     {
         return Task.FromResult(_cards.Where(predicate));
     }

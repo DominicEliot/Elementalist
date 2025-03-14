@@ -2,11 +2,11 @@
 using Discord.Interactions;
 using MediatR;
 using Microsoft.Extensions.Options;
-using SorceryBot.Features.Card;
-using SorceryBot.Infrastructure.Config;
-using SorceryBot.Models;
+using Elementalist.Features.Card;
+using Elementalist.Infrastructure.Config;
+using Elementalist.Models;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public static class CardDisplay
 {

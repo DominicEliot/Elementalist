@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
-using SorceryBot.Models;
-using SorceryBot.Shared;
+using Elementalist.Models;
+using Elementalist.Shared;
 
-namespace SorceryBot.Infrastructure.DataAccess.CardData;
+namespace Elementalist.Infrastructure.DataAccess.CardData;
 
 public interface ICardRepository
 {

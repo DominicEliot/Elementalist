@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public class UniqueCardIdentifier
 {

@@ -1,14 +1,10 @@
-using System.Reflection.Metadata;
 using Discord;
 using Discord.Interactions;
-using Discord.Rest;
 using Discord.WebSocket;
+using Elementalist.Infrastructure.Config;
 using Microsoft.Extensions.Options;
-using Serilog;
-using SorceryBot.Infrastructure.Config;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace SorceryBot;
+namespace Elementalist;
 
 public class BotStartupService : BackgroundService
 {
@@ -17,7 +13,7 @@ public class BotStartupService : BackgroundService
     private readonly InteractionService _interactionService;
     private readonly Serilog.ILogger _logger;
 
-    // Unforunatley Discord.Net needs the IServiceProvider to make interaction service calls, instead using DI properly
+    // Unfortunately Discord.Net needs the IServiceProvider to make interaction service calls, instead using DI properly
     private readonly IServiceProvider _serviceProvider;
 
     public BotStartupService(DiscordSocketClient client, IOptions<BotTokenSettings> options, InteractionService interactionService, Serilog.ILogger logger, IServiceProvider serviceProvider)

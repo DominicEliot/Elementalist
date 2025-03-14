@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 using MediatR;
-using SorceryBot.Infrastructure.DataAccess.CardData;
-using SorceryBot.Shared;
+using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Shared;
 
-namespace SorceryBot.Features.Card;
+namespace Elementalist.Features.Card;
 
 public record GetCardsQuery : IQuery<IEnumerable<Models.Card>>
 {

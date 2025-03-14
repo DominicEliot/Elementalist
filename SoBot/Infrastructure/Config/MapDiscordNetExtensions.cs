@@ -10,7 +10,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 
-namespace SorceryBot.Infrastructure.Config;
+namespace Elementalist.Infrastructure.Config;
 internal static class MapDiscordNetExtensions
 {
     public static void MapDiscord(this IHost host)

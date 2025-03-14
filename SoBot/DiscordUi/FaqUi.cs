@@ -1,9 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
 using MediatR;
-using SorceryBot.Infrastructure.DataAccess.CardData;
+using Elementalist.Infrastructure.DataAccess.CardData;
 
-namespace SorceryBot.DiscordUi;
+namespace Elementalist.DiscordUi;
 
 public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
 {

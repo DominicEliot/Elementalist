@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoBot\SorceryBot.csproj" />
+    <ProjectReference Include="..\SoBot\ElementalistBot.csproj" />
   </ItemGroup>
 
 </Project>
