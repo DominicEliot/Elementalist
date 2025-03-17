@@ -1,10 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
-using MediatR;
-using Microsoft.Extensions.Options;
 using Elementalist.Features.Card;
 using Elementalist.Infrastructure.Config;
 using Elementalist.Models;
+using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace Elementalist.DiscordUi;
 
@@ -150,7 +150,7 @@ public static class CardArt
     {
         cardSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
         var escapedSet = Uri.EscapeDataString(setName);
-        return $"http://wrexial.com/images/{escapedSet}/{cardSlug}.png";
+        return $"https://content.wrexial.com/SorceryImages/{escapedSet}/{cardSlug}.png";
     }
 }
 
