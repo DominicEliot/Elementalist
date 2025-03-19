@@ -7,6 +7,9 @@
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/Solution Items/github workflows/" Id="e5b2e82c-f1cb-41a0-9d7f-fa54d97c9182">
+    <File Path=".github/workflows/dotnet.yml" />
+  </Folder>
   <Project Path="Elementalist/ElementalistBot.csproj" Id="30adf37a-f8c1-58a7-b2ad-84e5f26f741b" />
   <Project Path="ElementalistTests/ElementalistTests.csproj" Id="fba96531-0275-45f1-8cdd-f74c56c7cc75" />
 </Solution>
