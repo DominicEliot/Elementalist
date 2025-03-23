@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using MediatR;
 using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Features.Card;
 
 namespace Elementalist.DiscordUi;
 
@@ -11,6 +12,17 @@ public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketIn
 
     [ComponentInteraction("faq-*")]
     public async Task ShowFaq(string cardName)
+    {
+        await RespondWithFaq(cardName);
+    }
+
+    [SlashCommand("faq", "Shows any FAQs for the input card.")]
+    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool privateMessage = false)
+    {
+        await RespondWithFaq(cardName, privateMessage);
+    }
+
+    private async Task RespondWithFaq(string cardName, bool privateMessage = false)
     {
         var faqs = await _faqRepository.GetFaqs();
         if (faqs.TryGetValue(cardName, out var cardFaqs) is not true)
@@ -26,6 +38,6 @@ public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketIn
             faqEmbed.AddField(faq.QuestionText, faq.AnswerText);
         }
 
-        await RespondAsync(embed: faqEmbed.Build());
+        await RespondAsync(embed: faqEmbed.Build(), ephemeral: privateMessage);
     }
 }
