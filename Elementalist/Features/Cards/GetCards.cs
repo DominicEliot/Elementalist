@@ -1,7 +1,7 @@
-﻿using FluentValidation;
-using MediatR;
-using Elementalist.Infrastructure.DataAccess.CardData;
+﻿using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Shared;
+using FluentValidation;
+using MediatR;
 
 namespace Elementalist.Features.Card;
 
@@ -54,10 +54,11 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
 
         if (request.TextContains != null)
         {
+            var searchTerms = request.TextContains.Split(' ');
             cards = cards.Where(c =>
-                c.Guardian.RulesText.Contains(request.TextContains, StringComparison.OrdinalIgnoreCase) ||
-                c.SubTypes.Contains(request.TextContains, StringComparison.OrdinalIgnoreCase) ||
-                c.Guardian.Type.Contains(request.TextContains, StringComparison.OrdinalIgnoreCase)
+                searchTerms.Any(singleWord => c.Guardian.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase)) ||
+                searchTerms.Any(singleWord => c.SubTypes.Contains(singleWord, StringComparison.OrdinalIgnoreCase)) ||
+                searchTerms.Any(singleWord => c.Guardian.Type.Contains(singleWord, StringComparison.OrdinalIgnoreCase))
             );
         }
 
