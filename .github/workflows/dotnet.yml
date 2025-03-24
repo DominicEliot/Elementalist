@@ -23,6 +23,6 @@ jobs:
     - name: Display Build Options
       run: dotnet --list-sdks
     - name: Build
-      run: dotnet build SorceryBot.slnx
+      run: dotnet build Elementalist.slnx
     - name: Test
-      run: dotnet test SorceryBot.slnx --no-build --verbosity normal
+      run: dotnet test Elementalist.slnx --no-build --verbosity normal
