@@ -55,13 +55,19 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
         if (request.TextContains != null)
         {
             var searchTerms = request.TextContains.Split(' ');
-            cards = cards.Where(c =>
-                searchTerms.Any(singleWord => c.Guardian.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase)) ||
-                searchTerms.Any(singleWord => c.SubTypes.Contains(singleWord, StringComparison.OrdinalIgnoreCase)) ||
-                searchTerms.Any(singleWord => c.Guardian.Type.Contains(singleWord, StringComparison.OrdinalIgnoreCase))
-            );
+
+            cards = cards.Where(c => DoesCardHaveAllTerms(c, searchTerms));
         }
 
         return cards;
+    }
+
+    private bool DoesCardHaveAllTerms(Models.Card card, string[] searchTerms)
+    {
+        var matchCount = searchTerms.Count(singleWord => card.Guardian?.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
+            + searchTerms.Count(singleWord => card.Guardian?.Type?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
+            + searchTerms.Count(singleWord => card.SubTypes?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
+
+        return matchCount >= searchTerms.Length;
     }
 }
