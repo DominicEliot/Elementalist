@@ -9,6 +9,7 @@ public record GetCardsQuery : IQuery<IEnumerable<Models.Card>>
 {
     public string? CardNameContains { get; set; }
     public string? TextContains { get; set; }
+    public string? TypeContains { get; set; }
     public string? ElementsContain { get; set; }
 }
 
@@ -17,7 +18,7 @@ public class GetCardsQueryValidator : AbstractValidator<GetCardsQuery>
     public GetCardsQueryValidator()
     {
         RuleFor(q => q)
-            .Must(q => q.CardNameContains is not null || q.TextContains is not null || q.ElementsContain is not null)
+            .Must(q => q.CardNameContains is not null || q.TextContains is not null || q.ElementsContain is not null || q.TypeContains is not null)
             .WithMessage("You must pass at least one value to the query");
 
         RuleFor(q => q.CardNameContains)
@@ -59,13 +60,26 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
             cards = cards.Where(c => DoesCardHaveAllTerms(c, searchTerms));
         }
 
+        if (request.TypeContains != null)
+        {
+            var searchTerms = request.TypeContains.Split(" ");
+
+            cards = cards.Where(c => DoesCardHaveAllTypes(c, searchTerms));
+        }
+
         return cards;
     }
 
     private bool DoesCardHaveAllTerms(Models.Card card, string[] searchTerms)
     {
-        var matchCount = searchTerms.Count(singleWord => card.Guardian?.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
-            + searchTerms.Count(singleWord => card.Guardian?.Type?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
+        var matchCount = searchTerms.Count(singleWord => card.Guardian?.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
+
+        return matchCount >= searchTerms.Length;
+    }
+
+    private bool DoesCardHaveAllTypes(Models.Card card, string[] searchTerms)
+    {
+        var matchCount = searchTerms.Count(singleWord => card.Guardian?.Type?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
             + searchTerms.Count(singleWord => card.SubTypes?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
 
         return matchCount >= searchTerms.Length;

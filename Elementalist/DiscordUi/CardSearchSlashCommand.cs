@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Runtime.CompilerServices;
+using Discord;
 using Discord.Interactions;
 using Elementalist.Features.Card;
 using Elementalist.Infrastructure.Config;
@@ -55,35 +56,39 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
     public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
     {
-        var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
+        var query = new GetCardsQuery() { CardNameContains = cardName };
+        var cards = await _mediator.Send(query);
 
-        await SendDiscordResponse(cardName, cards, ephemeral);
+        await SendDiscordResponse(cardName, cards, ephemeral, query);
     }
 
     [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByRulesText(string cardText, string? element = null, bool ephemeral = false)
+    public async Task CardSearchByRulesText(string cardText, string? element = null, string? cardTypes = null, bool ephemeral = false)
     {
         var query = new GetCardsQuery()
         {
             TextContains = cardText,
-            ElementsContain = element
+            ElementsContain = element,
+            TypeContains = cardTypes,
         };
         var cards = await _mediator.Send(query);
 
         await SendDiscordResponse(cardText, cards, ephemeral: ephemeral, query);
     }
 
-    private async Task SendDiscordResponse(string cardName, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery? query = null)
+    private async Task SendDiscordResponse(string cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
     {
         if (!cards.Any())
         {
-            await RespondAsync($"Couldn't find match for '{cardName}'", ephemeral: true);
+            await RespondAsync($"Couldn't find match for '{cardNameOrText}'", ephemeral: true);
             return;
         }
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            await RespondAsync($"Too many matches for {cardName}", ephemeral: true);
+            string responseText = $"Too many matches to display your search results,\nplease see {GetRealmsAppUrl(query)}";
+
+            await base.RespondAsync(responseText, ephemeral: ephemeral);
             return;
         }
 
@@ -105,6 +110,28 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         if (query?.ElementsContain is not null) searchParamters += $"Element: {query.ElementsContain}";
 
         await RespondAsync(searchParamters, embeds: embeds.ToArray(), components: components, ephemeral: ephemeral);
+    }
+
+    //Todo: this should maybe be its own service
+    private static string[] hiddenCardTypes = ["Minion", "Artifact"];
+
+    public static Uri GetRealmsAppUrl(GetCardsQuery query)
+    {
+        if (query is null) throw new NullReferenceException($"{nameof(query)} cannot be null");
+
+        List<string> queryParams = query.TextContains?.Replace(",", "").Split(' ').Select(t => $"x:{t}").ToList() ?? [];
+        queryParams.AddRange(query.CardNameContains?.Replace(",", "").Split(' ').Select(n => $"n:{n}") ?? []);
+        queryParams.AddRange(query.ElementsContain?.Replace(",", "").Split(' ').Select(e => $"e:{e}") ?? []);
+
+        foreach (var cardType in query.TypeContains?.Replace(",", "").Split(' ') ?? [])
+        {
+            var cardTypeSyntaxOption = hiddenCardTypes.Contains(cardType) ? "t:" : "l:";
+            queryParams.Add($"{cardTypeSyntaxOption}{cardType}");
+        }
+
+        var uri = new UriBuilder($"https://www.realmsapp.com/sorcery_tcg/cards");
+        uri.Query = $"?query={string.Join("+", queryParams)}";
+        return uri.Uri;
     }
 }
 
