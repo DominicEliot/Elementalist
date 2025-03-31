@@ -20,17 +20,15 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Display Build Options
-      run: dotnet --list-sdks
     - name: Build
-      run: dotnet build Elementalist.slnx
+      run: dotnet build --configuration Release
     - name: Test
-      run: dotnet test Elementalist.slnx --no-build --verbosity normal
+      run: dotnet test --configuration Release --no-build --verbosity normal
     #- name: Create Artifact
     #  run: |
     #    mkdir -p artifact
     #    cp -r ./bin/Release/net9.0/* artifact/
-    - name: Upload Artifact
+    - name: Create and upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: my-artifact
