@@ -63,7 +63,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     }
 
     [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByRulesText(string cardText, string? element = null, string? cardTypes = null, bool ephemeral = false)
+    public async Task CardSearchByRulesText(string? cardText = null, string? element = null, string? cardTypes = null, bool ephemeral = false)
     {
         var query = new GetCardsQuery()
         {
@@ -125,7 +125,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
         foreach (var cardType in query.TypeContains?.Replace(",", "").Split(' ') ?? [])
         {
-            var cardTypeSyntaxOption = hiddenCardTypes.Contains(cardType) ? "t:" : "l:";
+            var cardTypeSyntaxOption = hiddenCardTypes.Contains(cardType, StringComparer.OrdinalIgnoreCase) ? "t:" : "l:";
             queryParams.Add($"{cardTypeSyntaxOption}{cardType}");
         }
 
