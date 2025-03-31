@@ -23,6 +23,7 @@ public class Program
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<BotTokenSettings>(builder.Configuration);
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
+            builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
 
             builder.Services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(builder.Configuration)
@@ -34,6 +35,7 @@ public class Program
 
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddHostedService<CardPriceService>();
+            builder.Services.AddHostedService<BotActivityChangingService>();
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
 
