@@ -21,9 +21,9 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Build
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release -o ~/elementalist
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
+      run: dotnet test --configuration Release --no-build --verbosity normal -o ~/elementalist
     #- name: Create Artifact
     #  run: |
     #    mkdir -p artifact
@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: my-artifact
-        path: ./bin/Release/net9.0/
+        path: ~/elementalist
