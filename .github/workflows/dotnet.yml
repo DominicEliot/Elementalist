@@ -20,16 +20,18 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Build
-      run: dotnet build --configuration Release -o ~/elementalist
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal -o ~/elementalist
-    #- name: Create Artifact
-    #  run: |
-    #    mkdir -p artifact
-    #    cp -r ./bin/Release/net9.0/* artifact/
-    - name: Create and upload Artifact
+      run: dotnet test --no-build --verbosity normal --configuration Release  
+
+    - name: dotnet publish
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publishedApp
+
+    - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
-        name: my-artifact
-        path: ~/elementalist
+        name: elementalist
+        path: ${{env.DOTNET_ROOT}}/publishedApp
