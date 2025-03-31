@@ -65,8 +65,8 @@ public static class Prices
 
                 var items = JsonSerializer.Deserialize<TcgPlayerGameSets>(await reply.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-                cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(12))
-                .SetValue(items!.Results);
+                cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(24))
+                    .SetValue(items!.Results);
 
                 return items.Results!;
             });
@@ -78,13 +78,22 @@ public static class Prices
             List<TcgPlayerCard>? cards = await _cache.GetOrCreateAsync("cardIds", async cacheItem =>
             {
                 var cardsList = new List<TcgPlayerCard>();
+
+                var taskList = new List<Task<TcgPlayerSet?>>();
                 foreach (var set in await GetSetsIdsAsync())
                 {
-                    var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set.SetNameId));
+                    taskList.Add(Task.Run(async () =>
+                    {
+                        var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set.SetNameId));
 
-                    var tcgPlayerSet = JsonSerializer.Deserialize<TcgPlayerSet>(await cardIdsResult.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                        return JsonSerializer.Deserialize<TcgPlayerSet>(await cardIdsResult.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                    }));
+                }
 
-                    cardsList.AddRange(tcgPlayerSet?.Result ?? []);
+                var resultSets = await Task.WhenAll(taskList);
+                foreach (var set in resultSets)
+                {
+                    cardsList.AddRange(set?.Result ?? []);
                 }
 
                 cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(12))
