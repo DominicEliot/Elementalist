@@ -28,10 +28,10 @@ jobs:
       run: dotnet test --no-build --verbosity normal --configuration Release  
 
     - name: dotnet publish
-      run: dotnet publish ./Elementalist -c Release -o /publishedApp
+      run: dotnet publish ./Elementalist -c Release -o ./publishedApp
 
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
         name: elementalist
-        path: /publishedApp
+        path: ./publishedApp
