@@ -42,7 +42,7 @@ public class BotStartupService : BackgroundService
             await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
 
             await _client.StartAsync();
-            await _client.SetCustomStatusAsync("Looking for a one foot ruler...");
+            await _client.SetCustomStatusAsync("Opening some packs!");
             _logger.Information("Discord client started");
 
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
@@ -58,37 +58,40 @@ public class BotStartupService : BackgroundService
         }
     }
 
-    private async Task LogAsync(LogMessage message)
+    private Task LogAsync(LogMessage message)
     {
         switch (message.Severity)
         {
             case LogSeverity.Critical:
-                _logger.Fatal(message.Exception, message.ToString());
+                _logger.Fatal(message.Exception, message.Message);
                 break;
 
             case LogSeverity.Error:
-                _logger.Error(message.Exception, message.ToString());
+                _logger.Error(message.Exception, message.Message);
                 break;
 
             case LogSeverity.Warning:
-                _logger.Warning(message.ToString());
+                _logger.Warning(message.Message);
                 break;
 
             case LogSeverity.Info:
-                _logger.Information(message.ToString());
+                _logger.Information(message.Message);
                 break;
 
             case LogSeverity.Verbose:
-                _logger.Debug(message.ToString());
+                _logger.Debug(message.Message);
                 break;
 
             case LogSeverity.Debug:
-                _logger.Debug(message.ToString());
+                _logger.Debug(message.Message);
                 break;
 
             default:
+                _logger.Warning("Unknown log message severity {0}:\nmessage:{}", message.Severity, message.Message);
                 break;
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task _client_InteractionCreated(SocketInteraction arg)
