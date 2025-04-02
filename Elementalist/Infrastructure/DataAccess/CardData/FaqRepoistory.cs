@@ -35,7 +35,7 @@ public class FaqRepoistory
         return Task.FromResult(_faqs);
     }
 
-    private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode? singleCardNode)
+    private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode singleCardNode)
     {
         var cardFaqs = new List<CardFaq>();
 
@@ -59,8 +59,8 @@ public class FaqRepoistory
 
 public class CardFaq
 {
-    public string QuestionText { get; set; }
-    public string AnswerText { get; set; }
+    public string QuestionText { get; set; } = "";
+    public string AnswerText { get; set; } = "";
     public string? Html { get; init; }
     public bool HasTable { get; set; }
 

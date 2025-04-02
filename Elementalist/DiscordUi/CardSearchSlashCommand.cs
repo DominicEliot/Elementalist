@@ -76,11 +76,11 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         await SendDiscordResponse(cardText, cards, ephemeral: ephemeral, query);
     }
 
-    private async Task SendDiscordResponse(string cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
+    private async Task SendDiscordResponse(string? cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
     {
         if (!cards.Any())
         {
-            await RespondAsync($"Couldn't find match for '{cardNameOrText}'", ephemeral: true);
+            await RespondAsync($"Couldn't find match for '{cardNameOrText ?? query.ToString()}'", ephemeral: true);
             return;
         }
 
@@ -162,8 +162,8 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
 
 public class SetVariant
 {
-    public Set Set { get; set; }
-    public Variant Variant { get; set; }
+    public required Set Set { get; init; }
+    public required Variant Variant { get; init; }
 }
 
 public static class CardArt
@@ -187,23 +187,24 @@ internal static class CardLookups
     {
         var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
 
-        SetVariant setVariant = new();
+        Set? foundSet = null;
+        Variant? foundVariant = null;
 
         foreach (var set in sets)
         {
             var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
             if (variant?.Product == "Booster") return new SetVariant { Variant = variant, Set = set };
 
-            setVariant.Variant ??= variant;
-            setVariant.Set = set;
+            foundVariant ??= variant;
+            foundSet = set;
         }
 
-        if (setVariant.Variant == null)
+        if (foundSet is null || foundVariant is null)
         {
-            setVariant.Variant = sets.First().Variants.First();
-            setVariant.Set = sets.First();
+            foundVariant = sets.First().Variants.First();
+            foundSet = sets.First();
         }
 
-        return setVariant;
+        return new SetVariant { Set = foundSet, Variant = foundVariant };
     }
 }

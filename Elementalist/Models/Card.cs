@@ -1,60 +1,127 @@
-﻿namespace Elementalist.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Elementalist.Models;
 
 public class Card
 {
-    public string Name { get; set; }
-    public Guardian Guardian { get; set; }
-    public string Elements { get; set; }
-    public string SubTypes { get; set; }
-    public IEnumerable<Set> Sets { get; set; }
+    [JsonConstructor]
+    public Card(string name, Guardian guardian, string elements, string subTypes, IEnumerable<Set> sets)
+    {
+        Name = name;
+        Guardian = guardian;
+        Elements = elements;
+        SubTypes = subTypes;
+        Sets = sets;
+    }
+
+    public string Name { get; init; }
+    public Guardian Guardian { get; init; }
+    public string Elements { get; init; }
+    public string SubTypes { get; init; }
+    public IEnumerable<Set> Sets { get; init; }
 }
 
 public class Guardian
 {
-    public string Rarity { get; set; }
-    public string Type { get; set; }
-    public string RulesText { get; set; }
-    public int? Cost { get; set; }
-    public int? Attack { get; set; }
-    public int? Defence { get; set; }
-    public int? Life { get; set; }
-    public Thresholds Thresholds { get; set; }
+    [JsonConstructor]
+    public Guardian(string rarity, string type, string rulesText, int? cost, int? attack, int? defence, int? life, Thresholds thresholds)
+    {
+        Rarity = rarity;
+        Type = type;
+        RulesText = rulesText;
+        Cost = cost;
+        Attack = attack;
+        Defence = defence;
+        Life = life;
+        Thresholds = thresholds;
+    }
+
+    public string Rarity { get; init; }
+    public string Type { get; init; }
+    public string RulesText { get; init; }
+    public int? Cost { get; init; }
+    public int? Attack { get; init; }
+    public int? Defence { get; init; }
+    public int? Life { get; init; }
+    public Thresholds Thresholds { get; init; }
 }
 
 public class Thresholds
 {
-    public int Air { get; set; }
-    public int Earth { get; set; }
-    public int Fire { get; set; }
-    public int Water { get; set; }
+    [JsonConstructor]
+    public Thresholds(int air, int earth, int fire, int water)
+    {
+        Air = air;
+        Earth = earth;
+        Fire = fire;
+        Water = water;
+    }
+
+    public int Air { get; init; }
+    public int Earth { get; init; }
+    public int Fire { get; init; }
+    public int Water { get; init; }
 }
 
 public class Set
 {
-    public string Name { get; set; }
-    public DateTime ReleasedAt { get; set; }
-    public Metadata Metadata { get; set; }
-    public IEnumerable<Variant> Variants { get; set; }
+    [JsonConstructor]
+    public Set(string name, DateTime releasedAt, Metadata metadata, IEnumerable<Variant> variants)
+    {
+        Name = name;
+        ReleasedAt = releasedAt;
+        Metadata = metadata;
+        Variants = variants;
+    }
+
+    public string Name { get; init; }
+    public DateTime ReleasedAt { get; init; }
+    public Metadata Metadata { get; init; }
+    public IEnumerable<Variant> Variants { get; init; }
 }
 
 public class Metadata
 {
-    public string Rarity { get; set; }
-    public string Type { get; set; }
-    public string RulesText { get; set; }
-    public int? Cost { get; set; }
-    public int? Attack { get; set; }
-    public int? Defence { get; set; }
-    public int? Life { get; set; }
-    public Thresholds Thresholds { get; set; }
+    [JsonConstructor]
+    public Metadata(string rarity, string type, string rulesText, int? cost, int? attack, int? defence, int? life, Thresholds thresholds)
+    {
+        Rarity = rarity;
+        Type = type;
+        RulesText = rulesText;
+        Cost = cost;
+        Attack = attack;
+        Defence = defence;
+        Life = life;
+        Thresholds = thresholds;
+    }
+
+    public string Rarity { get; init; }
+    public string Type { get; init; }
+    public string RulesText { get; init; }
+    public int? Cost { get; init; }
+    public int? Attack { get; init; }
+    public int? Defence { get; init; }
+    public int? Life { get; init; }
+    public Thresholds Thresholds { get; init; }
 }
 
 public class Variant
 {
-    public string Slug { get; set; }
-    public string Finish { get; set; }
-    public string Product { get; set; }
-    public string Artist { get; set; }
-    public string FlavorText { get; set; }
-    public string TypeText { get; set; }
+    [JsonConstructor]
+    public Variant(string slug, string finish, string product, string artist, string flavorText, string typeText)
+    {
+        Slug = slug;
+        Finish = finish;
+        Product = product;
+        Artist = artist;
+        FlavorText = flavorText;
+        TypeText = typeText;
+    }
+
+    public string Slug { get; init; }
+    public string Finish { get; init; }
+    public string Product { get; init; }
+    public string Artist { get; init; }
+    public string FlavorText { get; init; }
+    public string TypeText { get; init; }
 }

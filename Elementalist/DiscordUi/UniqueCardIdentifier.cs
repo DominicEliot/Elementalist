@@ -21,15 +21,11 @@ public class UniqueCardIdentifier
     [JsonInclude]
     public string Finish { get; private set; }
 
-    [JsonConstructor]
-    private UniqueCardIdentifier()
-    {
-        
-    }
 
-    public UniqueCardIdentifier(string cardName, string set, string product, string finish)
+    [JsonConstructor]
+    public UniqueCardIdentifier(string name, string set, string product, string finish)
     {
-        Name = cardName;
+        Name = name;
         Set = set;
         Product = product;
         Finish = finish;

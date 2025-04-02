@@ -1,4 +1,5 @@
-﻿using Elementalist.DiscordUi;
+﻿using System.Text.Json;
+using Elementalist.DiscordUi;
 using Xunit;
 
 namespace SorceryBotTests.DiscordUi;
@@ -11,6 +12,9 @@ public class UniqueCardIdTests
 
         var json = uniqueCard.ToJson();
 
+        var uniqueCardDeserialized = JsonSerializer.Deserialize<UniqueCardIdentifier>(json);
+
         Assert.True(json.Length <= 100);
+        Assert.Equal(uniqueCard.Name, uniqueCardDeserialized!.Name);
     }
 }

@@ -7,10 +7,12 @@ namespace Elementalist.Features.Card;
 
 public record GetCardsQuery : IQuery<IEnumerable<Models.Card>>
 {
-    public string? CardNameContains { get; set; }
-    public string? TextContains { get; set; }
-    public string? TypeContains { get; set; }
-    public string? ElementsContain { get; set; }
+    public string? CardNameContains { get; init; }
+    public string? TextContains { get; init; }
+    public string? TypeContains { get; init; }
+    public string? ElementsContain { get; init; }
+
+    public override string ToString() => $"{CardNameContains} {TextContains} {TypeContains} {ElementsContain}".Trim();
 }
 
 public class GetCardsQueryValidator : AbstractValidator<GetCardsQuery>

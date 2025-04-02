@@ -34,7 +34,7 @@ public class CardSearchQueryHandlerTests
     }
 
     [Fact]
-    public async Task BuildTooManyMatchesUrl()
+    public void BuildTooManyMatchesUrl()
     {
         var query = new GetCardsQuery() { TextContains = "Airborne Voidwalk", CardNameContains = "onda", TypeContains = "Minion Beast" };
 
