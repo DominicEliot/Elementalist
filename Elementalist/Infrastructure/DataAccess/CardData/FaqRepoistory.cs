@@ -7,11 +7,11 @@ public class FaqRepoistory
 {
     private Dictionary<string, List<CardFaq>> _faqs = [];
 
-    public async Task<Dictionary<string, List<CardFaq>>> GetFaqs()
+    public Task<Dictionary<string, List<CardFaq>>> GetFaqs()
     {
         if (_faqs.Count() > 0)
         {
-            return _faqs;
+            return Task.FromResult(_faqs);
         }
 
         var web = new HtmlWeb();
@@ -32,7 +32,7 @@ public class FaqRepoistory
             _faqs.Add(cardName, cardFaqs);
         }
 
-        return _faqs;
+        return Task.FromResult(_faqs);
     }
 
     private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode? singleCardNode)
