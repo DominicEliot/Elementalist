@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using Discord;
 using Elementalist.Models;
+using NetCord;
 
 namespace Elementalist.DiscordUi;
 

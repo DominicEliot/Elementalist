@@ -1,6 +1,4 @@
-﻿using Discord;
-
-namespace Elementalist.Shared;
+﻿namespace Elementalist.Shared;
 public class Result<TResult>
 {
     private readonly TResult? _value;

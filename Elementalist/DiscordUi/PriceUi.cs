@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
-using Discord;
-using Discord.Interactions;
+using NetCord;
 using MediatR;
 using Elementalist.Features.Card;
 using Elementalist.Features.Cards;
@@ -8,12 +7,12 @@ using Elementalist.Infrastructure.DataAccess.CardData;
 
 namespace Elementalist.DiscordUi;
 
-public class PriceUi(IMediator mediator, ICardRepository cardRepository) : InteractionModuleBase<SocketInteractionContext>
+public class PriceUi(IMediator mediator, ICardRepository cardRepository) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly IMediator _mediator = mediator;
     private readonly ICardRepository _cardRepository = cardRepository;
 
-    [ComponentInteraction("price-*")]
+    [ComponentInteraction("price")]
     public async Task ShowPrice(string cardName)
     {
         if (!(Context.Interaction is IComponentInteraction { } interaction)) throw new ArgumentNullException(nameof(Context.Interaction));
@@ -53,7 +52,7 @@ public class PriceUi(IMediator mediator, ICardRepository cardRepository) : Inter
     }
 
     [SlashCommand("price", "Shows the price of the specified card.")]
-    public async Task CardPriceByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
+    public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
         var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 

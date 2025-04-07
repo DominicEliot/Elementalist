@@ -1,43 +1,46 @@
-﻿using Discord;
-using Discord.Interactions;
-using MediatR;
-using Elementalist.Infrastructure.DataAccess.CardData;
-using Elementalist.Features.Card;
+﻿using Elementalist.Infrastructure.DataAccess.CardData;
+using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
+using NetCord.Rest;
 
 namespace Elementalist.DiscordUi;
 
-public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
+public class FaqUi(FaqRepoistory faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly FaqRepoistory _faqRepository = faqRepository;
 
-    [ComponentInteraction("faq-*")]
+    [ComponentInteraction("faq")]
     public async Task ShowFaq(string cardName)
     {
         await RespondWithFaq(cardName);
     }
 
     [SlashCommand("faq", "Shows any FAQs for the input card.")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool privateMessage = false)
+    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
     {
         await RespondWithFaq(cardName, privateMessage);
     }
 
     private async Task RespondWithFaq(string cardName, bool privateMessage = false)
     {
+        var message = new InteractionMessageProperties();
+        if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;
+
         var faqs = await _faqRepository.GetFaqs();
         if (faqs.TryGetValue(cardName, out var cardFaqs) is not true)
         {
-            await RespondAsync($"No FAQ entries found for {cardName}", ephemeral: true);
-            return;
+            message.Content = $"No FAQ entries found for {cardName}";
+            message.Flags = NetCord.MessageFlags.Ephemeral;
+            await RespondAsync(InteractionCallback.Message(message));
         }
 
-        var faqEmbed = new EmbedBuilder().WithTitle($"{cardName} FAQs");
+        var faqEmbed = new EmbedProperties().WithTitle($"{cardName} FAQs");
 
         foreach (var faq in cardFaqs)
         {
-            faqEmbed.AddField(faq.QuestionText, faq.AnswerText);
+            faqEmbed.AddFields(new EmbedFieldProperties().WithName(faq.QuestionText).WithValue(faq.AnswerText));
         }
-
-        await RespondAsync(embed: faqEmbed.Build(), ephemeral: privateMessage);
+        message.Embeds = [faqEmbed];
+        await RespondAsync(InteractionCallback.Message(message));
     }
 }
