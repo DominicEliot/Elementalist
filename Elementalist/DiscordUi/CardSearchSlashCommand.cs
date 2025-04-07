@@ -184,7 +184,7 @@ public static class CardArt
     {
         cardSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
         var escapedSet = Uri.EscapeDataString(setName);
-        return $"https://content.wrexial.com/SorceryImages/{escapedSet}/{cardSlug}.png";
+        return $"https://sorceryimages.blob.core.windows.net/sets/{escapedSet}/{cardSlug}.png";
     }
 }
 
