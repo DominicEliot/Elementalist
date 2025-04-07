@@ -11,15 +11,27 @@ public class BotActivityChangingService(GatewayClient client, IOptions<ActivityO
         {
             var rand = Random.Shared.Next(0, options.Value.Activities.Count());
 
-            //Todo - Set the status
             var status = options.Value.Activities.ElementAt(rand);
 
-             await Task.Delay(TimeSpan.FromMinutes(20), stoppingToken);
+            try
+            {
+                await client.UpdatePresenceAsync(new PresenceProperties(NetCord.UserStatusType.Online)
+                {
+                    Activities = [new UserActivityProperties(status, UserActivityType.Custom)]
+                }, cancellationToken: stoppingToken);
+
+                await Task.Delay(TimeSpan.FromMinutes(options.Value.CycleTimeInMinutes), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
 }
 
 public class ActivityOptions
 {
+    public int CycleTimeInMinutes { get; set; }
     public IEnumerable<string> Activities { get; set; } = [];
 }
