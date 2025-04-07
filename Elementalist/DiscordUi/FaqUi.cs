@@ -1,11 +1,11 @@
 ﻿using Elementalist.Infrastructure.DataAccess.CardData;
+using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
-using NetCord.Rest;
 
 namespace Elementalist.DiscordUi;
 
-public class FaqUi(FaqRepoistory faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
+public class FaqUi(FaqRepoistory faqRepository) : ComponentInteractionModule<ButtonInteractionContext>
 {
     private readonly FaqRepoistory _faqRepository = faqRepository;
 
