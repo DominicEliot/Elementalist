@@ -1,6 +1,5 @@
+using System.Text.Json;
 using NetCord;
-using Elementalist.Infrastructure.Config;
-using Microsoft.Extensions.Options;
 using NetCord.Gateway;
 
 namespace Elementalist;
@@ -18,6 +17,7 @@ public class BotStartupService : BackgroundService
         _client = client;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _client.InteractionCreate += _client_InteractionCreated;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,7 +31,7 @@ public class BotStartupService : BackgroundService
 
             //await _client.StartAsync();
             //await _client.UpdatePresenceAsync(new("Opening some packs!"));
-            _logger.Information("Discord client started");
+            //_logger.Information("Discord client started");
 
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
             //await Task.Delay(-1, stoppingToken);
@@ -68,24 +68,11 @@ public class BotStartupService : BackgroundService
 
     private ValueTask _client_InteractionCreated(Interaction arg)
     {
-        //var ctx = new SocketInteractionContext(_client, arg);
-        //var component = arg as SocketMessageComponent;
-
-        //_logger.Information("{user} is executing discord {type} id {Id}. Interaction {customId}", arg.User.Username, arg.Type, arg.Id, component?.Data.CustomId);
-
-        //try
-        //{
-        //    await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
-        //}
-        //catch (Exception ex)
-        //{
-        //    _logger.Error(ex, "Discord {Type} interaction {Id} failed.", arg.Type, arg.Id);
-
-        //    if (!ctx.Interaction.HasResponded)
-        //    {
-        //        await ctx.Interaction.RespondAsync($"An error occoured: {ex.Message}", ephemeral: true);
-        //    }
-        //}
+        _logger.Information("{user} is executing discord {type} id {Id}. Interaction {data}",
+            arg.User.Username,
+            arg.Context.GetType().Name,
+            arg.Id,
+            JsonSerializer.Serialize(arg.Data));
 
         return ValueTask.CompletedTask;
     }
