@@ -1,5 +1,4 @@
 using Elementalist.Features.Cards;
-using Elementalist.Infrastructure.Config;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Infrastructure.Logging;
 using NetCord;
@@ -10,7 +9,6 @@ using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Hosting.Services.ComponentInteractions;
 using NetCord.Services.ComponentInteractions;
 using Serilog;
-using Serilog.Events;
 using static Elementalist.Features.Cards.Prices;
 
 namespace Elementalist;

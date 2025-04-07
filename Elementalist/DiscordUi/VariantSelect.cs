@@ -1,6 +1,5 @@
 ﻿using NetCord;
 using NetCord.Rest;
-using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
@@ -10,57 +9,60 @@ public class VariantSelect : ComponentInteractionModule<StringMenuInteractionCon
     [ComponentInteraction("variantSelect")]
     public async Task SelectVariant()
     {
-        //List<ComponentProperties> components = Context.Message.Components.Select(c => c.).ToList();
+        //Todo: Maybe just reuse the code to create the message, and modify the selected value.
+        var components = ToEditableComponents(Context.Message.Components);
+        var menu = components.OfType<StringMenuProperties>().First();
 
-        //for (int i = 0; i < components.ActionRows.Count; i++)
-        //{
-        //    ActionRowBuilder? row = components.ActionRows[i];
-        //    var selectMenu = row.Components.OfType<SelectMenuComponent>().FirstOrDefault();
-
-        //    if (selectMenu != null)
-        //    {
-        //        var selectMenuBuilder = selectMenu.ToBuilder();
-
-        //        foreach (var item in selectMenuBuilder.Options)
-        //        {
-        //            var selected = userSelection.Contains(item.Value);
-
-        //            item.WithDefault(selected);
-        //        }
-
-        //        components.ActionRows[i] = new ActionRowBuilder().WithSelectMenu(selectMenuBuilder);
-        //    }
-        //}
-        
-        var menu = Context.Message.Components.OfType<StringMenu>().First();
         foreach (var option in menu.Options)
         {
-            if (option.Value == Context.SelectedValues.First())
-            {
-            }
-            else
-            {
-                option.Default = false;
-            }
-        }
-
-        List<ComponentProperties> converter = Context.Message.Components.OfType<StringMenu>().ToList();
-        foreach (var component in converter.OfType<StringMenu>())
-        {
-            component.
+            option.Default = option.Value.Equals(Context.SelectedValues.First(), StringComparison.OrdinalIgnoreCase);
         }
 
         var callback = InteractionCallback.ModifyMessage(m =>
         {
-            m.Components = converter;
-            foreach (var item in menu)
-            {
-                if (item.CustomId == Context.SelectedValues.First())
-                {
-                    Console.WriteLine("found");
-                }
-            }
+            m.Components = components;
         });
         await RespondAsync(callback);
+    }
+
+    private List<ComponentProperties> ToEditableComponents(IEnumerable<IComponent> components)
+    {
+        var componentList = new List<ComponentProperties>();
+        foreach (var messageComponent in components)
+        {
+            if (messageComponent is ActionRow ar)
+            {
+                var newActionRow = new ActionRowProperties();
+                newActionRow.AddButtons(ar.Buttons.OfType<Button>()
+                    .Select(b => new ButtonProperties(b.CustomId, b.Label, b.Style)
+                    {
+                        Disabled = b.Disabled,
+                        Emoji = (b.Emoji?.Id != null) ? new EmojiProperties(b.Emoji.Id.Value) : null
+                    }
+                ));
+                componentList.Add(newActionRow);
+            }
+
+            else if (messageComponent is StringMenu sm)
+            {
+                var newMenu = new StringMenuProperties(sm.CustomId);
+                newMenu.AddOptions(sm.Options
+                    .Select(o => new StringMenuSelectOptionProperties(o.Label, o.Value)
+                    {
+                        Default = o.Default,
+                        Description = o.Description,
+                        Emoji = (o.Emoji?.Id != null) ? new EmojiProperties(o.Emoji.Id.Value) : null
+                    }
+                ));
+                componentList.Add(newMenu);
+            }
+
+            else
+            {
+                throw new ArgumentException($"Unknown type {messageComponent.GetType().FullName}");
+            }
+        }
+
+        return componentList;
     }
 }

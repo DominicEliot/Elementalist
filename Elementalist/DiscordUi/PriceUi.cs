@@ -1,82 +1,97 @@
 ﻿using System.Text.Json;
-using NetCord;
-using MediatR;
 using Elementalist.Features.Card;
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
+using MediatR;
+using NetCord;
+using NetCord.Rest;
+using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class PriceUi(IMediator mediator, ICardRepository cardRepository) : ApplicationCommandModule<ApplicationCommandContext>
+public static class PriceUi
 {
-    private readonly IMediator _mediator = mediator;
-    private readonly ICardRepository _cardRepository = cardRepository;
-
-    [ComponentInteraction("price")]
-    public async Task ShowPrice(string cardName)
+    public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository) : ComponentInteractionModule<ButtonInteractionContext>
     {
-        if (!(Context.Interaction is IComponentInteraction { } interaction)) throw new ArgumentNullException(nameof(Context.Interaction));
-        var message = interaction.Message;
-        var components = message.Components;
+        private readonly IMediator _mediator = mediator;
+        private readonly ICardRepository _cardRepository = cardRepository;
 
-        var selectedMenus = components.OfType<ActionRowComponent>().SelectMany(ar => ar.Components.OfType<SelectMenuComponent>()); //?.Options.FirstOrDefault(o => o.IsDefault == true)?.Value;
-        var uniqueCardJson = selectedMenus.First().Options.First(o => o.IsDefault == true).Value;
-        var uniqueCardId = JsonSerializer.Deserialize<UniqueCardIdentifier>(uniqueCardJson);
-
-        var card = (await _cardRepository.GetCardsMatching(c => c.Name == cardName)).FirstOrDefault();
-
-        if (card is not null && uniqueCardId is not null)
+        [ComponentInteraction("price")]
+        public async Task ShowPrice(string cardName)
         {
-            var set = card.Sets.First(s => s.Name == uniqueCardId.Set);
-            var variant = set.Variants.First(v => v.Finish == uniqueCardId.Finish && v.Product == uniqueCardId.Product);
+            var message = Context.Interaction.Message;
+            var components = message.Components;
 
-            var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, variant.Finish);
-            var priceResponse = await _mediator.Send(priceQuery);
+            var menu = components.OfType<StringMenu>().First();
+            var uniqueCardJson = menu.Options.First(o => o.Default).Value;
+            var uniqueCardId = JsonSerializer.Deserialize<UniqueCardIdentifier>(uniqueCardJson);
 
-            if (priceResponse.IsValid())
+            var card = (await _cardRepository.GetCardsMatching(c => c.Name == cardName)).FirstOrDefault();
+
+            if (card is not null && uniqueCardId is not null)
             {
-                if (priceResponse.Value.Count() == 0)
+                var set = card.Sets.First(s => s.Name == uniqueCardId.Set);
+                var variant = set.Variants.First(v => v.Finish == uniqueCardId.Finish && v.Product == uniqueCardId.Product);
+
+                var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, variant.Finish);
+                var priceResponse = await _mediator.Send(priceQuery);
+
+                if (priceResponse.IsValid())
                 {
-                    await RespondAsync($"No prices for {uniqueCardId}", ephemeral: true);
+                    if (priceResponse.Value.Count() == 0)
+                    {
+                        await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
+                        return;
+                    }
+
+                    var embed = CardPriceEmbed(cardName, priceResponse.Value);
+
+                    await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
                     return;
                 }
-
-                var embed = CardPriceEmbed(cardName, priceResponse.Value);
-
-                await RespondAsync(embed: embed.Build());
-                return;
             }
-        }
 
-        await RespondAsync($"Couldn't find a price for {cardName}", ephemeral: true);
+            await RespondAsync(InteractionCallback.Message(new() { Content = $"Couldn't find a price for {cardName}", Flags = MessageFlags.Ephemeral }));
+        }
     }
 
-    [SlashCommand("price", "Shows the price of the specified card.")]
-    public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
+    public class PriceUiSlashCommand(IMediator mediator) : ApplicationCommandModule<ApplicationCommandContext>
     {
-        var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
+        private readonly IMediator _mediator = mediator;
 
-        var priceQuery = new Prices.CardPriceQuery(cardName);
-        var priceResponse = await _mediator.Send(priceQuery);
-
-        if (priceResponse.IsError())
+        [SlashCommand("price", "Shows the price of the specified card.")]
+        public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
         {
-            await RespondAsync($"Couldn't find prices for card {cardName}", ephemeral: true);
-        }
+            var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
 
-        var embed = CardPriceEmbed(cardName, priceResponse.Value);
-        await RespondAsync(embed: embed.Build());
+            var priceQuery = new Prices.CardPriceQuery(cardName);
+            var priceResponse = await _mediator.Send(priceQuery);
+
+            if (priceResponse.IsError())
+            {
+                await RespondAsync(InteractionCallback.Message(new() { Content = $"Couldn't find prices for card {cardName}", Flags = MessageFlags.Ephemeral }));
+            }
+
+            var embed = CardPriceEmbed(cardName, priceResponse.Value);
+            await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
+        }
     }
 
-    private static EmbedBuilder CardPriceEmbed(string cardName, IEnumerable<Prices.PriceData> prices)
+    private static EmbedProperties CardPriceEmbed(string cardName, IEnumerable<Prices.PriceData> prices)
     {
-        var builder = new EmbedBuilder()
+        var builder = new EmbedProperties()
             .WithTitle($"{cardName} Prices");
 
+        var fields = new List<EmbedFieldProperties>();
         foreach (var item in prices)
         {
-            builder.AddField(item.Card.ToNamelessString(), $"{item.Condition} Low: {item.Low:C2}, Mid: {item.Mid:C2}".Trim());
+            fields.Add(new EmbedFieldProperties()
+                .WithName(item.Card.ToNamelessString())
+                .WithValue($"{item.Condition} Low: {item.Low:C2}, Mid: {item.Mid:C2}".Trim())
+                );
         }
+        builder.AddFields(fields);
 
         return builder;
     }

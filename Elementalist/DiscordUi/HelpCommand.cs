@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Elementalist.DiscordUi;
-using Elementalist.Infrastructure.DataAccess.CardData;
-using NetCord.Rest;
+﻿using System.Reflection;
 using NetCord.Services.ApplicationCommands;
-using NetCord.Services.Commands;
 
 namespace ElementalistBot.DiscordUi;
 
@@ -24,8 +14,6 @@ public class HelpCommand : ApplicationCommandModule<ApplicationCommandContext>
     public static Lazy<string> CommandsText = new Lazy<string>(() =>
     {
         var slashCommands = Assembly.GetExecutingAssembly().GetTypes()
-            //Todo: get real interface
-            .Where(t => t.IsAssignableTo(typeof(ApplicationCommandModule<>)))
             .SelectMany(T => T.GetMembers())
             .Select(M => Attribute.GetCustomAttribute(M, typeof(SlashCommandAttribute)))
             .OfType<SlashCommandAttribute>()

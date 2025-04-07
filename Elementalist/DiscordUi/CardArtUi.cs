@@ -3,8 +3,6 @@ using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Models;
 using NetCord;
 using NetCord.Rest;
-using NetCord.Services;
-using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
@@ -19,7 +17,7 @@ public class CardArtUi(ICardRepository cardRepository) : ComponentInteractionMod
         var buttonMessage = Context.Message;
         var components = buttonMessage.Components;
 
-        var selectedMenus = components.OfType<StringMenu>(); //?.Options.FirstOrDefault(o => o.IsDefault == true)?.Value;
+        var selectedMenus = components.OfType<StringMenu>();
         var uniqueCardJson = selectedMenus.First().Options.First(o => o.Default == true).Value;
         var cardVersionMetadata = JsonSerializer.Deserialize<UniqueCardIdentifier>(uniqueCardJson);
 
@@ -54,7 +52,7 @@ public class CardArtUi(ICardRepository cardRepository) : ComponentInteractionMod
 
     internal class EmbedCardArtAdapter : EmbedProperties
     {
-        public EmbedCardArtAdapter(Models.Card card, SetVariant? setVariant = null)
+        public EmbedCardArtAdapter(Card card, SetVariant? setVariant = null)
         {
             setVariant ??= CardLookups.GetDefaultVariant(card);
 
