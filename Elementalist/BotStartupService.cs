@@ -1,8 +1,6 @@
 using System.Text.Json;
 using NetCord;
 using NetCord.Gateway;
-using NetCord.Services.ApplicationCommands;
-using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist;
 
@@ -70,21 +68,15 @@ public class BotStartupService : BackgroundService
 
     private ValueTask _client_InteractionCreated(Interaction arg)
     {
-        string data = "unknown interaction type";
-        if (arg is ButtonInteraction buttonInteraction)
+        string data = arg.Data switch
         {
-            data = $"{buttonInteraction.Data.ComponentType}:{buttonInteraction.Data.CustomId}";
-        }
-        if (arg is StringMenuInteraction stringMenu)
-        {
-            data = $"{stringMenu.Data.ComponentType}:{stringMenu.Data.CustomId}";
-        }
-        if (arg is ApplicationCommandInteraction commandContext)
-        {
-            //todo: command args
-            data = $"{commandContext.Data.Type}:{commandContext.Data.Name}";
-        }
-        //Todo: auto complete
+            ButtonInteractionData b => $"{b.ComponentType}:{b.CustomId}",
+            StringMenuInteractionData stringMenu => $"{stringMenu.ComponentType}:{stringMenu.CustomId}",
+            AutocompleteInteractionData autoCompleteData => $"{autoCompleteData.Type}:{autoCompleteData.Name}",
+            SlashCommandInteractionData slashCommandData => $"{slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
+            ModalInteractionData modalData => $"{nameof(ModalInteraction)}:{modalData.CustomId}",
+            _ => $"unknown interaction type {arg.Data.GetType().Name}"
+        };
 
         _logger.Information("{user} is executing discord {type} id {Id}. Interaction {data}",
             arg.User.Username,
