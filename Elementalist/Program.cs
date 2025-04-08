@@ -34,7 +34,7 @@ public class Program
             builder.Services.AddHttpClient();
             builder.Services.AddMemoryCache();
 
-            //builder.Services.AddHostedService<CardPriceService>();
+            builder.Services.AddHostedService<CardPriceService>();
             builder.Services.AddHostedService<BotActivityChangingService>();
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
