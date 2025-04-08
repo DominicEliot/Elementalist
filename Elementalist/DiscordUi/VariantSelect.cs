@@ -27,9 +27,12 @@ public class VariantSelect(ICardRepository cardRepository) : ComponentInteractio
         var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
+        var message = CardDisplay.CardInfoMessage([card], setVariant);
+
         var callback = InteractionCallback.ModifyMessage(m =>
         {
-            m.Components = CardDisplay.CardComponentBuilder(card, setVariant);
+            m.Components = message.Components;
+            m.Embeds = message.Embeds;
         });
         await RespondAsync(callback);
     }

@@ -10,6 +10,24 @@ namespace Elementalist.DiscordUi;
 
 public static class CardDisplay
 {
+    public static InteractionMessageProperties CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
+    {
+        var message = new InteractionMessageProperties();
+        var embeds = new List<EmbedProperties>();
+        foreach (var card in cards)
+        {
+            embeds.Add(new EmbedCardDetailAdapter(card, variant));
+        }
+        message.Embeds = embeds;
+
+        if (cards.Count() == 1)
+        {
+            message.Components = CardComponentBuilder(cards.First(), variant);
+        }
+
+        return message;
+    }
+
     internal static List<ComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
     {
         var components = new List<ComponentProperties>();
@@ -82,7 +100,6 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     private async Task SendDiscordResponse(string? cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
     {
         var message = new InteractionMessageProperties();
-        if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (!cards.Any())
         {
@@ -100,17 +117,8 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
             return;
         }
 
-        var embeds = new List<EmbedProperties>();
-        foreach (var card in cards)
-        {
-            embeds.Add(new EmbedCardDetailAdapter(card));
-        }
-        message.Embeds = embeds;
-
-        if (cards.Count() == 1)
-        {
-            message.Components = CardDisplay.CardComponentBuilder(cards.First());
-        }
+        message = CardDisplay.CardInfoMessage(cards);
+        if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))
         {
