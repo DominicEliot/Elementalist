@@ -1,6 +1,8 @@
 using System.Text.Json;
 using NetCord;
 using NetCord.Gateway;
+using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist;
 
@@ -68,11 +70,27 @@ public class BotStartupService : BackgroundService
 
     private ValueTask _client_InteractionCreated(Interaction arg)
     {
+        string data = "unknown interaction type";
+        if (arg is ButtonInteraction buttonInteraction)
+        {
+            data = $"{buttonInteraction.Data.ComponentType}:{buttonInteraction.Data.CustomId}";
+        }
+        if (arg is StringMenuInteraction stringMenu)
+        {
+            data = $"{stringMenu.Data.ComponentType}:{stringMenu.Data.CustomId}";
+        }
+        if (arg is ApplicationCommandInteraction commandContext)
+        {
+            //todo: command args
+            data = $"{commandContext.Data.Type}:{commandContext.Data.Name}";
+        }
+        //Todo: auto complete
+
         _logger.Information("{user} is executing discord {type} id {Id}. Interaction {data}",
             arg.User.Username,
             arg.Context.GetType().Name,
             arg.Id,
-            JsonSerializer.Serialize(arg.Data));
+            data);
 
         return ValueTask.CompletedTask;
     }
