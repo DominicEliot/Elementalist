@@ -10,14 +10,14 @@ namespace Elementalist.DiscordUi;
 
 public static class CardDisplay
 {
-    internal static List<ComponentProperties> CardComponentBuilder(Card card)
+    internal static List<ComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
     {
         var components = new List<ComponentProperties>();
         var buttonRow = new ActionRowProperties();
 
         if (card.Sets.Count() > 1 || card.Sets.Any(s => s.Variants.Count() > 1))
         {
-            AddVariantsMenu(card, components);
+            AddVariantsMenu(card, components, variant);
         }
 
         buttonRow.AddButtons(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
@@ -28,11 +28,11 @@ public static class CardDisplay
         return components;
     }
 
-    private static void AddVariantsMenu(Card card, List<ComponentProperties> componentsList)
+    private static void AddVariantsMenu(Card card, List<ComponentProperties> componentsList, SetVariant? defaultVariant)
     {
         var menuBuilder = new StringMenuProperties("variantSelect");
 
-        var defaultVariant = CardLookups.GetDefaultVariant(card);
+        defaultVariant ??= CardLookups.GetDefaultVariant(card);
 
         var selectMenuOptions = new List<StringMenuSelectOptionProperties>();
         foreach (var set in card.Sets)

@@ -107,8 +107,8 @@ public class Metadata
 
 public class SetVariant
 {
-    public Set Set { get; init; }
-    public Variant Variant { get; init; }
+    public required Set Set { get; init; }
+    public required Variant Variant { get; init; }
 }
 
 public class Variant
