@@ -1,4 +1,4 @@
-name: Trigger auto deployment for disco-bot-container
+name: Trigger auto deployment for azure container
 
 # When this action will be executed
 on:
@@ -7,7 +7,7 @@ on:
     branches: 
       [ main ]
     paths:
-    - '**'
+    - 'Elementalist/**'
     - '.github/workflows/disco-bot-container-AutoDeployTrigger-0e9da29e-57bc-4d77-b8b0-14e28a3d90b8.yml'
 
   # Allow manual trigger 
