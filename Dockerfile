@@ -31,5 +31,5 @@ ENV LC_ALL en_US.UTF-8
 
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV DISCORD__TOKEN
+ENV DISCORD__TOKEN=
 ENTRYPOINT ["dotnet", "ElementalistBot.dll"]
