@@ -45,6 +45,15 @@ public class Program
                 .AddDiscordGateway(options =>
                 {
                     options.Intents = GatewayIntents.AllNonPrivileged;
+                    options.Presence = new PresenceProperties(UserStatusType.Online)
+                    {
+                        Activities = [
+                            new("The Elementalist", UserActivityType.Playing)
+                            {
+                                Name = "Shuffling a spicy brew"
+                            }
+                        ],
+                    };
                 })
                 .AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>()
                 .AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>()

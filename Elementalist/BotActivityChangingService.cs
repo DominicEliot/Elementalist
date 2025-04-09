@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using NetCord;
 using NetCord.Gateway;
 
 namespace Elementalist;
@@ -38,19 +39,25 @@ public class BotActivityChangingService : BackgroundService
         {
             if (!_connected)
             {
-                await Task.Delay(1000);
+                await Task.Delay(1000, default);
             }
 
             var rand = Random.Shared.Next(0, _options.Value.Activities.Count());
 
-            var status = _options.Value.Activities.ElementAt(rand);
-
             try
             {
-                await _client.UpdatePresenceAsync(new PresenceProperties(NetCord.UserStatusType.Online)
+                await _client.UpdatePresenceAsync(new PresenceProperties(UserStatusType.Online)
                 {
-                    Activities = [new UserActivityProperties(status, UserActivityType.Custom)]
-                }, cancellationToken: stoppingToken);
+                    Activities = [
+                            new("The Elementalist", UserActivityType.Custom)
+                            {
+                                Name = "The Elementalist",
+                                Details = "A bot for helping discussions about sorcery cards in Discord.",
+                                State = _options.Value.Activities.ElementAt(rand),
+                            }
+                        ]
+                },
+                cancellationToken: stoppingToken);
 
                 await Task.Delay(TimeSpan.FromMinutes(_options.Value.CycleTimeInMinutes), stoppingToken);
             }

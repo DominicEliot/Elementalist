@@ -36,45 +36,4 @@ public class VariantSelect(ICardRepository cardRepository) : ComponentInteractio
         });
         await RespondAsync(callback);
     }
-
-    private List<ComponentProperties> ToEditableComponents(IEnumerable<IComponent> components)
-    {
-        var componentList = new List<ComponentProperties>();
-        foreach (var messageComponent in components)
-        {
-            if (messageComponent is ActionRow ar)
-            {
-                var newActionRow = new ActionRowProperties();
-                newActionRow.AddButtons(ar.Buttons.OfType<Button>()
-                    .Select(b => new ButtonProperties(b.CustomId, b.Label, b.Style)
-                    {
-                        Disabled = b.Disabled,
-                        Emoji = (b.Emoji?.Id != null) ? new EmojiProperties(b.Emoji.Id.Value) : null
-                    }
-                ));
-                componentList.Add(newActionRow);
-            }
-
-            else if (messageComponent is StringMenu sm)
-            {
-                var newMenu = new StringMenuProperties(sm.CustomId);
-                newMenu.AddOptions(sm.Options
-                    .Select(o => new StringMenuSelectOptionProperties(o.Label, o.Value)
-                    {
-                        Default = o.Default,
-                        Description = o.Description,
-                        Emoji = (o.Emoji?.Id != null) ? new EmojiProperties(o.Emoji.Id.Value) : null
-                    }
-                ));
-                componentList.Add(newMenu);
-            }
-
-            else
-            {
-                throw new ArgumentException($"Unknown type {messageComponent.GetType().FullName}");
-            }
-        }
-
-        return componentList;
-    }
 }
