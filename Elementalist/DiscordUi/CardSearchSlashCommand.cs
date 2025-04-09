@@ -1,60 +1,81 @@
-﻿using System.Runtime.CompilerServices;
-using Discord;
-using Discord.Interactions;
-using Elementalist.Features.Card;
+﻿using Elementalist.Features.Card;
 using Elementalist.Infrastructure.Config;
 using Elementalist.Models;
 using MediatR;
 using Microsoft.Extensions.Options;
+using NetCord.Rest;
+using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi;
 
 public static class CardDisplay
 {
-    internal static ComponentBuilder CardComponentBuilder(Card card)
+    public static InteractionMessageProperties CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
     {
-        var builder = new ComponentBuilder();
+        var message = new InteractionMessageProperties();
+        var embeds = new List<EmbedProperties>();
+        foreach (var card in cards)
+        {
+            embeds.Add(new EmbedCardDetailAdapter(card, variant));
+        }
+        message.Embeds = embeds;
+
+        if (cards.Count() == 1)
+        {
+            message.Components = CardComponentBuilder(cards.First(), variant);
+        }
+
+        return message;
+    }
+
+    internal static List<ComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
+    {
+        var components = new List<ComponentProperties>();
+        var buttonRow = new ActionRowProperties();
 
         if (card.Sets.Count() > 1 || card.Sets.Any(s => s.Variants.Count() > 1))
         {
-            AddVariantsMenu(card, builder);
+            AddVariantsMenu(card, components, variant);
         }
 
-        builder.WithButton("Art", $"art-{card.Name}");
-        builder.WithButton("Faq", $"faq-{card.Name}");
-        builder.WithButton("Price", $"price-{card.Name}");
+        buttonRow.AddButtons(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
+                           new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary),
+                           new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
+        components.Add(buttonRow);
 
-        return builder;
+        return components;
     }
 
-    private static void AddVariantsMenu(Card card, ComponentBuilder builder)
+    private static void AddVariantsMenu(Card card, List<ComponentProperties> componentsList, SetVariant? defaultVariant)
     {
-        var menuBuilder = new SelectMenuBuilder();
-        menuBuilder.WithCustomId($"variantSelect");
+        var menuBuilder = new StringMenuProperties("variantSelect");
 
-        var defaultVariant = CardLookups.GetDefaultVariant(card);
+        defaultVariant ??= CardLookups.GetDefaultVariant(card);
 
+        var selectMenuOptions = new List<StringMenuSelectOptionProperties>();
         foreach (var set in card.Sets)
         {
             foreach (var variant in set.Variants)
             {
                 var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
                 var uniqueCardId = new UniqueCardIdentifier(card.Name, set.Name, variant.Product, variant.Finish);
-                menuBuilder.AddOption(uniqueCardId.ToNamelessString(), uniqueCardId.ToJson(), isDefault: isDefault);
+                selectMenuOptions.Add(new(uniqueCardId.ToNamelessString(), uniqueCardId.ToJson()) { Default = isDefault });
             }
         }
 
-        builder.WithSelectMenu(menuBuilder);
+        menuBuilder.AddOptions(selectMenuOptions);
+
+        componentsList.Add(menuBuilder);
     }
 }
 
-public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : InteractionModuleBase<SocketInteractionContext>
+public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly BotConfig _config = config.Value;
     private readonly IMediator _mediator = mediator;
 
     [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool ephemeral = false)
+    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
         var query = new GetCardsQuery() { CardNameContains = cardName };
         var cards = await _mediator.Send(query);
@@ -78,38 +99,38 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
     private async Task SendDiscordResponse(string? cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
     {
+        var message = new InteractionMessageProperties();
+
         if (!cards.Any())
         {
-            await RespondAsync($"Couldn't find match for '{cardNameOrText ?? query.ToString()}'", ephemeral: true);
+            message.WithContent($"Couldn't find match for '{cardNameOrText ?? query.ToString()}'")
+                .WithFlags(NetCord.MessageFlags.Ephemeral);
+            await RespondAsync(InteractionCallback.Message(message));
             return;
         }
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            string responseText = $"Too many matches to display your search results,\nplease see {GetRealmsAppUrl(query)}";
+            message.WithContent($"Too many matches to display your search results,\nplease see {GetRealmsAppUrl(query)}");
 
-            await base.RespondAsync(responseText, ephemeral: ephemeral);
+            await RespondAsync(InteractionCallback.Message(message));
             return;
         }
 
-        var embeds = new List<Embed>();
-        foreach (var card in cards)
+        message = CardDisplay.CardInfoMessage(cards);
+        if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
+
+        if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))
         {
-            embeds.Add(new EmbedCardDetailAdapter(card).Build());
+            var searchParamters = (query is not null) ? $"Search Criteria: " : string.Empty;
+            if (query?.CardNameContains is not null) searchParamters += $"Name: {query.CardNameContains} ";
+            if (query?.TextContains is not null) searchParamters += $"Card Text: {query.TextContains} ";
+            if (query?.ElementsContain is not null) searchParamters += $"Element: {query.ElementsContain}";
+
+            message.Content = searchParamters;
         }
 
-        MessageComponent? components = null;
-        if (cards.Count() == 1)
-        {
-            components = CardDisplay.CardComponentBuilder(cards.First()).Build();
-        }
-
-        var searchParamters = (query is not null) ? $"Search Criteria: " : string.Empty;
-        if (query?.CardNameContains is not null) searchParamters += $"Name: {query.CardNameContains} ";
-        if (query?.TextContains is not null) searchParamters += $"Card Text: {query.TextContains} ";
-        if (query?.ElementsContain is not null) searchParamters += $"Element: {query.ElementsContain}";
-
-        await RespondAsync(searchParamters, embeds: embeds.ToArray(), components: components, ephemeral: ephemeral);
+        await RespondAsync(InteractionCallback.Message(message));
     }
 
     //Todo: this should maybe be its own service
@@ -135,7 +156,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     }
 }
 
-internal class EmbedCardDetailAdapter : EmbedBuilder
+internal class EmbedCardDetailAdapter : EmbedProperties
 {
     public EmbedCardDetailAdapter(Card card, SetVariant? setVariant = null)
     {
@@ -147,7 +168,7 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
         WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
         WithUrl($"https://curiosa.io/cards/{card.Name.ToLower().Replace(' ', '_')}");
         WithColor(DiscordHelpers.GetCardColor(card.Elements));
-        WithThumbnailUrl(CardArt.GetUrl(setVariant));
+        WithThumbnail(new(CardArt.GetUrl(setVariant)));
         WithDescription(setVariant.Variant.TypeText);
 
         var powerText = (card.Guardian.Attack > 0) ? $"Attack: {card.Guardian.Attack} " : string.Empty;
@@ -156,14 +177,8 @@ internal class EmbedCardDetailAdapter : EmbedBuilder
 
         var subtypeText = (!string.IsNullOrEmpty(card.SubTypes)) ? $" - {card.SubTypes}" : string.Empty;
 
-        AddField(card.Guardian.Type + subtypeText, rulesTextField);
+        AddFields(new EmbedFieldProperties().WithName(card.Guardian.Type + subtypeText).WithValue(rulesTextField));
     }
-}
-
-public class SetVariant
-{
-    public required Set Set { get; init; }
-    public required Variant Variant { get; init; }
 }
 
 public static class CardArt
@@ -177,7 +192,7 @@ public static class CardArt
     {
         cardSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
         var escapedSet = Uri.EscapeDataString(setName);
-        return $"https://content.wrexial.com/SorceryImages/{escapedSet}/{cardSlug}.png";
+        return $"https://sorceryimages.blob.core.windows.net/sets/{escapedSet}/{cardSlug}.png";
     }
 }
 

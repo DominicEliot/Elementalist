@@ -1,43 +1,56 @@
-﻿using Discord;
-using Discord.Interactions;
-using MediatR;
-using Elementalist.Infrastructure.DataAccess.CardData;
-using Elementalist.Features.Card;
+﻿using Elementalist.Infrastructure.DataAccess.CardData;
+using NetCord.Rest;
+using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class FaqUi(FaqRepoistory faqRepository) : InteractionModuleBase<SocketInteractionContext>
+public class FaqUi(FaqRepoistory faqRepository) : ComponentInteractionModule<ButtonInteractionContext>
 {
     private readonly FaqRepoistory _faqRepository = faqRepository;
 
-    [ComponentInteraction("faq-*")]
+    [ComponentInteraction("faq")]
     public async Task ShowFaq(string cardName)
     {
-        await RespondWithFaq(cardName);
+        var message = await FaqUiHelper.CreateFaqMessage(cardName, _faqRepository);
+        await RespondAsync(InteractionCallback.Message(message));
     }
+}
+
+public class FaqSlashCommand(FaqRepoistory faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
+{
+    private readonly FaqRepoistory _faqRepository = faqRepository;
 
     [SlashCommand("faq", "Shows any FAQs for the input card.")]
-    public async Task CardSearchByName([Autocomplete<CardAutoCompleteHandler>()] string cardName, bool privateMessage = false)
+    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
     {
-        await RespondWithFaq(cardName, privateMessage);
+        var message = await FaqUiHelper.CreateFaqMessage(cardName, _faqRepository, privateMessage);
+        await RespondAsync(InteractionCallback.Message(message));
     }
+}
 
-    private async Task RespondWithFaq(string cardName, bool privateMessage = false)
+public static class FaqUiHelper
+{
+    internal static async Task<InteractionMessageProperties> CreateFaqMessage(string cardName, FaqRepoistory faqRepository, bool privateMessage = false)
     {
-        var faqs = await _faqRepository.GetFaqs();
+        var message = new InteractionMessageProperties();
+        if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;
+
+        var faqs = await faqRepository.GetFaqs();
         if (faqs.TryGetValue(cardName, out var cardFaqs) is not true)
         {
-            await RespondAsync($"No FAQ entries found for {cardName}", ephemeral: true);
-            return;
+            message.Content = $"No FAQ entries found for {cardName}";
+            message.Flags = NetCord.MessageFlags.Ephemeral;
+            return message;
         }
 
-        var faqEmbed = new EmbedBuilder().WithTitle($"{cardName} FAQs");
+        var faqEmbed = new EmbedProperties().WithTitle($"{cardName} FAQs");
 
         foreach (var faq in cardFaqs)
         {
-            faqEmbed.AddField(faq.QuestionText, faq.AnswerText);
+            faqEmbed.AddFields(new EmbedFieldProperties().WithName(faq.QuestionText).WithValue(faq.AnswerText));
         }
-
-        await RespondAsync(embed: faqEmbed.Build(), ephemeral: privateMessage);
+        message.Embeds = [faqEmbed];
+        return message;
     }
 }

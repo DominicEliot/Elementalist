@@ -105,6 +105,12 @@ public class Metadata
     public Thresholds Thresholds { get; init; }
 }
 
+public class SetVariant
+{
+    public required Set Set { get; init; }
+    public required Variant Variant { get; init; }
+}
+
 public class Variant
 {
     [JsonConstructor]

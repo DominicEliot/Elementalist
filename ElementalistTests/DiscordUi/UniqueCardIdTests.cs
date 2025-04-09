@@ -6,7 +6,7 @@ namespace SorceryBotTests.DiscordUi;
 public class UniqueCardIdTests
 {
     [Fact]
-    public void TestSerialization()
+    public void SerializationTest()
     {
         var uniqueCard = new UniqueCardIdentifier("Caerleon-Upon-Usk", "Arthurian Legends", "Preconstructed_Deck", "Normal");
 

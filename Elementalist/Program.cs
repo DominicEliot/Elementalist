@@ -1,12 +1,14 @@
-using Discord;
-using Discord.Interactions;
-using Discord.WebSocket;
 using Elementalist.Features.Cards;
-using Elementalist.Infrastructure.Config;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Infrastructure.Logging;
+using NetCord;
+using NetCord.Gateway;
+using NetCord.Hosting.Gateway;
+using NetCord.Hosting.Services;
+using NetCord.Hosting.Services.ApplicationCommands;
+using NetCord.Hosting.Services.ComponentInteractions;
+using NetCord.Services.ComponentInteractions;
 using Serilog;
-using Serilog.Events;
 using static Elementalist.Features.Cards.Prices;
 
 namespace Elementalist;
@@ -21,7 +23,6 @@ public class Program
         {
             var builder = Host.CreateApplicationBuilder(args);
             builder.Configuration.AddEnvironmentVariables();
-            builder.Services.Configure<BotTokenSettings>(builder.Configuration);
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
             builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
 
@@ -30,28 +31,36 @@ public class Program
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext());
 
+            Log.Logger.Information("Starting Elementalist version {v}", typeof(Program).Assembly.GetName().Version);
+
             builder.Services.AddHttpClient();
             builder.Services.AddMemoryCache();
 
-            builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddHostedService<CardPriceService>();
             builder.Services.AddHostedService<BotActivityChangingService>();
+            builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
-
-            var logLevel = (Log.Logger.IsEnabled(LogEventLevel.Debug)) ? LogSeverity.Debug : LogSeverity.Info;
-            var clientConfig = new DiscordSocketConfig { MessageCacheSize = 5, LogLevel = logLevel, GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages | GatewayIntents.Guilds };
-            builder.Services.AddSingleton(clientConfig);
-            builder.Services.AddSingleton<DiscordSocketClient>();
-            builder.Services.AddSingleton(new InteractionServiceConfig() { LogLevel = LogSeverity.Info, AutoServiceScopes = true });
             builder.Services.AddSingleton<FaqRepoistory>();
 
-            builder.Services.AddSingleton(services =>
-            {
-                var client = services.GetRequiredService<DiscordSocketClient>();
-                var interactionServiceConfig = new InteractionServiceConfig() { UseCompiledLambda = true, LogLevel = LogSeverity.Info, AutoServiceScopes = true };
-                return new InteractionService(client, interactionServiceConfig);
-            });
+            builder.Services
+                .AddDiscordGateway(options =>
+                {
+                    options.Intents = GatewayIntents.AllNonPrivileged;
+                    options.Presence = new PresenceProperties(UserStatusType.Online)
+                    {
+                        Activities = [
+                            new("The Elementalist", UserActivityType.Playing)
+                            {
+                                Name = "Shuffling a spicy brew"
+                            }
+                        ],
+                    };
+                })
+                .AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>()
+                .AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>()
+                //.AddComponentInteractions<ModalInteraction, ModalInteractionContext>()
+                .AddApplicationCommands();
 
             builder.Services.AddMediatR(cfg =>
             {
@@ -61,7 +70,8 @@ public class Program
 
             var host = builder.Build();
 
-            host.MapDiscord();
+            host.AddModules(typeof(Program).Assembly);
+            host.UseGatewayEventHandlers();
 
             await host.RunAsync();
         }

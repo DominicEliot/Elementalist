@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Elementalist.Models;
 
 namespace Elementalist.DiscordUi;
 
@@ -43,9 +44,9 @@ public class UniqueCardIdentifier
 
     public string ToString(string spacer) => $"{Name}{spacer}{Set}{spacer}{Product}{spacer}{Finish}";
 
-    public string ToNamelessString() => $"{Set} - {Product} - {Finish}";
+    public string ToNamelessString() => $"{Set} - {Product.Replace("_", " ")} - {Finish}";
 
-    public string ToNamelessString(string spacer) => $"{Set}{spacer}{Product}{spacer}{Finish}";
+    public string ToNamelessString(string spacer) => $"{Set}{spacer}{Product.Replace("_", " ")}{spacer}{Finish}";
 
     public string ToJson(JsonSerializerOptions? options = null)
     {

@@ -1,52 +1,40 @@
-using Discord;
-using Discord.Interactions;
-using Discord.WebSocket;
-using Elementalist.Infrastructure.Config;
-using Microsoft.Extensions.Options;
+using System.Text.Json;
+using NetCord;
+using NetCord.Gateway;
 
 namespace Elementalist;
 
 public class BotStartupService : BackgroundService
 {
-    private readonly DiscordSocketClient _client;
-    private readonly IOptions<BotTokenSettings> _options;
-    private readonly InteractionService _interactionService;
+    private readonly GatewayClient _client;
     private readonly Serilog.ILogger _logger;
 
     // Unfortunately Discord.Net needs the IServiceProvider to make interaction service calls, instead using DI properly
     private readonly IServiceProvider _serviceProvider;
 
-    public BotStartupService(DiscordSocketClient client, IOptions<BotTokenSettings> options, InteractionService interactionService, Serilog.ILogger logger, IServiceProvider serviceProvider)
+    public BotStartupService(GatewayClient client, Serilog.ILogger logger, IServiceProvider serviceProvider)
     {
         _client = client;
-        _options = options;
-        _interactionService = interactionService;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _client.InteractionCreate += _client_InteractionCreated;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            if (string.IsNullOrEmpty(_options.Value.Token))
-            {
-                throw new ApplicationException("The BOT_TOKEN environment variable must be initialized.");
-            }
+            //_client.Log += LogAsync;
+            //_client.InteractionCreate += _client_InteractionCreated;
 
-            _client.Log += LogAsync;
-            _interactionService.Log += LogAsync;
-            _client.Ready += clientReady;
-            _client.InteractionCreated += _client_InteractionCreated;
+            //await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
 
-            await _client.LoginAsync(_options.Value.TokenType, _options.Value.Token);
-
-            await _client.StartAsync();
-            await _client.SetCustomStatusAsync("Opening some packs!");
-            _logger.Information("Discord client started");
+            //await _client.StartAsync();
+            //await _client.UpdatePresenceAsync(new("Opening some packs!"));
+            //_logger.Information("Discord client started");
 
             //Block the thread so that the client stays logged in, at least until the user requests the service to restart/stop
-            await Task.Delay(-1, stoppingToken);
+            //await Task.Delay(-1, stoppingToken);
         }
         catch (Exception ex) when (ex is not TaskCanceledException)
         {
@@ -54,36 +42,20 @@ public class BotStartupService : BackgroundService
         }
         finally
         {
-            await _client.StopAsync();
+            //await _client.StopAsync();
         }
     }
 
-    private Task LogAsync(LogMessage message)
+    private ValueTask LogAsync(LogMessage message)
     {
         switch (message.Severity)
         {
-            case LogSeverity.Critical:
-                _logger.Fatal(message.Exception, message.Message);
-                break;
-
             case LogSeverity.Error:
                 _logger.Error(message.Exception, message.Message);
                 break;
 
-            case LogSeverity.Warning:
-                _logger.Warning(message.Message);
-                break;
-
             case LogSeverity.Info:
                 _logger.Information(message.Message);
-                break;
-
-            case LogSeverity.Verbose:
-                _logger.Debug(message.Message);
-                break;
-
-            case LogSeverity.Debug:
-                _logger.Debug(message.Message);
                 break;
 
             default:
@@ -91,42 +63,43 @@ public class BotStartupService : BackgroundService
                 break;
         }
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    private async Task _client_InteractionCreated(SocketInteraction arg)
+    private ValueTask _client_InteractionCreated(Interaction arg)
     {
-        var ctx = new SocketInteractionContext(_client, arg);
-        var component = arg as SocketMessageComponent;
-
-        _logger.Information("{user} is executing discord {type} id {Id}. Interaction {customId}", arg.User.Username, arg.Type, arg.Id, component?.Data.CustomId);
-
-        try
+        string data = arg.Data switch
         {
-            await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Discord {Type} interaction {Id} failed.", arg.Type, arg.Id);
+            ButtonInteractionData b => $"{b.ComponentType}:{b.CustomId}",
+            StringMenuInteractionData stringMenu => $"{stringMenu.ComponentType}:{stringMenu.CustomId}",
+            AutocompleteInteractionData autoCompleteData => $"{autoCompleteData.Type}:{autoCompleteData.Name}",
+            SlashCommandInteractionData slashCommandData => $"{slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
+            ModalInteractionData modalData => $"{nameof(ModalInteraction)}:{modalData.CustomId}",
+            _ => $"unknown interaction type {arg.Data.GetType().Name}"
+        };
 
-            if (!ctx.Interaction.HasResponded)
-            {
-                await ctx.Interaction.RespondAsync($"An error occoured: {ex.Message}", ephemeral: true);
-            }
-        }
+        _logger.Information("{user} is executing discord {type} id {Id}. Interaction {data}",
+            arg.User.Username,
+            arg.Context.GetType().Name,
+            arg.Id,
+            data);
+
+        return ValueTask.CompletedTask;
     }
 
-    private async Task clientReady()
+    private ValueTask clientReady()
     {
-        try
-        {
-            await _interactionService.RegisterCommandsGloballyAsync();
+        //try
+        //{
+        //    await _interactionService.RegisterCommandsGloballyAsync();
 
-            _client.Ready -= clientReady;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "An error occourred while registering commands");
-        }
+        //    _client.Ready -= clientReady;
+        //}
+        //catch (Exception ex)
+        //{
+        //    _logger.Error(ex, "An error occourred while registering commands");
+        //}
+
+        return ValueTask.CompletedTask;
     }
 }

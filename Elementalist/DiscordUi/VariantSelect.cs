@@ -1,40 +1,39 @@
-﻿using Discord;
-using Discord.Interactions;
+﻿using System.Text.Json;
+using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Models;
+using NetCord;
+using NetCord.Rest;
+using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class VariantSelect : InteractionModuleBase<SocketInteractionContext>
+public class VariantSelect(ICardRepository cardRepository) : ComponentInteractionModule<StringMenuInteractionContext>
 {
+    private readonly ICardRepository _cardRepository = cardRepository;
+
     [ComponentInteraction("variantSelect")]
-    public async Task SelectVariant(string[] userSelection)
+    public async Task SelectVariant()
     {
-        if (!(Context.Interaction is IComponentInteraction { } interaction)) throw new ArgumentNullException(nameof(Context.Interaction));
+        var uniqueCard = JsonSerializer.Deserialize<UniqueCardIdentifier>(Context.SelectedValues[0]);
 
-        var components = ComponentBuilder.FromComponents(interaction.Message.Components);
-
-        for (int i = 0; i < components.ActionRows.Count; i++)
+        if (uniqueCard == null)
         {
-            ActionRowBuilder? row = components.ActionRows[i];
-            var selectMenu = row.Components.OfType<SelectMenuComponent>().FirstOrDefault();
-
-            if (selectMenu != null)
-            {
-                var selectMenuBuilder = selectMenu.ToBuilder();
-
-                foreach (var item in selectMenuBuilder.Options)
-                {
-                    var selected = userSelection.Contains(item.Value);
-
-                    item.WithDefault(selected);
-                }
-
-                components.ActionRows[i] = new ActionRowBuilder().WithSelectMenu(selectMenuBuilder);
-            }
+            await RespondAsync(InteractionCallback.Message(new() { Content = "Unknown card data format", Flags = MessageFlags.Ephemeral }));
+            return;
         }
 
-        await interaction.UpdateAsync(msg =>
+        var card = (await _cardRepository.GetCardsMatching(c => c.Name == uniqueCard.Name)).First();
+        var set = card.Sets.First(s => s.Name == uniqueCard.Set);
+        var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
+        var setVariant = new SetVariant() { Set = set, Variant = variant };
+
+        var message = CardDisplay.CardInfoMessage([card], setVariant);
+
+        var callback = InteractionCallback.ModifyMessage(m =>
         {
-            msg.Components = components.Build();
+            m.Components = message.Components;
+            m.Embeds = message.Embeds;
         });
+        await RespondAsync(callback);
     }
 }

@@ -13,7 +13,14 @@ public class CardPriceService(TcgPlayerDataProvider tcgPlayerData) : BackgroundS
             var cards = await tcgPlayerData.GetTcgPlayerCards(stoppingToken);
             Log.Information("Loaded {count} card prices.", cards.Count);
 
-            await Task.Delay(TimeSpan.FromHours(12) + TimeSpan.FromSeconds(5), stoppingToken);
+            try
+            {
+                await Task.Delay(TimeSpan.FromHours(12) + TimeSpan.FromSeconds(5), stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
         }
     }
 }
