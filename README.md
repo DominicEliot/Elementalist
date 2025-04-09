@@ -27,11 +27,11 @@ Get the docker container from docker hub, or run the Dockerfile after cloning th
 ```
 docker pull 2masgllrpxbruv/elementalist-bot:latest
 ```
-Set the `BOT_TOKEN` environment variable with `docker run -e BOT_TOKEN='your-token-from-discord' -e BOT_TOKEN_TYPE='Bot' image-name`
+Set the `DISCORD__TOKEN` environment variable with `docker run -e DISCORD__TOKEN=your-token-from-discord image-name`
 
 ## Building
 The bot is written in c# and uses .Net 9. The main solution is the SLNX file. Visual Studio 2022 requires that you enable preview feature to get this to work.
-Additionally you need to setup the bot token with the following command: `dotnet user-secrets set "BOT_TOKEN" "your-token-from-discord"`
+Additionally you need to setup the bot token with the following command: `dotnet user-secrets set "DISCORD:TOKEN" "your-token-from-discord"`
 From there building should be pretty straight forward.
 
 ## Code
@@ -40,4 +40,4 @@ It is using:
  * A version of the Vertical Slice Architecture, that I adapted to work a little better for a discord bot.
  * CQRS with MediatR
  * FluentValidation
- * Discord.Net to facilitate communications with the discord API
+ * [NetCord](https://netcord.dev/) to facilitate communications with the discord API
