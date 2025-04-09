@@ -31,6 +31,8 @@ public class Program
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext());
 
+            Log.Logger.Information("Starting Elementalist version {v}", typeof(Program).Assembly.GetName().Version);
+
             builder.Services.AddHttpClient();
             builder.Services.AddMemoryCache();
 

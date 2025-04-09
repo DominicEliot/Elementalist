@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-SoBot-24b91ce2-8429-454b-a557-930ce1833ca7</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Version>0.8.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
