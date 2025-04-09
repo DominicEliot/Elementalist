@@ -31,7 +31,5 @@ ENV LC_ALL en_US.UTF-8
 
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV BOT_TOKEN=
-ENV BOT_TOKEN_TYPE=
-ENV BOT_CLIENT_ID=
+ENV DISCORD__TOKEN
 ENTRYPOINT ["dotnet", "ElementalistBot.dll"]
