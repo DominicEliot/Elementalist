@@ -74,7 +74,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     private readonly BotConfig _config = config.Value;
     private readonly IMediator _mediator = mediator;
 
-    [SlashCommand("search-by-name", "Searches for and returns any matching sorcery cards")]
+    [SlashCommand("name", "Searches for and returns any matching sorcery cards")]
     public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
         var query = new GetCardsQuery() { CardNameContains = cardName };
@@ -83,7 +83,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
         await SendDiscordResponse(cardName, cards, ephemeral, query);
     }
 
-    [SlashCommand("search-by-text", "Searches for and returns any matching sorcery cards")]
+    [SlashCommand("text", "Searches for and returns any matching sorcery cards")]
     public async Task CardSearchByRulesText(string? cardText = null, string? element = null, string? cardTypes = null, bool ephemeral = false)
     {
         var query = new GetCardsQuery()

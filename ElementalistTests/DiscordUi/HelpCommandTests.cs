@@ -12,6 +12,6 @@ public class HelpCommandTests
 
         var helpText = command.ShowHelpText();
 
-        Assert.Contains("search-by-name", helpText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("faq", helpText, StringComparison.OrdinalIgnoreCase);
     }
 }
