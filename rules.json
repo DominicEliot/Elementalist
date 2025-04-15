@@ -1,0 +1,204 @@
+[
+    {
+        "Term": "[X]bound",
+        "Markdown": "**_Keyword Ability._** This minion is **disabled** while not occupying a certain type of **location**. For example, a minion with Waterbound is **disabled** while not occupying a **water location**, etc.",
+        "AdditionalTerms": ["Waterbound", "Landbound"]
+    },
+    {
+        "Term": "Adjacent",
+        "Markdown": "Refers to the card’s own square, and the squares that it shares a border with.",
+        "Reference": "Rulebook: page 14"
+    },
+    {
+        "Term": "Airborne",
+        "Markdown": "**_Keyword Ability._** This minion may fly while on the surface, gaining the following benefits:\n\nWhen taking a **step** this minion may move diagonally and can only be intercepted by other units if they have **Airborne** or **Ranged**.\n\nThis minion cannot be targeted by attacks, unless the attacking unit has the **Airborne** ability.",
+        "AdditionalTerms": ["Flying"]
+    },
+    {
+        "Term": "Ally/Allied",
+        "Markdown": "A unit that you control (including your Avatar)."
+    },
+    {
+        "Term": "Banish",
+        "Markdown": "Remove from the game."
+    },
+    {
+        "Term": "Body of Water",
+        "Markdown": "A contiguous cluster of adjacent **water sites**."
+    },
+    {
+        "Term": "Broken",
+        "Markdown": "Broken cards are artifacts that can be found in any cemetery."
+    },
+    {
+        "Term": "Burrowing",
+        "Markdown": "**_Keyword Ability._** This unit can be safely summoned to, exist in, and operate normally **underground**.\nWhen taking a **step**, it can instead move from the surface of a **land site** to the **underground** level there, or vice versa."
+    },
+    {
+        "Term": "Cardinal Directions",
+        "Markdown": "When a card talks about a cardinal direction, it includes all of the squares in the direction indicated on the card to the front, rear, left and right."
+    },
+    {
+        "Term": "Carrying Units",
+        "Markdown": "Some units can carry other units. A unit with this ability, picks them up or drops them in the same manner and time as it would artifacts. Units that have Airborne, Burrowing,\nSubmerge, or Voidwalk confer those abilities to units they are carrying while they are carried.\nA unit being carried may still cast spells or activate abilities as normal. If the carried unit moves to a location that the carrying unit doesn’t occupy, the unit ceases to be carried.",
+        "Reference": "Rulebook: page 26"
+    },
+    {
+        "Term": "Charge",
+        "Markdown": "**_Keyword Ability._** This unit can tap, or be tapped,\nto pay for costs associated with any ability on the turn it is summoned."
+    },
+    {
+        "Term": "Conjure",
+        "Markdown": "When a card is conjured, put it directly into play."
+    },
+    {
+        "Term": "Damage and Life Loss",
+        "Markdown": "Generally, units take damage from fighting and from the effects of spells and abilities. Damage dealt to minions accumulates until the end of turn when it is healed, while damage dealt to an Avatar causes them to lose life instead. Sometimes an Avatar will suffer life loss directly from things like a site being successfully attacked.\nWhen a minion has damage on it equal to or greater than its power, it dies.\nNote: When an Avatar is at **death’s door**, only damage will deliver a **death blow**."
+    },
+    {
+        "Term": "Dead",
+        "Markdown": "Dead cards are minions that can be found in any cemetery."
+    },
+    {
+        "Term": "Death Blow",
+        "Markdown": "When an Avatar is at **death’s door**, any damage dealt to them is a death blow, signaling their defeat."
+    },
+    {
+        "Term": "Death’s Door",
+        "Markdown": "When an Avatar’s life is reduced to 0, they are now at death’s door and can no longer gain life. At that moment, the Avatar becomes immune to damage for the rest of the current turn. After that brief and desperate window, any damage dealt to the Avatar is a death blow, ending the game."
+    },
+    {
+        "Term": "Deathrite",
+        "Markdown": "**_Keyword Ability._** When this unit dies, do what is stated before placing it in the cemetery."
+    },
+    {
+        "Term": "Dies, Destroyed, & Killed",
+        "Markdown": "When a card dies, is destroyed, or is killed place it in the cemetery."
+    },
+    {
+        "Term": "Disable/Disabled",
+        "Markdown": "While disabled, a minion loses all abilities\n(including basic abilities like Move and Attack),\ndoesn’t strike when fighting, can’t cast spells, and can’t take any action granted by another card or effect (ie. strike, shoot a projectile, take a step, etc.).\n\nA disabled minion can still be forcibly moved or tapped by effects.\n\n**Elemental Threshold**\n\nA minimum affinity for an element required to cast a given spell, or trigger or activate some abilities.\n\n**Elite**\n\nYou may include **two** copies of a card that has the keyword 'Elite' in its type line.\n\n**Enemy**\n\nA unit (including Avatars) that is controlled by an opponent.\n\n**Exceptional**\n\nYou may include **three** copies of a card that has the keyword 'Exceptional' in its type line.\n\n**Fight**\n\nWhen two units fight, they **strike** each other simultaneously.\n\nIf more than two units are involved in a fight, the controller of each side may allocate their units’\ndamage among the enemy as they wish.\n\n**Flooded**\n\nA flooded site becomes a **water site** and thus also increases the controller’s water affinity by one (W) if it was not already a water site. It still provides any other elemental affinity it did before.\n\n**Genesis**\n\n**_Keyword Ability._** When this card enters the **realm**,\ndo what is stated.\n\n**Ground Movement**\n\nGround movement is any step that a unit takes between the surface of two sites (except Airborne).\n\n**Here & There**\n\nSome cards will talk about something that is here or there contextually. When a site is referenced, here or there means both of a site’s locations, surface and subsurface. When anything else is being referenced,\nit means that thing’s same exact location."
+    },
+    {
+        "Term": "Immobile/Immobilised",
+        "Markdown": "This card cannot move itself, and cannot use the Move and Attack, Intercept, or Defend abilities."
+    },
+    {
+        "Term": "Lance",
+        "Markdown": "A minion with the Lance keyword enters play carrying a lance artifact token. They could use it for themselves or give it to another minion. The first time a unit strikes while carrying a lance, it deals an extra damage and strikes first if in a fight. Then the lance breaks.\nLance tokens are artifacts for all intents and purposes. They can be picked up and dropped\n(and stolen), just like other artifacts. When they are broken, they are removed from the realm like other tokens.",
+        "Reference": "Rulebook: page 23"
+    },
+    {
+        "Term": "Land Sites",
+        "Markdown": "All sites that are not **water sites** are considered land sites, including sites with no element icons and Rubble.\n\nLethal **_Keyword Ability._** Any strictly positive amount of damage this card deals to a minion is enough to kill."
+    },
+    {
+        "Term": "Life",
+        "Markdown": "Life represents the amount of damage that your Avatar can endure before it is placed on **death’s door**. As your Avatar incurs damage, its overall life will decrease accordingly."
+    },
+    {
+        "Term": "Location",
+        "Markdown": "The exact location of a card is determined by its square and by the region that it occupies."
+    },
+    {
+        "Term": "Mana",
+        "Markdown": "Mana can come from several sources, but sites are the most common. When they first come into play as well as at the start of your turn, sites provide one mana each. Other cards might add to this total.\nYou use this mana to cast spells or activate abilities.\nAt the end of your turn, any remaining mana is lost,\nwhether or not you used it that turn."
+    },
+    {
+        "Term": "Movement +X",
+        "Markdown": "**_Keyword Ability._** This unit may move up to X additional steps when using the Move and Attack or Defend basic abilities. To move multiple steps at once, choose a destination and a path to it then traverse that path one step at a time. You may need to resolve automatic triggers (or apply 'always on'\npassive abilities), some of which may prematurely stop the motion of the unit.\n\n**Moves Freely**\n\nWhen this unit uses the Move and Attack or Defend abilities they spend no steps when moving, as long as the starting and ending locations of the step satisfy the moves freely condition.\n\n**Nearby**\n\nRefers to the card’s own square, and all squares that surround it, including those diagonally.\n\n**Ordinary**\n\nYou may include **four** copies of a card that has the keyword 'Ordinary' in its type line.\n\n**Projectiles**\n\nA projectile’s flight begins at the shooting unit’s location and travels within the same **region** in a **cardinal direction**. Its flight continues until it either reaches the edge of its region or it reaches the first unit ( **enemy** or **ally** ) along its path, ignoring any allies at the projectile’s starting location. Different projectiles will have different effects, but will most often deal damage to the impacted unit.\n\nIn the event of multiple valid units, the player that fired the projectile chooses which unit the projectile hits.\n\n**Ranged X**\n\n**_Keyword Ability._** This unit has 'Tap → Shoot a projectile that stops after 1 (or X) steps. Strike the impacted unit'. This unit may also intercept **Airborne** units flying over them.\n\n**Range of Motion**\n\nAnywhere a card is allowed to move legally is considered within its range of motion.\n\n**Realm**\n\nThe realm includes all the squares in the game zone.\n\n**Region**\n\nThere are four distinct regions in the realm:\nsurface, underground, underwater, or in the void.\n\n**Rubble**\n\nA site that has been destroyed is placed in its owner’s cemetery as normal, but rather than reverting back to the **void**, the site is instead replaced with rubble. Rubble is a neutral **land** site that no player controls, and provides no mana or threshold.\n\n_Note: Use Rubble tokens or a face down site to represent rubble on a **square**._"
+    },
+    {
+        "Term": "Sacrifice",
+        "Markdown": "Sacrificing is removing something you control from the **realm** and placing it directly in its owner’s cemetery. A player may be forced to sacrifice something if an effect instructs them to do so. When a minion is sacrificed, it does indeed **die**, and its **Deathrites** trigger, if applicable. If something is sacrificed to pay the cost of an ability,\nit is not placed in the cemetery until after that ability has resolved.\nA **dying** unit cannot be sacrificed. When a site is sacrificed, it is replaced by rubble. Even **indestructible** things can be sacrificed, if a cost or effect otherwise informs you of the need to sacrifice something."
+    },
+    {
+        "Term": "Silence/Silenced",
+        "Markdown": "A card that is silenced loses all printed and granted abilities.\nAvatars cannot be silenced."
+    },
+    {
+        "Term": "Span of Land",
+        "Markdown": "A contiguous cluster of adjacent land sites."
+    },
+    {
+        "Term": "Spellcaster",
+        "Markdown": "**_Keyword Ability._** This card may cast spells.\nSome spellcasters may only cast spells that match a specific element. For example, Fire Spellcasters may only cast spells that have a Fire threshold icon (marked with (F))."
+    },
+    {
+        "Term": "Square",
+        "Markdown": "One grid square in the realm, that includes all cards present there."
+    },
+    {
+        "Term": "Stealth",
+        "Markdown": "**_Keyword Ability._** Minions with Stealth cannot be targeted by spells or abilities from your opponents,\nthey cannot be attacked, intercepted, or defended against, and projectiles cannot hit them.\nStealth is tracked with a stealth token.\nMinions lose Stealth after they activate a special ability, deal damage, or attack. When this happens,\nremove the Stealth token."
+    },
+    {
+        "Term": "Step",
+        "Markdown": "A step is the minimum unit of distance between two adjacent locations."
+    },
+    {
+        "Term": "Storyline",
+        "Markdown": "A sequence of events that is currently resolving. A unit that casts a spell, or activates an ability will start a storyline and add events to it. Triggered abilities can insert events into a storyline during its resolution, interrupting future events.",
+        "Reference": "Rulebook: page 31"
+    },
+    {
+        "Term": "Strike",
+        "Markdown": "A unit deals damage equal to its power."
+    },
+    {
+        "Term": "Strike First",
+        "Markdown": "Units that strike first resolve their strikes before their target can resolve theirs. If multiple units in the same fight are able to strike first, they all strike at the same time. Then any surviving units without that ability make their strikes."
+    },
+    {
+        "Term": "Stronger, Strongest, Weaker, and Weakest",
+        "Markdown": "Some effects compare the power of two units:\n\n- Stronger: Strictly more power than.\n- Strongest: Strictly highest power.\n- Weaker: Strictly less power than.\n- Weakest: Strictly lowest power.\n\nIn the case of ties, the active player chooses.\n\nWhen comparing a minion with split power, add the two power values together and then divide that in half to determine their comparative value."
+    },
+    {
+        "Term": "Submerge",
+        "Markdown": "**_Keyword Ability._** This unit can be safely summoned to, exist in, and operate normally **underwater**.\nWhen taking a **step**, it can instead move from the surface of a **water site** to the **underwater** level there or vice versa."
+    },
+    {
+        "Term": "Summon",
+        "Markdown": "When a card is summoned, put it directly into play."
+    },
+    {
+        "Term": "Tapping a Card",
+        "Markdown": "Cards in the realm can be tapped as a cost to activate various abilities. A player may also need to tap a card as a cost related to other spells or abilities on other cards.\n\nTo tap a card, turn a it 90° to the right, from an upright position. Only untapped cards and tokens in play can be tapped. All of your cards in play automatically (and necessarily) untap at the start of your turn."
+    },
+    {
+        "Term": "Target",
+        "Markdown": "Sometimes you will need to target things in the realm. Spells and abilities can only target things within the **Spellcaster’s** or referencing card’s same region."
+    },
+    {
+        "Term": "Transform",
+        "Markdown": "When a card is transformed it is considered the same game object as its previous version and therefore does not suffer from summoning sickness when it comes into play. If one card transforms into another card, the original card is removed from the game after the transformation."
+    },
+    {
+        "Term": "Underground",
+        "Markdown": "The lower level of a **land site** is part of the underground **region**."
+    },
+    {
+        "Term": "Underwater",
+        "Markdown": "The lower level of a **water site** is part of the underwater **region**."
+    },
+    {
+        "Term": "Unique",
+        "Markdown": "You may include **one** copy of a card that has the keyword 'Unique' in its type line."
+    },
+    {
+        "Term": "Units",
+        "Markdown": "Units are a collective term that includes Avatars and minions."
+    },
+    {
+        "Term": "Void",
+        "Markdown": "A **square** without a site is a part of the void **region**.\nAvatars can never enter void **locations**. Minions there are **banished** unless they have **Voidwalk**."
+    },
+    {
+        "Term": "Voidwalk",
+        "Markdown": "**_Keyword Ability._** This unit can be summoned to any void location and safely exist and operate there.\nWhen taking a step it can move into an adjacent void, or out of the **void** and onto the surface of an adjacent site (or directly to the subsurface if they can operate there)."
+    },
+    {
+        "Term": "Water Sites",
+        "Markdown": "Water sites are identified by the water icon marked with (W). All other sites are considered **land sites**,\nincluding sites with no threshold icons and rubble."
+    }
+]
