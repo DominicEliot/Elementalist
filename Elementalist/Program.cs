@@ -1,3 +1,4 @@
+using Elementalist.DiscordUi;
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Infrastructure.Logging;
@@ -25,6 +26,7 @@ public class Program
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
             builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
+            builder.Services.Configure<CardImageOptions>(builder.Configuration.GetRequiredSection("CardImageOptions"));
 
             builder.Services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(builder.Configuration)
@@ -42,6 +44,7 @@ public class Program
             builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
             builder.Services.AddSingleton<FaqRepoistory>();
+            builder.Services.AddSingleton<CardArtService>();
 
             builder.Services
                 .AddDiscordGateway(options =>

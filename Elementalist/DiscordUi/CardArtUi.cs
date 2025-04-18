@@ -7,7 +7,7 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class CardArtUi(ICardRepository cardRepository) : ComponentInteractionModule<ButtonInteractionContext>
+public class CardArtUi(ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<ButtonInteractionContext>
 {
     private readonly ICardRepository _cardRepo = cardRepository;
 
@@ -44,7 +44,7 @@ public class CardArtUi(ICardRepository cardRepository) : ComponentInteractionMod
 
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
-        var cardArtEmbed = new EmbedCardArtAdapter(card, setVariant);
+        var cardArtEmbed = new EmbedCardArtAdapter(card, cardArtService, setVariant);
         message.Embeds = [cardArtEmbed];
 
         await RespondAsync(InteractionCallback.Message(message));
@@ -52,14 +52,14 @@ public class CardArtUi(ICardRepository cardRepository) : ComponentInteractionMod
 
     internal class EmbedCardArtAdapter : EmbedProperties
     {
-        public EmbedCardArtAdapter(Card card, SetVariant? setVariant = null)
+        public EmbedCardArtAdapter(Card card, CardArtService cardArtService, SetVariant? setVariant = null)
         {
             setVariant ??= CardLookups.GetDefaultVariant(card);
 
             //sample style: https://message.style/app/editor/share/KYfJ50a5
             WithAuthor(new() { Name = card.Name });
             WithColor(DiscordHelpers.GetCardColor(card.Elements));
-            WithImage(new(CardArt.GetUrl(setVariant)));
+            WithImage(new(cardArtService.GetUrl(setVariant)));
             WithFooter(new() { Text = $"Art @ {setVariant.Variant.Artist}" });
         }
     }

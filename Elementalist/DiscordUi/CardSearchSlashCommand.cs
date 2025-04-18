@@ -10,13 +10,13 @@ namespace Elementalist.DiscordUi;
 
 public static class CardDisplay
 {
-    public static InteractionMessageProperties CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
+    public static InteractionMessageProperties CardInfoMessage(IEnumerable<Card> cards, CardArtService cardArtService, SetVariant? variant = null)
     {
         var message = new InteractionMessageProperties();
         var embeds = new List<EmbedProperties>();
         foreach (var card in cards)
         {
-            embeds.Add(new EmbedCardDetailAdapter(card, variant));
+            embeds.Add(new EmbedCardDetailAdapter(card, cardArtService, variant));
         }
         message.Embeds = embeds;
 
@@ -69,7 +69,7 @@ public static class CardDisplay
     }
 }
 
-public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config) : ApplicationCommandModule<ApplicationCommandContext>
+public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config, CardArtService cardArtService) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly BotConfig _config = config.Value;
     private readonly IMediator _mediator = mediator;
@@ -117,7 +117,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
             return;
         }
 
-        message = CardDisplay.CardInfoMessage(cards);
+        message = CardDisplay.CardInfoMessage(cards, cardArtService);
         if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))
@@ -158,7 +158,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
 internal class EmbedCardDetailAdapter : EmbedProperties
 {
-    public EmbedCardDetailAdapter(Card card, SetVariant? setVariant = null)
+    public EmbedCardDetailAdapter(Card card, CardArtService cardArtService, SetVariant? setVariant = null)
     {
         setVariant ??= CardLookups.GetDefaultVariant(card);
 
@@ -168,7 +168,7 @@ internal class EmbedCardDetailAdapter : EmbedProperties
         WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
         WithUrl($"https://curiosa.io/cards/{card.Name.ToLower().Replace(' ', '_')}");
         WithColor(DiscordHelpers.GetCardColor(card.Elements));
-        WithThumbnail(new(CardArt.GetUrl(setVariant)));
+        WithThumbnail(new(cardArtService.GetUrl(setVariant)));
         WithDescription(setVariant.Variant.TypeText);
 
         var powerText = (card.Guardian.Attack > 0) ? $"Attack: {card.Guardian.Attack} " : string.Empty;
@@ -181,19 +181,32 @@ internal class EmbedCardDetailAdapter : EmbedProperties
     }
 }
 
-public static class CardArt
+public class CardArtService(IOptions<CardImageOptions> imageOptions)
 {
-    public static string GetUrl(SetVariant setVariant)
+    public string GetUrl(SetVariant setVariant)
     {
         return GetUrl(setVariant.Variant.Slug, setVariant.Set.Name);
     }
 
-    public static string GetUrl(string cardSlug, string setName)
+    public string GetUrl(string cardSlug, string setName)
     {
-        cardSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
+        if (imageOptions.Value.RemoveSpacesInSetName)
+        {
+            setName = setName.Replace(" ", string.Empty);
+        }
         var escapedSet = Uri.EscapeDataString(setName);
-        return $"https://sorceryimages.blob.core.windows.net/sets/{escapedSet}/{cardSlug}.png";
+
+        var productSlug = cardSlug.Substring(0, 4); //slugs are in the format set_image-slug, for now...
+        var imageSlug = cardSlug.Substring(4);
+
+        return string.Format(imageOptions.Value.UrlFormat, escapedSet, productSlug, imageSlug);
     }
+}
+
+public class CardImageOptions
+{
+    public required string UrlFormat { get; init; }
+    public bool RemoveSpacesInSetName { get; init; } = false;
 }
 
 internal static class CardLookups

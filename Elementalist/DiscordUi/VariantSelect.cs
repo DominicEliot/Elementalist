@@ -7,7 +7,7 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class VariantSelect(ICardRepository cardRepository) : ComponentInteractionModule<StringMenuInteractionContext>
+public class VariantSelect(ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<StringMenuInteractionContext>
 {
     private readonly ICardRepository _cardRepository = cardRepository;
 
@@ -27,7 +27,7 @@ public class VariantSelect(ICardRepository cardRepository) : ComponentInteractio
         var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
-        var message = CardDisplay.CardInfoMessage([card], setVariant);
+        var message = CardDisplay.CardInfoMessage([card], cardArtService, setVariant);
 
         var callback = InteractionCallback.ModifyMessage(m =>
         {
