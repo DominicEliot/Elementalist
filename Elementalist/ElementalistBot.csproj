@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -8,10 +8,6 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <Version>0.8.0</Version>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="BotActivityChangingService.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.11.0" />
