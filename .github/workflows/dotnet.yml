@@ -6,9 +6,6 @@ name: .NET Build and Test
 on:
   push:
     branches: [ "main" ]
-    tags-ignore:
-      - docs*
-      - meta*
     paths:
       - 'Elementalist*/**'
   pull_request:
