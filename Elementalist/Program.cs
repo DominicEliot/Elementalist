@@ -2,6 +2,7 @@ using Elementalist.DiscordUi;
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Infrastructure.Logging;
+using ElementalistBot.Infrastructure.DataAccess.Rules;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
@@ -45,6 +46,7 @@ public class Program
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
             builder.Services.AddSingleton<FaqRepoistory>();
             builder.Services.AddSingleton<CardArtService>();
+            builder.Services.AddSingleton<RulesRepository>();
 
             builder.Services
                 .AddDiscordGateway(options =>
