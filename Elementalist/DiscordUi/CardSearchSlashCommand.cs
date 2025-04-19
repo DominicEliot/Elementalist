@@ -1,4 +1,5 @@
-﻿using Elementalist.Features.Card;
+﻿using System.Text.RegularExpressions;
+using Elementalist.Features.Card;
 using Elementalist.Infrastructure.Config;
 using Elementalist.Models;
 using MediatR;
@@ -196,8 +197,9 @@ public class CardArtService(IOptions<CardImageOptions> imageOptions)
         }
         var escapedSet = Uri.EscapeDataString(setName);
 
-        var productSlug = cardSlug.Substring(0, 4); //slugs are in the format set_image-slug, for now...
-        var imageSlug = cardSlug.Substring(4);
+        var imageSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
+        var productSlugRegex = Regex.Match(cardSlug, @"^(.*_)(\w+_\w+)$");
+        var productSlug = productSlugRegex.Groups[2].Value;
 
         return string.Format(imageOptions.Value.UrlFormat, escapedSet, productSlug, imageSlug);
     }
