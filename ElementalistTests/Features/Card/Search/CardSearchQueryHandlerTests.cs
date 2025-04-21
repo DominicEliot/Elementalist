@@ -7,16 +7,18 @@ namespace Elementalist.Features.Card.Search.Tests;
 
 public class CardSearchQueryHandlerTests
 {
-    [Fact]
-    public async Task HandleTestAsync()
+    [Theory]
+    [InlineData("Pudge", "Pudge Butcher")]
+    [InlineData("Dream Quest", "Dream-Quest")]
+    public async Task HandleTestAsync(string searchText, string actual)
     {
-        var query = new GetCardsQuery() { CardNameContains = "Pudge" };
+        var query = new GetCardsQuery() { CardNameContains = searchText };
         var handler = new GetCardsQueryHandler(new MockCardRepository());
 
         var result = await handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal("Pudge Butcher", result.First().Name);
+        Assert.Equal(actual, result.First().Name);
     }
 
     [Theory()]
