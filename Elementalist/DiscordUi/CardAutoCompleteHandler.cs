@@ -18,7 +18,9 @@ public class CardAutoCompleteHandler(ICardRepository cardRepository) : IAutocomp
             return [];
         }
 
-        var suggestions = await _cardRepository.GetCardsMatching(c => c.Name.Contains(value, StringComparison.OrdinalIgnoreCase));
+        var searchParams = value.Split(' ', '-', '&');
+
+        var suggestions = await _cardRepository.GetCardsMatching(c => searchParams.Any(sp => c.Name.Contains(sp, StringComparison.OrdinalIgnoreCase)));
         return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Name, c.Name));
     }
 }
