@@ -25,6 +25,6 @@ public class HelpCommand : ApplicationCommandModule<ApplicationCommandContext>
     public const string GeneralHelpText =
         @"### General
         1. To add the bot to a server click the bot's portrait icon, then click the `Add App` button.
-        1. To report a bug please fill out a issue on the bot's [github page](https://github.com/XenotropicDev/Elementalist)
+        1. To report a bug please fill out a issue on the bot's [github page](https://github.com/DominicEliot/Elementalist)
         ";
 }
