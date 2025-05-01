@@ -47,7 +47,8 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
 
         if (request.CardNameContains != null)
         {
-            cards = cards.Where(c => c.Name.Contains(request.CardNameContains, StringComparison.OrdinalIgnoreCase));
+            var splitValues = request.CardNameContains.Replace(",", "").Replace(".", "").Split(['-', ' ']);
+            cards = cards.Where(c => splitValues.All(s => c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (request.ElementsContain != null)
