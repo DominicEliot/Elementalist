@@ -42,7 +42,7 @@ public class Program
             builder.Services.AddHostedService<CardPriceService>();
             builder.Services.AddHostedService<BotActivityChangingService>();
             builder.Services.AddHostedService<BotStartupService>();
-            builder.Services.AddSingleton<ICardRepository, FileCardRepository>();
+            builder.Services.AddSingleton<ICardRepository, CuriosaApiCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
             builder.Services.AddSingleton<FaqRepoistory>();
             builder.Services.AddSingleton<CardArtService>();
