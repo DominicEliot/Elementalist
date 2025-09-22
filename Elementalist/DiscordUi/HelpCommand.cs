@@ -8,7 +8,9 @@ public class HelpCommand : ApplicationCommandModule<ApplicationCommandContext>
     [SlashCommand("help", "Gives descriptions for all the bot commands, and some information about the bot.")]
     public string ShowHelpText()
     {
-        return ($"{GeneralHelpText}\n### Commands\n{CommandsText.Value}");
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+
+        return $"{GeneralHelpText}\n### Commands\n{CommandsText.Value}\n_Runnning {nameof(Elementalist)} version: {version}_";
     }
 
     public static Lazy<string> CommandsText = new Lazy<string>(() =>
