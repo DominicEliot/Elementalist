@@ -30,7 +30,7 @@ docker pull 2masgllrpxbruv/elementalist-bot:latest
 Set the `DISCORD__TOKEN` environment variable with `docker run -e DISCORD__TOKEN=your-token-from-discord image-name`
 
 ## Building
-The bot is written in c# and uses .Net 9. The main solution is the SLNX file. Visual Studio 2022 requires that you enable preview feature to get this to work.
+The bot is written in c# and uses .Net 9. The main solution is the SLNX file. If you have issues opening the solution make sure your IDE is fully up to date.
 Additionally you need to setup the bot token with the following command: `dotnet user-secrets set "DISCORD:TOKEN" "your-token-from-discord"`
 From there building should be pretty straight forward.
 
