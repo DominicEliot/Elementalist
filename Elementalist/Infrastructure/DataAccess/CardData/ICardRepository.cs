@@ -34,7 +34,10 @@ public class CuriosaApiCardRepository(HttpClient httpClient, ILogger<ICardReposi
             }
             catch (Exception e)
             {
-                await File.WriteAllTextAsync(Path.Combine("logs", "curiosaHttpResponse.txt"), await cardsFromApi.Content.ReadAsStringAsync());
+                Directory.CreateDirectory("logs");
+                var path = Path.Combine("logs", "curiosaHttpResponse.txt");
+                _logger.LogInformation("writing http log file at {path}", path);
+                await File.WriteAllTextAsync(path, await cardsFromApi.Content.ReadAsStringAsync());
                 throw;
             }
         }
