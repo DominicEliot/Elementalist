@@ -23,8 +23,6 @@ public class TcgPlayerSet
 
 public class TcgPlayerCard
 {
-    private string _printing;
-
     [JsonConstructor]
     public TcgPlayerCard(int productID, int productConditionID, string? condition, string? game, bool isSupplemental, float lowPrice, float marketPrice, string? number, string printing, string productName, string? rarity, int sales, string? set, string? setAbbrv, string? type)
     {
