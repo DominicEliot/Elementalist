@@ -5,22 +5,30 @@ using static Elementalist.Features.Cards.Prices;
 
 namespace Elementalist;
 
-public class CardDataService(ICardRepository tcgPlayerData, IOptions<DataRefreshOptions> refreshOptions) : BackgroundService
+public class CardDataService(ICardRepository cardRepository, IOptions<DataRefreshOptions> refreshOptions) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
             Log.Information("Fetching card data.");
-            var cards = await tcgPlayerData.GetCards();
+            if (cardRepository is CuriosaApiCardRepository apiRepo)
+            {
+                await apiRepo.RefreshData();
+            }
+
+            var cards = await cardRepository.GetCards();
             Log.Information("Loaded {count} cards.", cards.Count());
 
             try
             {
-                var delayTime = TimeSpan.FromHours(refreshOptions.Value.Hours).Add(TimeSpan.FromSeconds(-5));
+                var delayTime = TimeSpan.FromHours(refreshOptions.Value.Hours);
 
-                if (delayTime <= TimeSpan.Zero)
-                    delayTime = TimeSpan.FromMinutes(1);
+                if (delayTime <= TimeSpan.FromSeconds(10))
+                {
+                    Log.Warning("Card data refresh time cannot be less than 10 seconds. Data will not be refreshed.");
+                    return;
+                }
 
                 await Task.Delay(delayTime, stoppingToken);
             }

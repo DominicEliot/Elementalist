@@ -18,16 +18,19 @@ public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefres
     private readonly HttpClient _httpClient = httpClient;
     private readonly IOptions<DataRefreshOptions> _dataRefreshOptions = dataRefreshOptions;
     private List<Card> _cards = [];
-    private DateTimeOffset _lastUpdated = DateTimeOffset.MinValue;
+
+    public async Task RefreshData()
+    {
+        var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
+        var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
+        _cards = cardResults ?? [];
+    }
 
     public async Task<IEnumerable<Card>> GetCards()
     {
-        if (_lastUpdated < SystemClock.Now.AddHours(_dataRefreshOptions.Value.Hours * (-1)))
+        if (_cards.Count == 0)
         {
-            var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
-            var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
-            _cards = cardResults ?? [];
-            _lastUpdated = SystemClock.Now;
+            await RefreshData();
         }
 
         return _cards;
