@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Elementalist.Models;
 using Elementalist.Shared;
+using Microsoft.Extensions.Options;
 
 namespace Elementalist.Infrastructure.DataAccess.CardData;
 
@@ -12,23 +13,21 @@ public interface ICardRepository
     Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 }
 
-public class CuriosaApiCardRepository(HttpClient httpClient, ILogger<ICardRepository> logger) : ICardRepository
+public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefreshOptions> dataRefreshOptions) : ICardRepository
 {
     private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<ICardRepository> _logger = logger;
+    private readonly IOptions<DataRefreshOptions> _dataRefreshOptions = dataRefreshOptions;
     private List<Card> _cards = [];
     private DateTimeOffset _lastUpdated = DateTimeOffset.MinValue;
 
     public async Task<IEnumerable<Card>> GetCards()
     {
-        if (_lastUpdated < SystemClock.Now.AddHours(48))
+        if (_lastUpdated < SystemClock.Now.AddHours(-48))
         {
-            _logger.LogInformation("Fetching cards from Curiosa API");
             var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
             var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
             _cards = cardResults ?? [];
             _lastUpdated = SystemClock.Now;
-            _logger.LogInformation($"Fetched {_cards.Count} cards from Curiosa API");
         }
 
         return _cards;
