@@ -12,7 +12,7 @@ public class CardArtUi(ICardRepository cardRepository, CardArtService cardArtSer
     private readonly ICardRepository _cardRepo = cardRepository;
 
     [ComponentInteraction("art")]
-    public async Task ShowFaq(string cardName)
+    public async Task ShowCardArt(string cardName)
     {
         var buttonMessage = Context.Message;
         var components = buttonMessage.Components;
