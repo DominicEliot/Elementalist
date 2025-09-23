@@ -33,7 +33,7 @@ public static class Prices
         public async Task<Result<IEnumerable<PriceData>>> GetPriceData(string cardName, string? set, string? cardFinish)
         {
             var cts = new CancellationTokenSource();
-            var tcgPlayerCardData = (await GetTcgPlayerCards(cts.Token)).Where(c => c.ProductName.Contains(cardName));
+            var tcgPlayerCardData = (await GetTcgPlayerCards(cts.Token)).Where(c => c.ProductName.Contains(cardName)) ?? [];
 
             if (set is not null)
             {
@@ -48,7 +48,7 @@ public static class Prices
 
             foreach (var tcgPlayerCard in tcgPlayerCardData)
             {
-                var uniqueCard = new UniqueCardIdentifier(cardName, tcgPlayerCard.Set, tcgPlayerCard.ProductName, tcgPlayerCard.Printing);
+                var uniqueCard = new UniqueCardIdentifier(cardName, tcgPlayerCard.Set ?? "", tcgPlayerCard.ProductName, tcgPlayerCard.Printing);
                 var data = new PriceData() { Card = uniqueCard, Low = tcgPlayerCard.LowPrice, Mid = tcgPlayerCard.MarketPrice, Condition = tcgPlayerCard.Condition };
 
                 priceData.Add(data);

@@ -2,5 +2,5 @@
 
 public class DataRefreshOptions
 {
-    public decimal Hours { get; init; }
+    public double Hours { get; init; }
 }
