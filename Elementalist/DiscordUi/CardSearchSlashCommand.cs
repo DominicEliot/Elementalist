@@ -211,9 +211,9 @@ public class CardImageOptions
     public bool RemoveSpacesInSetName { get; init; } = false;
 }
 
-internal static class CardLookups
+public static class CardLookups
 {
-    internal static SetVariant GetDefaultVariant(Models.Card card)
+    public static SetVariant GetDefaultVariant(Models.Card card)
     {
         var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
 
