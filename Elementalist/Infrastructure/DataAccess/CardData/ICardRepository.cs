@@ -25,10 +25,18 @@ public class CuriosaApiCardRepository(HttpClient httpClient, ILogger<ICardReposi
         {
             _logger.LogInformation("Fetching cards from Curiosa API");
             var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
-            var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
-            _cards = cardResults ?? [];
-            _lastUpdated = SystemClock.Now;
-            _logger.LogInformation($"Fetched {_cards.Count} cards from Curiosa API");
+            try
+            {
+                var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
+                _cards = cardResults ?? [];
+                _lastUpdated = SystemClock.Now;
+                _logger.LogInformation("Fetched {CardsCount} cards from Curiosa API", _cards.Count);
+            }
+            catch (Exception e)
+            {
+                await File.WriteAllTextAsync(Path.Combine("logs", "curiosaHttpResponse.txt"), await cardsFromApi.Content.ReadAsStringAsync());
+                throw;
+            }
         }
 
         return _cards;
