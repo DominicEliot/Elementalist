@@ -22,7 +22,7 @@ public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefres
 
     public async Task<IEnumerable<Card>> GetCards()
     {
-        if (_lastUpdated < SystemClock.Now.AddHours(-48))
+        if (_lastUpdated < SystemClock.Now.AddHours(_dataRefreshOptions.Value.Hours * (-1)))
         {
             var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
             var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();

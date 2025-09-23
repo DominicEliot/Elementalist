@@ -28,6 +28,7 @@ public class Program
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
             builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
             builder.Services.Configure<CardImageOptions>(builder.Configuration.GetRequiredSection("CardImageOptions"));
+            builder.Services.Configure<DataRefreshOptions>(builder.Configuration.GetRequiredSection("DataRefreshOptions"));
 
             builder.Services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(builder.Configuration)
