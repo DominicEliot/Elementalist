@@ -14,7 +14,7 @@ public class CardArtServiceTests
     {
         var options = Options.Create(new CardImageOptions
         {
-            UrlFormat = @"https://dominiceliot.github.io/sorcery-image-gallery/media/original/{0}/{1}/{2}.png"
+            UrlFormat = @"https://dominiceliot.github.io/sorcery-image-gallery/media/original/{0}.png"
         });
         var service = new CardArtService(options);
         var repo = new MockCardRepository();
@@ -25,6 +25,6 @@ public class CardArtServiceTests
 
         var url = service.GetUrl(variant);
 
-        Assert.Equal("https://dominiceliot.github.io/sorcery-image-gallery/media/original/Beta/b_s/hounds_of_ondaros_b_s.png", url);
+        Assert.Equal("https://dominiceliot.github.io/sorcery-image-gallery/media/original/bet-hounds_of_ondaros-b-s.png", url);
     }
 }

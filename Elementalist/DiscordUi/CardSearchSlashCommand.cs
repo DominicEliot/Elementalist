@@ -198,10 +198,11 @@ public class CardArtService(IOptions<CardImageOptions> imageOptions)
         var escapedSet = Uri.EscapeDataString(setName);
 
         var imageSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
-        var productSlugRegex = Regex.Match(cardSlug, @"^(.*_)(\w+_\w+)$");
+        var productSlugRegex = Regex.Match(cardSlug, @"^(\w{3})-.*_(\w+_\w+)$");
         var productSlug = productSlugRegex.Groups[2].Value;
+        var shortSet = productSlugRegex.Groups[1].Value;
 
-        return string.Format(imageOptions.Value.UrlFormat, escapedSet, productSlug, imageSlug);
+        return string.Format(imageOptions.Value.UrlFormat, cardSlug, escapedSet, productSlug, imageSlug);
     }
 }
 
