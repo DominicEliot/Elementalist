@@ -7,19 +7,20 @@ public class FaqRepoistory
 {
     private Dictionary<string, List<CardFaq>> _faqs = [];
 
-    public Task<Dictionary<string, List<CardFaq>>> GetFaqs()
+    public async Task<Dictionary<string, List<CardFaq>>> GetFaqs()
     {
         if (_faqs.Count() > 0)
         {
-            return Task.FromResult(_faqs);
+            return _faqs; //Todo: this will cause the FAQs to be come out of date if the bot is running for a long time, maybe we should reload the FAQs after a few days?
         }
 
         var web = new HtmlWeb();
-        //var html = @"https://curiosa.io/faqs";
-        //var htmlDoc = await web.LoadFromWebAsync(html);
-        var htmlDoc = new HtmlDocument();
+        var html = @"https://curiosa.io/faqs";
+        var htmlDoc = await web.LoadFromWebAsync(html);
 
-        htmlDoc.Load(Path.Combine("Infrastructure", "DataAccess", "CardData", "faq.html"));
+        //Todo: maybe this should be a separate interface Implementation? 
+        //var htmlDoc = new HtmlDocument();
+        //htmlDoc.Load(Path.Combine("Infrastructure", "DataAccess", "CardData", "faq.html"));
 
         var cardNodes = htmlDoc.DocumentNode
             .SelectNodes("/html[1]/body[1]/div[1]/main[1]/div[1]/div[1]/div[1]/div");
@@ -32,7 +33,7 @@ public class FaqRepoistory
             _faqs.Add(cardName, cardFaqs);
         }
 
-        return Task.FromResult(_faqs);
+        return _faqs;
     }
 
     private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode singleCardNode)
