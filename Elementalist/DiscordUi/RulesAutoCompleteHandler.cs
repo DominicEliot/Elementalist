@@ -6,9 +6,9 @@ using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi;
 
-public class RulesAutoCompleteHandler(RulesRepository rulesRepository) : IAutocompleteProvider<AutocompleteInteractionContext>
+public class RulesAutoCompleteHandler(IRulesRepository rulesRepository) : IAutocompleteProvider<AutocompleteInteractionContext>
 {
-    private readonly RulesRepository rulesRepository = rulesRepository;
+    private readonly IRulesRepository rulesRepository = rulesRepository;
 
     public async ValueTask<IEnumerable<ApplicationCommandOptionChoiceProperties>?> GetChoicesAsync(ApplicationCommandInteractionDataOption option, AutocompleteInteractionContext context)
     {
@@ -16,12 +16,12 @@ public class RulesAutoCompleteHandler(RulesRepository rulesRepository) : IAutoco
 
         if (string.IsNullOrWhiteSpace(value))
         {
-            return [new("Airborne", "Airborne"), new("Immobile", "Immobile/Immobilised"), new("Disabled", "Disable/Disabled")];
+            return [new("Airborne", "Airborne"), new("Fight", "Fight"), new("Disabled", "Disabled")];
         }
 
         var searchParams = value.Split(' ', '-', '&');
 
-        var suggestions = (await rulesRepository.GetRules()).Where(rule => searchParams.Any(sp => rule.Name.Contains(sp, StringComparison.OrdinalIgnoreCase)));
-        return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Name, c.Name));
+        var suggestions = (await rulesRepository.GetRules()).Where(rule => searchParams.Any(sp => rule.Title.Contains(sp, StringComparison.OrdinalIgnoreCase)));
+        return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Title, c.Title));
     }
 }

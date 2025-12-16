@@ -4,13 +4,13 @@ using ElementalistBot.Models;
 using MediatR;
 
 namespace ElementalistBot.Features.Rules;
-public record GetRulesQuery(string RuleName) : IQuery<IEnumerable<Rule>>;
+public record GetRulesQuery(string RuleName) : IQuery<IEnumerable<CodexEntry>>;
 
-public class GetCardsQueryHandler(RulesRepository rulesRepository) : IRequestHandler<GetRulesQuery, IEnumerable<Rule>>
+public class GetCardsQueryHandler(CodexCsvRulesRepository rulesRepository) : IRequestHandler<GetRulesQuery, IEnumerable<CodexEntry>>
 {
-    public async Task<IEnumerable<Rule>> Handle(GetRulesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<CodexEntry>> Handle(GetRulesQuery request, CancellationToken cancellationToken)
     {
-        var rules = (await rulesRepository.GetRules()).Where(r => r.Name.Equals(request.RuleName, StringComparison.OrdinalIgnoreCase));
+        var rules = (await rulesRepository.GetRules()).Where(r => r.Title.Equals(request.RuleName, StringComparison.OrdinalIgnoreCase));
 
         return rules;
     }

@@ -7,7 +7,6 @@ namespace ElementalistTests.Infrastructure.DataAccess.CardData;
 
 public class CuriosaApiCardRepositoryTest
 {
-
     [Fact]
     [Trait("Category", "Integration")]
     public async Task GetCardsTest()
