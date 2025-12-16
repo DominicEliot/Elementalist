@@ -46,9 +46,9 @@ public class Program
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, CuriosaApiCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
-            builder.Services.AddSingleton<FaqRepoistory>();
+            builder.Services.AddSingleton<IFaqRepository, CsvFaqRepository>();
             builder.Services.AddSingleton<CardArtService>();
-            builder.Services.AddSingleton<RulesRepository>();
+            builder.Services.AddSingleton<IRulesRepository, CodexCsvRulesRepository>();
 
             builder.Services
                 .AddDiscordGateway(options =>

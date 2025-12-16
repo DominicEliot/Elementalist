@@ -5,9 +5,9 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class FaqUi(FaqRepoistory faqRepository) : ComponentInteractionModule<ButtonInteractionContext>
+public class FaqUi(IFaqRepository faqRepository) : ComponentInteractionModule<ButtonInteractionContext>
 {
-    private readonly FaqRepoistory _faqRepository = faqRepository;
+    private readonly IFaqRepository _faqRepository = faqRepository;
 
     [ComponentInteraction("faq")]
     public async Task ShowFaq(string cardName)
@@ -17,9 +17,9 @@ public class FaqUi(FaqRepoistory faqRepository) : ComponentInteractionModule<But
     }
 }
 
-public class FaqSlashCommand(FaqRepoistory faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
+public class FaqSlashCommand(IFaqRepository faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
 {
-    private readonly FaqRepoistory _faqRepository = faqRepository;
+    private readonly IFaqRepository _faqRepository = faqRepository;
 
     [SlashCommand("faq", "Shows any FAQs for the input card.")]
     public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
@@ -31,7 +31,7 @@ public class FaqSlashCommand(FaqRepoistory faqRepository) : ApplicationCommandMo
 
 public static class FaqUiHelper
 {
-    internal static async Task<InteractionMessageProperties> CreateFaqMessage(string cardName, FaqRepoistory faqRepository, bool privateMessage = false)
+    internal static async Task<InteractionMessageProperties> CreateFaqMessage(string cardName, IFaqRepository faqRepository, bool privateMessage = false)
     {
         var message = new InteractionMessageProperties();
         if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;

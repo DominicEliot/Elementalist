@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.3" />
     <PackageReference Include="MediatR" Version="12.5.0" />
@@ -26,10 +27,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Infrastructure\DataAccess\CardData\faq.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Infrastructure\DataAccess\CardData\faq.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Infrastructure\DataAccess\CardData\faqs.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Infrastructure\DataAccess\Rules\codex.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
