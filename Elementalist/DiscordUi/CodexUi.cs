@@ -1,0 +1,69 @@
+﻿using System.Data;
+using Elementalist.Infrastructure.DataAccess.CardData;
+using ElementalistBot.Infrastructure.DataAccess.Rules;
+using ElementalistBot.Models;
+using NetCord.Rest;
+using NetCord.Services.ApplicationCommands;
+using NetCord.Services.ComponentInteractions;
+
+namespace Elementalist.DiscordUi.Rules;
+
+public class CodexSlashCommand(IRulesRepository faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
+{
+    private readonly IRulesRepository _faqRepository = faqRepository;
+
+    [SlashCommand("codex", "Shows any Rules/Codex entries for the provided input.")]
+    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
+    {
+        var message = await CodexUiHelper.CreateCodexMessage(cardName, _faqRepository, privateMessage);
+        await RespondAsync(InteractionCallback.Message(message));
+    }
+}
+
+public static class CodexUiHelper
+{
+    internal static async Task<InteractionMessageProperties> CreateCodexMessage(string ruleToCreate, IRulesRepository faqRepository, bool privateMessage = false)
+    {
+        var message = new InteractionMessageProperties();
+        if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;
+
+        var codex = await faqRepository.GetRules();
+        if (!codex.Any(r => r.Title.Contains(ruleToCreate, StringComparison.OrdinalIgnoreCase)))
+        {
+            message.Content = $"No Rules/Codex entries found for {ruleToCreate}";
+            message.Flags = NetCord.MessageFlags.Ephemeral;
+            return message;
+        }
+
+        var singleEntry = codex.SingleOrDefault(r => r.Title.Equals(ruleToCreate, StringComparison.OrdinalIgnoreCase));
+        if (singleEntry is not null)
+        {
+            var codexEmbed = CreateCodexRuleEmbed(singleEntry);
+
+            message.Embeds = [codexEmbed];
+            return message;
+        }
+
+        var embeds = new List<EmbedProperties>();
+        foreach (var rule in codex.Where(r => r.Title.Contains(ruleToCreate, StringComparison.OrdinalIgnoreCase)))
+        {
+            var codexEmbed = CreateCodexRuleEmbed(rule);
+
+            embeds.Add(codexEmbed);
+        }
+        message.Embeds = embeds;
+        return message;
+    }
+
+    private static EmbedProperties CreateCodexRuleEmbed(CodexEntry rule)
+    {
+        var codexEmbed = new EmbedProperties().WithTitle($"{rule.Title} Codex/Rules").WithDescription(rule.Content);
+
+        foreach (var subCodex in rule.Subcodexes)
+        {
+            codexEmbed.AddFields(new EmbedFieldProperties().WithName(subCodex.Title).WithValue(subCodex.Content));
+        }
+
+        return codexEmbed;
+    }
+}
