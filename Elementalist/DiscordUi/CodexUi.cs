@@ -13,9 +13,9 @@ public class CodexSlashCommand(IRulesRepository faqRepository) : ApplicationComm
     private readonly IRulesRepository _faqRepository = faqRepository;
 
     [SlashCommand("codex", "Shows any Rules/Codex entries for the provided input.")]
-    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
+    public async Task CodexSearchByTitle([SlashCommandParameter(AutocompleteProviderType = typeof(RulesAutoCompleteHandler))] string codexName, bool privateMessage = false)
     {
-        var message = await CodexUiHelper.CreateCodexMessage(cardName, _faqRepository, privateMessage);
+        var message = await CodexUiHelper.CreateCodexMessage(codexName, _faqRepository, privateMessage);
         await RespondAsync(InteractionCallback.Message(message));
     }
 }
