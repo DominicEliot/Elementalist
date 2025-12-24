@@ -234,8 +234,8 @@ carrying an artifact, the artifact is immediately dropped. If a unit is forceful
 they're carrying moves with them, e.g. [[Bury]]. If a minion leaves the realm, anything they're 
 carrying remains in the realm, e.g. [[Fey Changeling]], [[Cast into Exile]], [[Monster Hunter]].",""
 "Carrying Units","Normally, units cannot be carried by other units, but some effects allow it, e.g. [[War Horse]]. 
-Such units have modified Pick Up and Drop basic abilities, as described in those codex entries. If 
-such a unit loses the ability to carry other units, the carried units are immediately dropped. A 
+Such units have ))modified(( Pick Up and Drop basic abilities, as described in those codex entries. 
+If such a unit loses the ability to carry other units, the carried units are immediately dropped. A 
 unit that's being carried must share at least one location with the unit that's carrying it. If they 
 ever share no locations, the carried unit is automatically dropped. Similar to carrying artifacts, 
 the carried units are moved along with the unit that's carrying them. This is considered forced 
@@ -243,17 +243,17 @@ movement. If a carried unit cannot enter the location, the carried unit won't mo
 dropped as usual if they no longer share a location with the carrying unit). For example, if a War 
 Horse tries to carry a [[Bosk Troll]] into a [[Gnome Hollows]], the War Horse can enter the Gnome 
 Hollows but the Troll cannot, and thus the Troll remains where it was and is automatically dropped. 
-Units that can carry other units confer their movement abilities to the carried units while they're 
-carried. For example, [[Phantom Steed]] can pick up a [[Bosk Troll]] and then carry the Troll into 
-the Void. The Troll will have Voidwalk while being carried by the Phantom Steed, and thus be able to 
-survive in the void. Carried units may take the Move and Attack action normally (once the Storyline 
-is empty). Therefore, even if the carrying unit can't Drop that turn, the carried unit could still 
-move themselves normally. For that first step, they will have any movement abilities conferred to 
-them by being carried, which are lost as soon as they're no longer carried. For example, a Bosk 
-Troll on a Phantom Steed in the void could step from the void onto the surface of an adjacent site, 
-using the Voidwalk ability conferred to them by being carried. Once the Troll is on the surface of a 
-site, it's no longer being carried by the Phantom Steed, but by that point it's safely in on the 
-surface.",""
+Units that can carry other units confer Airborne, Burrowing, Submerge, and/or Voidwalk to the 
+carried units while they're carried. For example, [[Phantom Steed]] can pick up a [[Bosk Troll]] and 
+then carry the Troll into the Void. The Troll will have Voidwalk while being carried by the Phantom 
+Steed, and thus be able to survive in the void. Carried units may take the Move and Attack action 
+normally (once the Storyline is empty). Therefore, even if the carrying unit ))can't Drop(( that 
+turn, the carried unit could still move themselves normally. For that first step, they will have any 
+movement abilities conferred to them by being carried, which are lost as soon as they're no longer 
+carried. For example, a Bosk Troll on a Phantom Steed in the void could step from the void onto the 
+surface of an adjacent site, using the Voidwalk ability conferred to them by being carried. Once the 
+Troll is on the surface of a site, it's no longer being carried by the Phantom Steed, but by that 
+point it's safely out of the void and on the surface.",""
 "Casting Spells","Spells are the main way Avatars and other Spellcasters influence the realm. You cast minions, 
 artifacts, auras, and magics. You can only cast a spell during your main phase, while the storyline 
 is empty. (A few cards like [[Dodge Roll]] grant a timing exception.) When you cast a spell, follow 
@@ -402,6 +402,45 @@ clarify that Avatars can only enter surface locations (instead of preventing the
 non-surface regions). That is, they can enter other regions as long as those regions are also part 
 of the surface region, e.g. [[The Void]]. Clarified that ((Wounded)) for minions means taking damage 
 this turn. Added '((Break Stealth)).'"
+"","","Changelog - December 21, 2025:  FAQ [[Corruptor]] corrected to match design intent: minions gain the 
+new type, and retain their original type as well. For example, a [[Lugbog Cat]] will be a Beast 
+Monster and thus [[Pond]] will still function even with [[Corruptor]], and [[Bower of Bliss]] will 
+still silence a Mortal Undead [[Grandmaster Wizard]]. [[Imposter]] clarified that it can wear masks 
+of avatars with pre-game or setup abilities, and those setup abilities do not trigger since the game 
+has already begun (e.g. [[Pathfinder]] is fine even though your atlas has duplicates, you don't get 
+to pick a Dragon for [[Dragonlord]] or roll for summoning portals as [[Harbinger]], your decks 
+remain as-is for [[Magician]], etc.) Fixed the [[Persecutor]] FAQ and ((Ward)) definition that gave 
+an example of Persecutor branding its own minion (which is not possible). Clarified that [[Pith 
+Imp]] steals the card to a separate zone, not to your hand. You can only cast it if Pith Imp becomes 
+a spellcaster. [[The Void]] clarified targeting while occupying this site, and your opponent casting 
+Voidwalk minions to this site. [[Castle Haunt]] clarified what happens if it survives leaving its 
+summoning site, and what happens if it's not summoned to a site in the first place (e.g. [[Lucid 
+Dreamers]]). Clarified that when [[Dragonlord]] gains [[Ignis Rex]]'s ability, the Dragonlord will 
+indeed deal fire damage (and same for [[Adtonitum]] and air damage). Removed superfluous comment in 
+[[Bodach Bogeyman]]'s FAQ; minions are dropped in the Bogeyman's location, not adjacent. Added FAQ 
+for [[Locusts of Illyria]] clarifying that you get one copy the first turn they're summoned; 'new 
+Locusts' refers to Locusts summoned by the triggered ability. Added FAQ for [[Jack the Ripper]] 
+clarifying he's a Monster (and Mortal). Added FAQ for [[Animist]] casting a Magic as a Minion spell 
+plus [[Orb of Ba'al Berith]]. (Orb doesn't copy it, because it's effectively a Minion spell, not 
+Magic.) Added FAQ for [[Gilman House]] clarifying multiple uses per turn is allowed. Added FAQ for 
+[[Sow the Earth]] clarifying mana from effects like a [[Lone Tower]]'s genesis or [[Abundance]] will 
+also be doubled. Added FAQ for [[Symmetric Suffering]] clarifying how to handle cards with multiple 
+types (e.g. an Automaton that is a minion and an artifact). Added FAQ for [[Mismanaged Mortuary]] 
+clarifying that you always put cards into the cemetery you own. Added FAQ for [[Lord of Greed]] 
+clarifying how his effect works. Codex Updated ((Sacrifice)), changing the way destruction 
+prevention effects and sacrifice interact. Now, sacrifice takes priority and effects that prevent 
+destruction (e.g. Ward, Lady Iseult, etc.) will not save a sacrificed card! Also reminded players 
+that sacrificed cards count as dying (which was already noted in the '((die))' entry). Updated [[The 
+Doom of Dilmun]] FAQ to match. Updated ((Disabled)) to clarify that disabled minions cannot deal 
+damage (e.g. [[Abyssal Assault]]). Fixed '((Oversized Units))' section that previously said there 
+were exceptions to size being a characteristic; it's always a characteristic now and won't change if 
+silenced or disabled. Added Ward as an example of a replacement effect that can protect from death 
+in the '((Die))' entry. Clarified how to order multiple cards with passive abilities entering the 
+realm simultaneously, e.g. [[Boneyard]]. See '((Apply Ongoing Effects in Order)).' Clarified '((How 
+to Handle Dependencies))' when applying ongoing effects. Updated ((Zone)) to include ((Collection)). 
+Clarified '((Stops))' to include rules for units being carried by other units, matching player 
+intuition. Clarified '((Cost))' when casting using alternate costs other than 'for free,' like [[De 
+Vermis Mysteriis]], and added FAQ too!"
 "Characteristics","Many cards have abilities that can be gained or removed during the game, but there are some 
 characteristics that all cards possess, depending on their card type. Effects that remove or modify 
 abilities will not remove or modify these characteristics, unless specifically mentioned in the 
@@ -466,13 +505,13 @@ storyline, per the normal token rules.",""
 [[Hamlet]]. Cost cannot be negative. Sites have a default cost of zero. When determining the mana 
 cost of a spell with an X value (e.g. [[Assorted Animals]]), X is the actual cost while the spell is 
 on the storyline, and otherwise X is zero. To calculate the total cost of a spell or ability: Start 
-with the mana cost or activation cost. For example, (3) for [[Bury]]. Include any additional costs. 
-For example, discarding a site for [[Craterize]]. Add anything that increases cost. For example, (2) 
-for [[Maddening Bells]]. Subtract anything that reduces cost. For example, (1) less for 
-[[Philosopher's Stone]]. Note that if you cast the spell 'for free' or 'for (0),' you do not pay any 
-additional costs at all! For example, [[Deathspeaker]] on Death's Door near a [[Maddening Bells]] 
-will still pay (0) to use the Deathspeaker's ability. See ((For Free)) in the Codex for more 
-details.",""
+with the mana cost or activation cost. For example, (3) for [[Bury]], or (5) if casting via [[De 
+Vermis Mysteriis]]. Include any additional costs. For example, discarding a site for [[Craterize]]. 
+Add anything that increases cost. For example, (2) for [[Maddening Bells]]. Subtract anything that 
+reduces cost. For example, (1) less for [[Philosopher's Stone]]. Note that if you cast the spell 
+'for free' or 'for (0),' you do not pay any additional costs at all! For example, [[Deathspeaker]] 
+on Death's Door near a [[Maddening Bells]] will still pay (0) to use the Deathspeaker's ability. See 
+((For Free)) in the Codex for more details.",""
 "Damage","Cards take damage from fighting and from the effects of spells and abilities. Damage dealt to 
 minions accumulates until the end phase, at which time it is healed. Whenever a minion accumulates 
 damage equal to or greater than its power, it dies. Damage dealt to your Avatar causes you to lose 
@@ -942,7 +981,7 @@ possible steps to the destination. If there are multiple equally short paths, th
 chooses. If no such path exists, the unit doesn't move at all. See ((Range of Motion)) for how to 
 apply lookahead when determining the path. Note that the basic abilities 'Move and Attack' and 
 'Defend' do not require the player to choose the shortest path to the destination because they are 
-limited by the defending unit's movement (typically just a single step)."
+limited by the unit's movement (typically just a single step)."
 "Move and Attack","Move and Attack is a basic, activated ability with the following text: Tap -> This unit may take one 
 step. Then, it may attack.",""
 "","","Movement:  Normally the unit's movement path is one step between two adjacent surface locations, but 
@@ -1106,8 +1145,8 @@ if I play King of the Realm, then you play King of the Realm, you Mesmerize my K
 Infiltrate my King back... We would note that Mesmerize and Infiltrate are independent of the King's 
 effects, and apply those first. Mesmerize, then Infiltrate. Then we'd apply the King's abilities in 
 order after that. Finally, note that if two effects are both dependent on each other, use timestamp 
-normally. Examples of that are detailed ))above(( in '((Example - Two Kings of the Realm))', 
-'((Example - Two Smokestacks of Gnaak))', and '((Example - Flood vs. Drought)).'"
+normally. Examples of that are detailed ))above(( in '((Example - Two Kings of the Realm)),' 
+'((Example - Two Smokestacks of Gnaak)), and '((Example - Flood vs. Drought)).'"
 "Only It Can Cast","Some effects allow a non-Avatar to become a special spellcaster, draw a spell, and then only it can 
 cast the spell. For example, [[Char Omphalos]], [[Morgana Le Fay]], or [[Archangel Gabriel]]. The 
 card counts as drawn by you, but it ends up in a separate zone, not your hand. Ensure it does not 
@@ -1336,9 +1375,20 @@ site placement rules. In all other ways, Rubble is treated the same as any other
 because it has no water affinity, it is a land site.",""
 "Sacrifice","You can only sacrifice cards you control and that are in the realm. If you are sacrificing as part 
 of paying a cost for an effect, the sacrificed card doesn't go to the cemetery until the effect is 
-resolved. For example, [[Sinkhole]]. If you try to sacrifice a card and it doesn't actually die 
-(e.g. [[Lady Iseult]], [[Gilded Aegis]]) then you didn't actually sacrifice it, and thus you didn't 
-pay whatever cost you were trying to pay.",""
+resolved. For example, [[Sinkhole]]. If you sacrifice a card that would normally be prevented from 
+being destroyed (e.g. ((Ward)), [[Lady Iseult]], [[Gilded Aegis]], [[The Doom of Dilmun]], etc.), 
+the prevention fails and the card is actually sacrificed. That is, sacrifice effects supersede all 
+destruction prevention effects, contrary to the typical '((Can vs. Can't))' priority. It's still 
+being killed, deathrites still trigger, kill credit is still awarded, etc.; the sacrificed minion 
+simply won't be saved by any prevention or replacement effects. For example, if I have [[Bluecap 
+Knockers]] on my [[Sinkhole]] and then use the activated ability on my Sinkhole to sacrifice it, I 
+indeed destroy my own Sinkhole even though Bluecap Knockers says it can't be destroyed. As another 
+example, my Apprentice Wizard is nearby Lady Iseult when I sacrifice my Apprentice Wizard to summon 
+a [[Moon Clan Werewolf]]. My Apprentice Wizard is about to die, and normally Lady Iseult would 
+return him to my hand. But because this is a sacrifice effect, the death cannot be prevented. The 
+Moon Clan Werewolf is summoned and the Apprentice Wizard goes to my cemetery. The examples above 
+would be the same if the Sinkhole and Apprentice Wizard were warded; the Ward would not save them 
+from being sacrificed!",""
 "Search","Searching a zone (e.g. [[Adept Illusionist]]) allows you to look at the cards in those zones and 
 potentially find something. If you search a public zone, then you must find what you're searching 
 for, if possible. If you search a private zone, then you may choose to fail to find what you're 
@@ -1449,7 +1499,8 @@ include [[Guile Sirens]], which could make a nearby Airborne enemy take a diagon
 and [[Leap Attack]], which could allow a Burrowed minion to unburrow to the surface and strike all 
 the units there. Note that the Moves Freely ability only applies during the 'Move and Attack' and 
 'Defend' basic abilities.",""
-"Stops","After a unit moves, it 'stops' when there is no additional movement for that unit on the storyline. 
+"Stops","After a unit moves, it 'stops' when there is no additional movement for that unit on the storyline 
+(or if it's being carried, no additional movement on the storyline for the unit that's carrying it). 
 A unit must first move to then stop. Projectiles are similar; if they do not enter a new location, 
 the projectile hasn't moved at all and thus cannot stop. For example, a [[Snowball]] that doesn't 
 enter any new locations and doesn't move will not deal any damage. Note that 'stops' is not the same 
@@ -1856,13 +1907,13 @@ realm. Units with 0 power (e.g. [[Grandmaster Wizard]]) only die if they take da
 spell cast for zero mana does not require any mana at all to cast, but it still counts as a cast 
 spell.",""
 "Zone","A zone is a general area where a card can exist. Game zones include: The realm (a shared zone) Each 
-player's spellbook, atlas, cemetery, and hand zones (specific to each player) The storyline (a 
-shared zone) Additional zones based on specific cards (e.g. [[Morgana le Fay]] creates a 'Morgana's 
-hand' zone.) Public zones include the realm and cemeteries, and cards in these zones have no hidden 
-information, i.e. they're face-up, and you're allowed to look at the opposite side of any card in 
-those zones, e.g. [[Druid]]. For clarity of game state, it's acceptable to put banished cards 
-face-down in a specific area of the table, but they may be reviewed by either player at any time. 
-The number of cards and type of card (e.g. spell or site) in each zone is public information (e.g. 
-any player can know how many cards remain in any deck, or how many cards of each type you have in 
-your hand). Each player may view the cards in their own hand. Cards in the spellbook and atlas are 
-face-down, and thus not visible to any player.",""
+player's spellbook, atlas, cemetery, collection, and hand zones (specific to each player) The 
+storyline (a shared zone) Additional zones based on specific cards (e.g. [[Morgana le Fay]] creates 
+a 'Morgana's hand' zone.) Public zones include the realm and cemeteries, and cards in these zones 
+have no hidden information, i.e. they're face-up, and you're allowed to look at the opposite side of 
+any card in those zones, e.g. [[Druid]]. For clarity of game state, it's acceptable to put banished 
+cards face-down in a specific area of the table, but they may be reviewed by either player at any 
+time. The number of cards and type of card (e.g. spell or site) in each zone is public information 
+(e.g. any player can know how many cards remain in any deck, or how many cards of each type you have 
+in your hand). Each player may view the cards in their own hand and collection. Cards in the 
+spellbook and atlas are face-down, and thus not visible to any player.",""

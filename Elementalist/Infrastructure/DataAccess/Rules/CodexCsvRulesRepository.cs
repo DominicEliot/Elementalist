@@ -16,6 +16,8 @@ public class CodexCsvRulesRepository : IRulesRepository
             return _rules;
         }
 
+        //Todo: will `blob:https://curiosa.io/2e27b065-73b7-4088-9b02-f266058d9eaa` work forever? check next codex update?
+        //Also will `blob:https://curiosa.io/7ce0e074-ef59-404f-99ee-6eeaa8cb880d` work for FAQs?
         using var reader = new StreamReader(Path.Combine(nameof(Infrastructure), nameof(DataAccess), nameof(Rules), "codex.csv"));
         var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
