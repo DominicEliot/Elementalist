@@ -1,7 +1,9 @@
 ﻿using System.Data;
+using System.Text.RegularExpressions;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using ElementalistBot.Infrastructure.DataAccess.Rules;
 using ElementalistBot.Models;
+using NetCord.Gateway;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
@@ -16,11 +18,12 @@ public class CodexSlashCommand(IRulesRepository faqRepository) : ApplicationComm
     public async Task CodexSearchByTitle([SlashCommandParameter(AutocompleteProviderType = typeof(RulesAutoCompleteHandler))] string codexName, bool privateMessage = false)
     {
         var message = await CodexUiHelper.CreateCodexMessage(codexName, _faqRepository, privateMessage);
+
         await RespondAsync(InteractionCallback.Message(message));
     }
 }
 
-public static class CodexUiHelper
+public static partial class CodexUiHelper
 {
     internal static async Task<InteractionMessageProperties> CreateCodexMessage(string ruleToCreate, IRulesRepository faqRepository, bool privateMessage = false)
     {
@@ -41,6 +44,7 @@ public static class CodexUiHelper
             var codexEmbed = CreateCodexRuleEmbed(singleEntry);
 
             message.Embeds = [codexEmbed];
+            message.WithComponents(CreateCodexComponents(singleEntry));
             return message;
         }
 
@@ -66,4 +70,33 @@ public static class CodexUiHelper
 
         return codexEmbed;
     }
+
+    private static IEnumerable<ComponentProperties>? CreateCodexComponents(CodexEntry singleEntry)
+    {
+        var components = new List<ComponentProperties>();
+        var stringMenu = new StringMenuProperties("referenceSelect");
+
+        foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content))
+        {
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Captures[1].Value, $"card:{cardMatch}"));
+        }
+
+        foreach (Match codexMatch in CodexMentionsRegex().Matches(singleEntry.Content))
+        {
+            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Captures[1].Value, $"codex:{codexMatch}"));
+        }
+
+        if (stringMenu.Any())
+        {
+            components.Add(stringMenu);
+        }
+
+        return components;
+    }
+
+    [GeneratedRegex(@"\(\((.*)\)\)")]
+    private static partial Regex CardMentionsRegex();
+
+    [GeneratedRegex(@"\[\[(.*)\]\]")]
+    private static partial Regex CodexMentionsRegex();
 }
