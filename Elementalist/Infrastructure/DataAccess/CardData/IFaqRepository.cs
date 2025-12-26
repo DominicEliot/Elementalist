@@ -17,7 +17,7 @@ public class CsvFaqRepository : IFaqRepository
 
     public Task<Dictionary<string, List<CardFaq>>> GetFaqs()
     {
-        if (_faqs.Count() > 0)
+        if (_faqs.Count > 0)
         {
             return Task.FromResult(_faqs);
         }
@@ -62,63 +62,6 @@ public class CsvFaqRepository : IFaqRepository
         public required string card_name { get; init; }
         public required string question { get; init; }
         public required string answer { get; init; }
-    }
-}
-
-public class HtmlFaqRepository : IFaqRepository
-{
-    private Dictionary<string, List<CardFaq>> _faqs = [];
-
-    public async Task<Dictionary<string, List<CardFaq>>> GetFaqs()
-    {
-        if (_faqs.Count() > 0)
-        {
-            return _faqs; //Todo: this will cause the FAQs to become out of date if the bot is running for a long time, maybe we should reload the FAQs after a few days?
-        }
-
-        var web = new HtmlWeb();
-        //var html = @"https://curiosa.io/faqs";
-        //var htmlDoc = await web.LoadFromWebAsync(html);
-
-        //Todo: maybe this should be a separate interface Implementation? 
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.Load(Path.Combine("Infrastructure", "DataAccess", "CardData", "faq.html"));
-
-        var cardNodes = htmlDoc.DocumentNode
-            .SelectNodes("/html[1]/body[1]/div[1]/main[1]/div[1]/div[1]/div[1]/div[3]/div");
-
-        foreach (var singleCardNode in cardNodes)
-        {
-            var cardName = Regex.Replace(singleCardNode.SelectSingleNode("h3").InnerText, @"(\s|\n)+", " ").Trim();
-            List<CardFaq> cardFaqs = ParseHtmlFaqsForSingleCard(singleCardNode);
-
-            _faqs.Add(cardName, cardFaqs);
-        }
-
-        return _faqs;
-    }
-
-    private static List<CardFaq> ParseHtmlFaqsForSingleCard(HtmlNode singleCardNode)
-    {
-        var cardFaqs = new List<CardFaq>();
-
-        foreach (var faq in singleCardNode.SelectNodes("div/div"))
-        {
-            var question = faq.GetAttributes("class")
-                .FirstOrDefault(a => a?.Value?.Contains("curiosa-faq") == true && !a.Value.Contains("curiosa-faq-a"))?
-                .OwnerNode;
-
-            var cardFaq = new CardFaq
-            {
-                HasTable = faq.Descendants("table").Any(),
-                QuestionText = Regex.Replace(faq.SelectSingleNode("p[1]").InnerText, @"(\s|\n)+", " "),
-                AnswerText = Regex.Replace(faq.SelectSingleNode("p[2]").InnerText, @"(\s|\n)+", " ")
-            };
-
-            cardFaqs.Add(cardFaq);
-        }
-
-        return cardFaqs;
     }
 }
 
