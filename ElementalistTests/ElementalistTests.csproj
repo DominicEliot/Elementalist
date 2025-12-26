@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Elementalist\ElementalistBot.csproj" />
+    <ProjectReference Include="..\Elementalist\Elementalist.csproj" />
   </ItemGroup>
 
 </Project>
