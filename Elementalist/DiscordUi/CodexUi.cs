@@ -1,12 +1,9 @@
 ﻿using System.Data;
 using System.Text.RegularExpressions;
-using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Models;
 using ElementalistBot.Infrastructure.DataAccess.Rules;
-using ElementalistBot.Models;
-using NetCord.Gateway;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
-using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi.Rules;
 
@@ -71,10 +68,10 @@ public static partial class CodexUiHelper
         return codexEmbed;
     }
 
-    private static IEnumerable<ComponentProperties>? CreateCodexComponents(CodexEntry singleEntry)
+    private static List<IMessageComponentProperties> CreateCodexComponents(CodexEntry singleEntry)
     {
-        var components = new List<ComponentProperties>();
-        var stringMenu = new StringMenuProperties("referenceSelect");
+        var components = new List<IMessageComponentProperties>();
+        var stringMenu = new StringMenuProperties("referencesSelect");
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content))
         {

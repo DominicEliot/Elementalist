@@ -29,6 +29,7 @@ public static class Prices
         private readonly IOptions<TcgPlayerSettings> _settings = settings;
         private readonly IMemoryCache _cache = cache;
         private readonly HttpClient _httpClient = httpClient;
+        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
         public async Task<Result<IEnumerable<PriceData>>> GetPriceData(string cardName, string? set, string? cardFinish)
         {
@@ -63,7 +64,7 @@ public static class Prices
             {
                 var reply = await _httpClient.GetAsync(_settings.Value.FormattedSetsUrl);
 
-                var items = JsonSerializer.Deserialize<TcgPlayerGameSets>(await reply.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                var items = JsonSerializer.Deserialize<TcgPlayerGameSets>(await reply.Content.ReadAsStringAsync(), _jsonOptions);
 
                 cacheItem.SetAbsoluteExpiration(TimeSpan.FromHours(24))
                     .SetValue(items!.Results);
@@ -84,9 +85,9 @@ public static class Prices
                 {
                     taskList.Add(Task.Run(async () =>
                     {
-                        var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set.SetNameId));
+                        var cardIdsResult = await _httpClient.GetAsync(string.Format(_settings.Value.CardIdsUrl, set.SetNameId), cancellationToken);
 
-                        return JsonSerializer.Deserialize<TcgPlayerSet>(await cardIdsResult.Content.ReadAsStringAsync(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                        return JsonSerializer.Deserialize<TcgPlayerSet>(await cardIdsResult.Content.ReadAsStringAsync(), _jsonOptions);
                     }));
                 }
 
@@ -109,8 +110,8 @@ public static class Prices
     public record PriceData
     {
         public required UniqueCardIdentifier Card { get; set; }
-        public Double Mid { get; set; }
-        public Double Low { get; set; }
+        public double Mid { get; set; }
+        public double Low { get; set; }
         public string? Condition { get; internal set; }
     }
 }

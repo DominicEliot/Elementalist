@@ -46,6 +46,7 @@ public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefres
 public class FileCardRepository() : ICardRepository
 {
     private List<Card> _cards = [];
+    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
     public async Task<IEnumerable<Card>> GetCards()
     {
@@ -59,9 +60,8 @@ public class FileCardRepository() : ICardRepository
         if (_cards.Count == 0)
         {
             var json = await File.ReadAllTextAsync(Path.Combine("Infrastructure", "DataAccess", "CardData", "cards.json"));
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
-            var cards = JsonSerializer.Deserialize<List<Card>>(json, jsonOptions);
+            var cards = JsonSerializer.Deserialize<List<Card>>(json, _jsonOptions);
             _cards = cards ?? [];
         }
     }

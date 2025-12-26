@@ -2,10 +2,10 @@
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Models;
 using Microsoft.Extensions.Options;
-using SorceryBotTests.Features.Card;
+using ElementalistTests.Features.Card;
 using Xunit;
 
-namespace SorceryBotTests.DiscordUi;
+namespace ElementalistTests.DiscordUi;
 
 public class CardArtServiceTests
 {

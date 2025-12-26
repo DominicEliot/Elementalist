@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using CsvHelper;
-using ElementalistBot.Models;
+using Elementalist.Models;
 
 namespace ElementalistBot.Infrastructure.DataAccess.Rules;
 

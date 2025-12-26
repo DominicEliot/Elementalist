@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using Elementalist.Infrastructure.DataAccess.CardData;
 
-namespace SorceryBotTests.Features.Card;
+namespace ElementalistTests.Features.Card;
 
 internal class MockCardRepository : ICardRepository
 {
-    private List<Elementalist.Models.Card> _cards = [
+    private readonly List<Elementalist.Models.Card> _cards = [
         new("Pudge Butcher", null!, "Earth", "Minion Demon", []),
         new("Dream-Quest", null!, "Air", "Magic", []),
         JsonSerializer.Deserialize<Elementalist.Models.Card>("""{ "name": "Hounds of Ondaros", "guardian": { "rarity": "Elite", "type": "Minion", "rulesText": "Airborne, Burrowing, Submerge, Voidwalk\n \nNearby enemies permanently lose Stealth.", "cost": 5, "attack": 4, "defence": 4, "life": null, "thresholds": { "air": 2, "earth": 0, "fire": 0, "water": 0 } }, "elements": "Air", "subTypes": "Beast", "sets": [ { "name": "Alpha", "releasedAt": "2023-04-19T00:00:00.000Z", "metadata": { "rarity": "Elite", "type": "Minion", "rulesText": "Airborne, Burrowing, Submerge, Voidwalk\n\nNearby enemies permanently lose Stealth.", "cost": 5, "attack": 4, "defence": 4, "life": null, "thresholds": { "air": 2, "earth": 0, "fire": 0, "water": 0 } }, "variants": [ { "slug": "alp-hounds_of_ondaros-b-s", "finish": "Standard", "product": "Booster", "artist": "Francesca Baerald", "flavorText": "From hell's heart they stab at thee.", "typeText": "Nowhere is safe from these Elite Beasts" }, { "slug": "alp-hounds_of_ondaros-b-f", "finish": "Foil", "product": "Booster", "artist": "Francesca Baerald", "flavorText": "From hell's heart they stab at thee.", "typeText": "Nowhere is safe from these Elite Beasts" } ] }, { "name": "Beta", "releasedAt": "2023-11-10T00:00:00.000Z", "metadata": { "rarity": "Elite", "type": "Minion", "rulesText": "Airborne, Burrowing, Submerge, Voidwalk\n \nNearby enemies permanently lose Stealth.", "cost": 5, "attack": 4, "defence": 4, "life": null, "thresholds": { "air": 2, "earth": 0, "fire": 0, "water": 0 } }, "variants": [ { "slug": "bet-hounds_of_ondaros-b-s", "finish": "Standard", "product": "Booster", "artist": "Francesca Baerald", "flavorText": "From hell's heart they stab at thee.", "typeText": "Nowhere is safe from these Elite Beasts" }, { "slug": "bet-hounds_of_ondaros-b-f", "finish": "Foil", "product": "Booster", "artist": "Francesca Baerald", "flavorText": "From hell's heart they stab at thee.", "typeText": "Nowhere is safe from these Elite Beasts" } ] } ]}""", JsonSerializerOptions.Web)!,

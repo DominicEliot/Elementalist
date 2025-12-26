@@ -8,7 +8,7 @@ namespace Elementalist.DiscordUi;
 
 public class RulesAutoCompleteHandler(IRulesRepository rulesRepository) : IAutocompleteProvider<AutocompleteInteractionContext>
 {
-    private readonly IRulesRepository rulesRepository = rulesRepository;
+    private readonly IRulesRepository _rulesRepository = rulesRepository;
 
     public async ValueTask<IEnumerable<ApplicationCommandOptionChoiceProperties>?> GetChoicesAsync(ApplicationCommandInteractionDataOption option, AutocompleteInteractionContext context)
     {
@@ -21,7 +21,7 @@ public class RulesAutoCompleteHandler(IRulesRepository rulesRepository) : IAutoc
 
         var searchParams = value.Split(' ', '-', '&');
 
-        var suggestions = (await rulesRepository.GetRules()).Where(rule => searchParams.Any(sp => rule.Title.Contains(sp, StringComparison.OrdinalIgnoreCase)));
+        var suggestions = (await _rulesRepository.GetRules()).Where(rule => searchParams.Any(sp => rule.Title.Contains(sp, StringComparison.OrdinalIgnoreCase)));
         return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Title, c.Title));
     }
 }

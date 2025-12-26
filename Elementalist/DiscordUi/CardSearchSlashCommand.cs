@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using Elementalist.Features.Card;
+using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.Config;
 using Elementalist.Models;
 using MediatR;
@@ -29,9 +29,9 @@ public static class CardDisplay
         return message;
     }
 
-    internal static List<ComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
+    internal static List<IMessageComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
     {
-        var components = new List<ComponentProperties>();
+        var components = new List<IMessageComponentProperties>();
         var buttonRow = new ActionRowProperties();
 
         if (card.Sets.Count() > 1 || card.Sets.Any(s => s.Variants.Count() > 1))
@@ -39,7 +39,7 @@ public static class CardDisplay
             AddVariantsMenu(card, components, variant);
         }
 
-        buttonRow.AddButtons(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
+        buttonRow.AddComponents(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
                            new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary),
                            new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
         components.Add(buttonRow);
@@ -47,7 +47,7 @@ public static class CardDisplay
         return components;
     }
 
-    private static void AddVariantsMenu(Card card, List<ComponentProperties> componentsList, SetVariant? defaultVariant)
+    private static void AddVariantsMenu(Card card, List<IMessageComponentProperties> componentsList, SetVariant? defaultVariant)
     {
         var menuBuilder = new StringMenuProperties("variantSelect");
 
@@ -135,7 +135,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
     }
 
     //Todo: this should maybe be its own service
-    private static string[] hiddenCardTypes = ["Minion", "Artifact"];
+    private static readonly string[] _hiddenCardTypes = ["Minion", "Artifact"];
 
     public static Uri GetRealmsAppUrl(GetCardsQuery query)
     {
@@ -147,12 +147,14 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
 
         foreach (var cardType in query.TypeContains?.Replace(",", "").Split(' ') ?? [])
         {
-            var cardTypeSyntaxOption = hiddenCardTypes.Contains(cardType, StringComparer.OrdinalIgnoreCase) ? "t:" : "l:";
+            var cardTypeSyntaxOption = _hiddenCardTypes.Contains(cardType, StringComparer.OrdinalIgnoreCase) ? "t:" : "l:";
             queryParams.Add($"{cardTypeSyntaxOption}{cardType}");
         }
 
-        var uri = new UriBuilder($"https://www.realmsapp.com/sorcery_tcg/cards");
-        uri.Query = $"?query={string.Join("+", queryParams)}";
+        var uri = new UriBuilder($"https://www.realmsapp.com/sorcery_tcg/cards")
+        {
+            Query = $"?query={string.Join("+", queryParams)}"
+        };
         return uri.Uri;
     }
 }
@@ -182,7 +184,7 @@ internal class EmbedCardDetailAdapter : EmbedProperties
     }
 }
 
-public class CardArtService(IOptions<CardImageOptions> imageOptions)
+public partial class CardArtService(IOptions<CardImageOptions> imageOptions)
 {
     public string GetUrl(SetVariant setVariant)
     {
@@ -198,12 +200,18 @@ public class CardArtService(IOptions<CardImageOptions> imageOptions)
         var escapedSet = Uri.EscapeDataString(setName);
 
         var imageSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
-        var productSlugRegex = Regex.Match(cardSlug, @"^(\w{3})-.*_(\w+_\w+)$");
-        var productSlug = productSlugRegex.Groups[2].Value;
-        var shortSet = productSlugRegex.Groups[1].Value;
+        var productSlugMatch = ProdcutSlugRegex().Match(cardSlug);
+        if (productSlugMatch.Success)
+        {
+            var productSlug = productSlugMatch.Groups[2].Value;
+            return string.Format(imageOptions.Value.UrlFormat, cardSlug, escapedSet, productSlug, imageSlug);
+        }
 
-        return string.Format(imageOptions.Value.UrlFormat, cardSlug, escapedSet, productSlug, imageSlug);
+        return string.Format(imageOptions.Value.UrlFormat, cardSlug, escapedSet, imageSlug);
     }
+
+    [GeneratedRegex(@"^(\w{3})-.*_(\w+_\w+)$")]
+    private static partial Regex ProdcutSlugRegex();
 }
 
 public class CardImageOptions

@@ -3,7 +3,7 @@ using Elementalist.Shared;
 using FluentValidation;
 using MediatR;
 
-namespace Elementalist.Features.Card;
+namespace Elementalist.Features.Cards;
 
 public record GetCardsQuery : IQuery<IEnumerable<Models.Card>>
 {
@@ -76,14 +76,14 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
         return cards;
     }
 
-    private bool DoesCardHaveAllTerms(Models.Card card, string[] searchTerms)
+    private static bool DoesCardHaveAllTerms(Models.Card card, string[] searchTerms)
     {
         var matchCount = searchTerms.Count(singleWord => card.Guardian?.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
 
         return matchCount >= searchTerms.Length;
     }
 
-    private bool DoesCardHaveAllTypes(Models.Card card, string[] searchTerms)
+    private static bool DoesCardHaveAllTypes(Models.Card card, string[] searchTerms)
     {
         var matchCount = searchTerms.Count(singleWord => card.Guardian?.Type?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
             + searchTerms.Count(singleWord => card.SubTypes?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);

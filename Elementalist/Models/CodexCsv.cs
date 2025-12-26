@@ -1,6 +1,6 @@
 ﻿using CsvHelper.Configuration.Attributes;
 
-namespace ElementalistBot.Models;
+namespace Elementalist.Models;
 
 public record CodexCsv
 {

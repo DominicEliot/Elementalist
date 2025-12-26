@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Elementalist.Features.Card;
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using MediatR;
@@ -37,7 +36,7 @@ public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository) :
 
             if (priceResponse.IsValid())
             {
-                if (priceResponse.Value.Count() == 0)
+                if (!priceResponse.Value.Any())
                 {
                     await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
                     return;
@@ -61,8 +60,6 @@ public class PriceUiSlashCommand(IMediator mediator) : ApplicationCommandModule<
     [SlashCommand("price", "Shows the price of the specified card.")]
     public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
-        var cards = await _mediator.Send(new GetCardsQuery() { CardNameContains = cardName });
-
         var priceQuery = new Prices.CardPriceQuery(cardName);
         var priceResponse = await _mediator.Send(priceQuery);
 
@@ -72,7 +69,7 @@ public class PriceUiSlashCommand(IMediator mediator) : ApplicationCommandModule<
         }
 
         var embed = PriceUi.CardPriceEmbed(cardName, priceResponse.Value);
-        await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
+        await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed], Flags = ephemeral ? MessageFlags.Ephemeral : null }));
     }
 }
 
