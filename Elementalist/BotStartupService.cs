@@ -30,6 +30,7 @@ public class BotStartupService : BackgroundService
             AutocompleteInteractionData autoCompleteData => $"{autoCompleteData.Type}:{autoCompleteData.Name}",
             SlashCommandInteractionData slashCommandData => $"{slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
             ModalInteractionData modalData => $"{nameof(ModalInteraction)}:{modalData.CustomId}",
+            MessageCommandInteractionData messageData => $"{messageData.Type}:{messageData.Name}",
             _ => $"unknown interaction type {arg.Data.GetType().Name}"
         };
 

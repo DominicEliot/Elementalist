@@ -67,7 +67,8 @@ public class Program
                 .AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>()
                 .AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>()
                 //.AddComponentInteractions<ModalInteraction, ModalInteractionContext>()
-                .AddApplicationCommands();
+                .AddApplicationCommands()
+                .AddGatewayHandlers(typeof(Program).Assembly);
 
             builder.Services.AddMediatR(cfg =>
             {
@@ -78,7 +79,6 @@ public class Program
             var host = builder.Build();
 
             host.AddModules(typeof(Program).Assembly);
-            host.UseGatewayEventHandlers();
 
             await host.RunAsync();
         }
