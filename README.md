@@ -13,7 +13,8 @@ _Pro tip: you can also add the bot from the bot's discord profile icon_
 From there you can start using the bot. To discover the commands it accepts just type `/` in the chat, or open a direct message with the bot.
 A good starter command is `/card-by-name Elementalist`
 
-Warning: Due to discord's newish limitation on bot's ability to see chat messages this bot cannot see/respond to messages with something like `[[Card Name]]` directly in the message like magic's scryfall bot can. This might be added in the future if discord approves my application for viewing message content.
+Additionally you can use the right click/tap context menu, or include a user mention @Elementalist in any messages you want the bot to parse the text out of for card names. Card names are expected to be in a `(Card Name)` or `[Card Name]` format. This feature only works if the bot has been joined to the server your message is in.
+*Warning: Due to discord's newish limitation on bot's ability to see chat messages this bot cannot see/respond to messages with `[Card Name]` tags in the message unless you tag it or use a right click command.*
 
 ## Contributing
 Contributions are welcome, from fully coded features, to feature requests, and issues.
