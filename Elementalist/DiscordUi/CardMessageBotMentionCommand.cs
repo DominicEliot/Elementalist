@@ -43,7 +43,7 @@ public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtSer
         var cardsToShow = new List<Card>();
         foreach (Match match in CardNameInTextRegex().Matches(textToSearch))
         {
-            var cardName = match.Captures[1].Value;
+            var cardName = match.Groups[1].Value;
 
             var query = new GetCardsQuery() { CardNameContains = cardName };
             var cards = await _mediator.Send(query);

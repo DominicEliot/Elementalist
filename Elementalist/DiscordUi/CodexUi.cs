@@ -75,12 +75,12 @@ public static partial class CodexUiHelper
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Captures[1].Value, $"card:{cardMatch}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch}"));
         }
 
         foreach (Match codexMatch in CodexMentionsRegex().Matches(singleEntry.Content))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Captures[1].Value, $"codex:{codexMatch}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch}"));
         }
 
         if (stringMenu.Any())
