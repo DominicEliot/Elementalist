@@ -71,7 +71,7 @@ public static partial class CodexUiHelper
     private static List<IMessageComponentProperties> CreateCodexComponents(CodexEntry singleEntry)
     {
         var components = new List<IMessageComponentProperties>();
-        var stringMenu = new StringMenuProperties("referencesSelect");
+        var stringMenu = new StringMenuProperties("referenceSelect");
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content))
         {
