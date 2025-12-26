@@ -2,9 +2,8 @@
 using Xunit;
 using Elementalist.DiscordUi;
 using Elementalist.Features.Cards;
-using ElementalistTests.Features.Card;
 
-namespace Elementalist.Features.Card.Search.Tests;
+namespace ElementalistTests.Features.Card.Search;
 
 public class CardSearchQueryHandlerTests
 {
