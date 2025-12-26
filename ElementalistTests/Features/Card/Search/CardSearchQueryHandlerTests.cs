@@ -1,7 +1,8 @@
 ﻿using static Elementalist.DiscordUi.CardDisplay;
-using SorceryBotTests.Features.Card;
 using Xunit;
 using Elementalist.DiscordUi;
+using Elementalist.Features.Cards;
+using ElementalistTests.Features.Card;
 
 namespace Elementalist.Features.Card.Search.Tests;
 

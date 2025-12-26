@@ -25,7 +25,7 @@ public class BotActivityChangingService : BackgroundService
         return ValueTask.CompletedTask;
     }
 
-    private ValueTask _client_Disconnect(bool arg)
+    private ValueTask _client_Disconnect(DisconnectEventArgs arg)
     {
         _connected = false;
         _client.Connect += _client_Connect;

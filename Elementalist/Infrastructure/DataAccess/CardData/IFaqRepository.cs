@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration.Attributes;
-using ElementalistBot.Models;
+using Elementalist.Models;
 using HtmlAgilityPack;
 
 namespace Elementalist.Infrastructure.DataAccess.CardData;
