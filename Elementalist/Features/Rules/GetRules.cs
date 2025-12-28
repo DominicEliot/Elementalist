@@ -6,7 +6,7 @@ using MediatR;
 namespace Elementalist.Features.Rules;
 public record GetRulesQuery(string RuleName) : IQuery<IEnumerable<CodexEntry>>;
 
-public class GetRulesQueryHandler(CodexCsvRulesRepository rulesRepository) : IRequestHandler<GetRulesQuery, IEnumerable<CodexEntry>>
+public class GetRulesQueryHandler(IRulesRepository rulesRepository) : IRequestHandler<GetRulesQuery, IEnumerable<CodexEntry>>
 {
     public async Task<IEnumerable<CodexEntry>> Handle(GetRulesQuery request, CancellationToken cancellationToken)
     {
