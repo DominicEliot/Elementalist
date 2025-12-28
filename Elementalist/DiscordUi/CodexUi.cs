@@ -1,7 +1,10 @@
 ﻿using System.Data;
+using System.Text;
 using System.Text.RegularExpressions;
 using Elementalist.Models;
+using Elementalist.Shared;
 using ElementalistBot.Infrastructure.DataAccess.Rules;
+using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
@@ -66,7 +69,16 @@ public static partial class CodexUiHelper
 
         foreach (var subCodex in rule.Subcodexes)
         {
-            codexEmbed.AddFields(new EmbedFieldProperties().WithName(subCodex.Title).WithValue(subCodex.Content));
+            var continued = string.Empty;
+            foreach (var fieldContentChunk in subCodex.Content.ChunkStringOnWords(1024)) //discord's max field length
+            {
+                codexEmbed.AddFields(new EmbedFieldProperties()
+                    .WithName(subCodex.Title + continued)
+                    .WithValue(new string(fieldContentChunk))
+                );
+
+                continued = " - continued";
+            }
         }
 
         return codexEmbed;
