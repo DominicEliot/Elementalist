@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using CsvHelper;
 using Elementalist.Models;
 
@@ -27,7 +28,7 @@ public class CodexCsvRulesRepository : IRulesRepository
             var rule = csvRules[i];
             if (!string.IsNullOrEmpty(rule.title))
             {
-                var codex = new CodexEntry() { Content = rule.content, Title = rule.title };
+                var codex = new CodexEntry() { Content = Regex.Replace(rule.content,"(?<!\")\n", ""), Title = rule.title };
 
                 var j = 1;
                 while (csvRules.Count > i + j + 1 && string.IsNullOrEmpty(csvRules[i + j].title)) //in the csv subcodexes have empty titles and use the subcodex field for all their data

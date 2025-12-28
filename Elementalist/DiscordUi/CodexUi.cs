@@ -58,7 +58,11 @@ public static partial class CodexUiHelper
 
     private static EmbedProperties CreateCodexRuleEmbed(CodexEntry rule)
     {
-        var codexEmbed = new EmbedProperties().WithTitle($"{rule.Title} Codex/Rules").WithDescription(rule.Content);
+        var codexEmbed = new EmbedProperties()
+            .WithTitle($"{rule.Title} Codex/Rules")
+            .WithDescription(rule.Content
+                .Replace("[[", "**").Replace("]]", "**")
+                .Replace("((", "_").Replace("))", "_"));
 
         foreach (var subCodex in rule.Subcodexes)
         {
@@ -73,14 +77,14 @@ public static partial class CodexUiHelper
         var components = new List<IMessageComponentProperties>();
         var stringMenu = new StringMenuProperties("referenceSelect");
 
-        foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content))
+        foreach (Match cardMatch in CardMentionsRegex().Matches(singleEntry.Content).DistinctBy(m => m.Groups[1].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch.Groups[1].Value}"));
         }
 
-        foreach (Match codexMatch in CodexMentionsRegex().Matches(singleEntry.Content))
+        foreach (Match codexMatch in CodexMentionsRegex().Matches(singleEntry.Content).DistinctBy(m => m.Groups[1].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch.Groups[1].Value}"));
         }
 
         if (stringMenu.Any())
@@ -91,9 +95,9 @@ public static partial class CodexUiHelper
         return components;
     }
 
-    [GeneratedRegex(@"\(\((.*)\)\)")]
+    [GeneratedRegex(@"\[\[(.*?)\]\]")]
     private static partial Regex CardMentionsRegex();
 
-    [GeneratedRegex(@"\[\[(.*)\]\]")]
+    [GeneratedRegex(@"\(\((.*?)\)\)")]
     private static partial Regex CodexMentionsRegex();
 }
