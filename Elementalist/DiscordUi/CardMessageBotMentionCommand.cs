@@ -5,31 +5,34 @@ using Elementalist.Models;
 using MediatR;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
+using NetCord.Rest;
 
 namespace ElementalistBot.DiscordUi;
 
-public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtService cardArtService) : IMessageCreateGatewayHandler
+public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtService cardArtService, ILogger<CardMessageBotMentionCommand> logger) : IMessageCreateGatewayHandler
 {
     private readonly IMediator _mediator = mediator;
     private readonly CardArtService _cardArtService = cardArtService;
+    private readonly ILogger<CardMessageBotMentionCommand> _logger = logger;
 
     /// <summary>
     /// This is the message event handler so that we can respond when people @ the bot with cards in the message.
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public async ValueTask HandleAsync(Message message)
     {
+        _logger.LogInformation("Parsing for cards from a tagged mention message: {message}", message);
         var cardsToShow = await FindCardsInText(message.Content);
         if (!cardsToShow.Any())
-        {            
+        {
+            _logger.LogWarning("No cards found in text '{message}'", message);
             return;
         }
 
         var responseMessage = CardDisplay.CardInfoMessage(cardsToShow, _cardArtService);
 
-        await message.ReplyAsync(new()
+        await message.ReplyAsync(new ReplyMessageProperties
         {
             Components = responseMessage.Components,
             Content = responseMessage.Content,
