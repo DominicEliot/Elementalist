@@ -9,6 +9,26 @@ namespace ElementalistBot.Infrastructure.DataAccess.Rules;
 public class CodexCsvRulesRepository : IRulesRepository
 {
     private IEnumerable<CodexEntry> _rules = [];
+    private IEnumerable<string> _keywords = [];
+
+    public async Task<IEnumerable<string>> GetKeywords()
+    {
+        if (_keywords.Any())
+        {
+            return _keywords;
+        }
+
+        if (!_rules.Any())
+        {
+            await GetRules();
+        }
+
+        var keywords = new List<string>(_rules.Select(r => r.Title));
+        keywords.AddRange(_rules.SelectMany(r => r.Subcodexes.Select(s => s.Title)));
+
+        _keywords = keywords;
+        return _keywords;
+    }
 
     public async Task<IEnumerable<CodexEntry>> GetRules()
     {
@@ -58,4 +78,6 @@ public class CodexCsvRulesRepository : IRulesRepository
 public interface IRulesRepository
 {
     Task<IEnumerable<CodexEntry>> GetRules();
+
+    Task<IEnumerable<string>> GetKeywords();
 }
