@@ -95,7 +95,7 @@ public static partial class CodexUiHelper
 
     private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
     {
-        var regex = @$"\b{string.Join("|", keywords.Where(word => word != rule.Title || rule.Subcodexes.Any(s => word == s.Title)))}\b";
+        var regex = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title || rule.Subcodexes.Any(s => word == s.Title)))})\b";
         var contentHighlighted = Regex.Replace(rule.Content, regex, "_$1_", RegexOptions.IgnoreCase);
 
         Serilog.Log.Debug("Generated highlighted content for {rule}: {content}", rule.Title, contentHighlighted);
