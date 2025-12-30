@@ -34,7 +34,7 @@ public class ReferenceSelect(IRulesRepository rulesRepository, ICardRepository c
 
     private async Task respondWithCard(string cardName)
     {
-        var card = (await _cardRepository.GetCardsMatching(c => c.Name == cardName)).SingleOrDefault();
+        var card = (await _cardRepository.GetCardsMatching(c => c.Name == cardName)).FirstOrDefault();
 
         if (card is null)
         {
@@ -48,7 +48,7 @@ public class ReferenceSelect(IRulesRepository rulesRepository, ICardRepository c
 
     private async Task respondWithCodex(string codexName)
     {
-        var codex = (await _rulesRepository.GetRules()).SingleOrDefault(c => c.Title == codexName || c.Subcodexes.Any(s => s.Title == codexName));
+        var codex = (await _rulesRepository.GetRules()).FirstOrDefault(c => c.Title == codexName || c.Subcodexes.Any(s => s.Title == codexName));
 
         if (codex is null)
         {

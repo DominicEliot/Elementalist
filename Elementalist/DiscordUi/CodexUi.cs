@@ -40,9 +40,9 @@ public static partial class CodexUiHelper
         }
 
         var keywords = await faqRepository.GetKeywords();
-        var singleEntry = matchingRules.SingleOrDefault();
-        if (singleEntry is not null)
+        if (matchingRules.Count() == 1)
         {
+            var singleEntry = matchingRules.First();
             var codexProperties = CreateCodexDiscordEntities(singleEntry, keywords);
 
             message.Embeds = [codexProperties.Item1];

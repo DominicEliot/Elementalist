@@ -22,7 +22,12 @@ public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtSer
     /// <returns></returns>
     public async ValueTask HandleAsync(Message message)
     {
-        _logger.LogInformation("Parsing for cards from a tagged mention message: {message}", message);
+        if (message.Author.IsBot)
+        {
+            return;
+        }
+
+        _logger.LogInformation("Parsing for cards from a tagged mention message: {message}", message.Content);
         var cardsToShow = await FindCardsInText(message.Content);
         if (!cardsToShow.Any())
         {

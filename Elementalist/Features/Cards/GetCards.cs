@@ -49,9 +49,9 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
         {
             var splitValues = request.CardNameContains.Replace(",", "").Replace(".", "").Split(['-', ' ']);
 
-            var exactMatch = cards.SingleOrDefault(c => c.Name.Equals(request.CardNameContains, StringComparison.OrdinalIgnoreCase));
+            var exactMatch = cards.Where(c => c.Name.Equals(request.CardNameContains, StringComparison.OrdinalIgnoreCase));
 
-            cards = (exactMatch is not null) ? [exactMatch] : cards.Where(c => splitValues.All(s => c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)));
+            cards = (exactMatch.Count() == 1) ? exactMatch : cards.Where(c => splitValues.All(s => c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (request.ElementsContain != null)
