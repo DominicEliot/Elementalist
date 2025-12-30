@@ -95,8 +95,19 @@ public static partial class CodexUiHelper
 
     private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
     {
-        var regex = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title || rule.Subcodexes.Any(s => word == s.Title)))})\b";
-        var contentHighlighted = Regex.Replace(rule.Content, regex, "_$1_", RegexOptions.IgnoreCase);
+        var contentHighlighted = rule.Content;
+        var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
+        var regex = new Regex(regexString, RegexOptions.IgnoreCase);
+
+        var nextMatch = regex.Match(contentHighlighted); //todo: use matches with a control loop for performance?
+        while (nextMatch.Success)
+        {
+            contentHighlighted = regex.Replace(contentHighlighted, "_$1_", 1);
+
+            regexString = regexString.Replace(nextMatch.Groups[1].Value + "|", "");
+            regex = new Regex(regexString, RegexOptions.IgnoreCase);
+            nextMatch = regex.Match(contentHighlighted);
+        }
 
         Serilog.Log.Debug("Generated highlighted content for {rule}: {content}", rule.Title, contentHighlighted);
 
@@ -114,12 +125,12 @@ public static partial class CodexUiHelper
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch.Groups[2].Value}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[2].Value, $"card:{cardMatch.Groups[2].Value}"));
         }
 
         foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch.Groups[2].Value}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[2].Value, $"codex:{codexMatch.Groups[2].Value}"));
         }
 
         if (stringMenu.Any())
