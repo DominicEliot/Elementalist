@@ -141,10 +141,10 @@ public static partial class CodexUiHelper
         return components;
     }
 
-    [GeneratedRegex(@"([[*]{2})([^()[\]*@$%^&_+={}|/<>]*?)[\]*]{2}")]
+    [GeneratedRegex(@"([[*]{2})([^()[\]*@$%^&_+={}|\/<>]*?)[\]*]{2}")]
     private static partial Regex CardMentionsRegex();
 
-    [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|/<>]*?)(\)\)|_)")]
+    [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|\/<>]*?)(\)\)|_)")]
     private static partial Regex CodexMentionsRegex();
 
 }
