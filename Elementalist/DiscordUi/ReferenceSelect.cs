@@ -48,7 +48,7 @@ public class ReferenceSelect(IRulesRepository rulesRepository, ICardRepository c
 
     private async Task respondWithCodex(string codexName)
     {
-        var codex = (await _rulesRepository.GetRules()).FirstOrDefault(c => c.Title == codexName || c.Subcodexes.Any(s => s.Title == codexName));
+        var codex = (await _rulesRepository.GetRules()).FirstOrDefault(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) || c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
 
         if (codex is null)
         {
