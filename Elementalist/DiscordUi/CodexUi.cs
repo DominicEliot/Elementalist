@@ -46,7 +46,7 @@ public static partial class CodexUiHelper
             var codexProperties = CreateCodexDiscordEntities(singleEntry, keywords);
 
             message.Embeds = [codexProperties.Item1];
-            message.WithComponents(codexProperties.Item2);
+            message.WithComponents(codexProperties.Item2.Take(25));
             return message;
         }
 
@@ -95,8 +95,10 @@ public static partial class CodexUiHelper
 
     private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
     {
-        var regex = @$"\b{string.Join("|", keywords)}\b";
+        var regex = @$"\b{string.Join("|", keywords.Where(word => word != rule.Title || rule.Subcodexes.Any(s => word == s.Title)))}\b";
         var contentHighlighted = Regex.Replace(rule.Content, regex, "_$1_", RegexOptions.IgnoreCase);
+
+        Serilog.Log.Debug("Generated highlighted content for {rule}: {content}", rule.Title, contentHighlighted);
 
         contentHighlighted = contentHighlighted
             .Replace("[[", "**").Replace("]]", "**")
@@ -110,14 +112,14 @@ public static partial class CodexUiHelper
         var components = new List<IMessageComponentProperties>();
         var stringMenu = new StringMenuProperties("referenceSelect");
 
-        foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[1].Value))
+        foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch.Groups[1].Value}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardMatch.Groups[1].Value, $"card:{cardMatch.Groups[2].Value}"));
         }
 
-        foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[1].Value))
+        foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
-            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch.Groups[1].Value}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(codexMatch.Groups[1].Value, $"codex:{codexMatch.Groups[2].Value}"));
         }
 
         if (stringMenu.Any())
@@ -128,9 +130,10 @@ public static partial class CodexUiHelper
         return components;
     }
 
-    [GeneratedRegex(@"[[*]{2}(.*?)[\]*]{2}")]
+    [GeneratedRegex(@"([[*]{2})([^()[\]*@$%^&_+={}|/<>]*?)[\]*]{2}")]
     private static partial Regex CardMentionsRegex();
 
-    [GeneratedRegex(@"(?<=\(\(|_)(.*?)(\)\)|_)")]
+    [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|/<>]*?)(\)\)|_)")]
     private static partial Regex CodexMentionsRegex();
+
 }
