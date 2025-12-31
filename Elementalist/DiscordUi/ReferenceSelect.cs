@@ -1,17 +1,14 @@
-﻿using System.Text.Json;
-using Elementalist.DiscordUi.Rules;
+﻿using Elementalist.DiscordUi.Rules;
 using Elementalist.Infrastructure.DataAccess.CardData;
-using Elementalist.Models;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class ReferenceSelect(IRulesRepository rulesRepository, ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<StringMenuInteractionContext>
+public class ReferenceSelect(ICodexMessageService codexService, ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<StringMenuInteractionContext>
 {
-    private readonly IRulesRepository _rulesRepository = rulesRepository;
+    private readonly ICodexMessageService _codexService = codexService;
     private readonly ICardRepository _cardRepository = cardRepository;
 
     [ComponentInteraction("referenceSelect")]
@@ -43,20 +40,20 @@ public class ReferenceSelect(IRulesRepository rulesRepository, ICardRepository c
         }
 
         var cardDisplay = CardDisplay.CardInfoMessage([card], cardArtService).WithFlags(MessageFlags.Ephemeral);
+
+        var isOriginalEphemeral = Context.Message.Flags == MessageFlags.Ephemeral;
+        cardDisplay.Flags &= isOriginalEphemeral ? MessageFlags.Ephemeral : 0;
+
         await RespondAsync(InteractionCallback.Message(cardDisplay));
     }
 
     private async Task respondWithCodex(string codexName)
     {
-        var codex = (await _rulesRepository.GetRules()).FirstOrDefault(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) || c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
+        var codexMessage = await _codexService.CreateCodexMessageAsync(codexName);
 
-        if (codex is null)
-        {
-            await RespondAsync(InteractionCallback.Message(new() { Content = $"Unknown codex/rule {codexName}", Flags = MessageFlags.Ephemeral }));
-            return;
-        }
+        var isOriginalEphemeral = Context.Message.Flags == MessageFlags.Ephemeral;
+        codexMessage.Flags &= isOriginalEphemeral ? MessageFlags.Ephemeral : 0;
 
-        var codexMessage = await CodexUiHelper.CreateCodexMessage(codexName, _rulesRepository, privateMessage: true);
         await RespondAsync(InteractionCallback.Message(codexMessage));
     }
 }

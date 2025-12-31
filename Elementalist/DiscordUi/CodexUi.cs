@@ -1,87 +1,76 @@
 ﻿using System.Data;
-using System.Text;
 using System.Text.RegularExpressions;
+using Elementalist.Infrastructure.DataAccess.Rules;
 using Elementalist.Models;
 using Elementalist.Shared;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi.Rules;
 
-public class CodexSlashCommand(IRulesRepository faqRepository) : ApplicationCommandModule<ApplicationCommandContext>
+public class CodexSlashCommand(ICodexMessageService codexMessageService) : ApplicationCommandModule<ApplicationCommandContext>
 {
-    private readonly IRulesRepository _faqRepository = faqRepository;
-
     [SlashCommand("codex", "Shows any Rules/Codex entries for the provided input.")]
     public async Task CodexSearchByTitle([SlashCommandParameter(AutocompleteProviderType = typeof(RulesAutoCompleteHandler))] string codexName, bool privateMessage = false)
     {
-        var message = await CodexUiHelper.CreateCodexMessage(codexName, _faqRepository, privateMessage);
+        var message = await codexMessageService.CreateCodexMessageAsync(codexName);
+
+        if (privateMessage)
+        {
+            message.Flags = MessageFlags.Ephemeral & message.Flags ?? 0;
+        }
 
         await RespondAsync(InteractionCallback.Message(message));
     }
 }
 
-public static partial class CodexUiHelper
+public partial class CodexMessageService(IRulesRepository codexRepository) : ICodexMessageService
 {
-    internal static async Task<InteractionMessageProperties> CreateCodexMessage(string ruleToCreate, IRulesRepository faqRepository, bool privateMessage = false)
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName)
     {
-        var message = new InteractionMessageProperties();
-        if (privateMessage) message.Flags = MessageFlags.Ephemeral;
+        var codex = (await codexRepository.GetRules())
+            .Where(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) || c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
 
-        var codex = await faqRepository.GetRules();
-        var matchingRules = codex.Where(r => r.Title.Contains(ruleToCreate, StringComparison.OrdinalIgnoreCase) || r.Subcodexes.Any(s => s.Title.Contains(ruleToCreate, StringComparison.OrdinalIgnoreCase)));
-        if (!matchingRules.Any())
+        if (codex.Count() == 1)
         {
-            message.Content = $"No Rules/Codex entries found for {ruleToCreate}";
-            message.Flags = MessageFlags.Ephemeral;
-            return message;
+            return await CreateCodexMessageAsync(codex.First());
         }
 
-        var keywords = await faqRepository.GetKeywords();
-        if (matchingRules.Count() == 1)
+        if (!codex.Any())
         {
-            var singleEntry = matchingRules.First();
-            var codexProperties = CreateCodexDiscordEntities(singleEntry, keywords);
-
-            message.Embeds = [codexProperties.Item1];
-            message.WithComponents(codexProperties.Item2.Take(25));
-            return message;
+            return new CodexDiscordMessage()
+            {
+                Flags = MessageFlags.Ephemeral,
+                Content = $"Couldn't find any codex entries with name '{codexName}'"
+            };
         }
 
-        var embeds = new List<EmbedProperties>();
-        foreach (var rule in matchingRules)
+        return new CodexDiscordMessage()
         {
-            var codexEmbed = CreateCodexDiscordEntities(rule, keywords);
-
-            embeds.Add(codexEmbed.Item1);
-        }
-        message.Embeds = embeds;
-        return message;
+            Flags = MessageFlags.Ephemeral,
+            Content = $"Too many results: {string.Join(", ", codex.Select(c => c.Title))}"
+        };
     }
 
-    private static Tuple<EmbedProperties, IEnumerable<IMessageComponentProperties>> CreateCodexDiscordEntities(CodexEntry rule, IEnumerable<string> keywords)
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex)
     {
-        var contentHighlighted = GetDiscordDescription(rule, keywords);
+        var keywords = await codexRepository.GetKeywords();
 
-        var codexEmbed = new EmbedProperties()
-            .WithTitle($"{rule.Title} Codex/Rules")
+        var contentHighlighted = GetDiscordDescription(codex, keywords);
+
+        var embed = new CodexEmbed()
+            .WithTitle($"{codex.Title} Codex/Rules")
             .WithDescription(contentHighlighted);
 
-        var components = new List<IMessageComponentProperties>();
-        components.AddRange(CreateCodexComponents(contentHighlighted));
-
-        foreach (var subCodex in rule.Subcodexes)
+        foreach (var subCodex in codex.Subcodexes)
         {
             var continued = string.Empty;
             var content = GetDiscordDescription(subCodex, keywords);
 
-            components.AddRange(CreateCodexComponents(content));
-
             foreach (var fieldContentChunk in content.ChunkStringOnWords(1024)) //1024 is discord's max field length
             {
-                codexEmbed.AddFields(new EmbedFieldProperties()
+                embed.AddFields(new EmbedFieldProperties()
                     .WithName(subCodex.Title + continued)
                     .WithValue(fieldContentChunk)
                 );
@@ -90,38 +79,19 @@ public static partial class CodexUiHelper
             }
         }
 
-        return new(codexEmbed, components.OfType<StringMenuProperties>().DistinctBy(c => c.CustomId));
-    }
+        var component = CreateCodexComponents(codex);
 
-    private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
-    {
-        var contentHighlighted = rule.Content;
-        var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
-        var regex = new Regex(regexString, RegexOptions.IgnoreCase);
-
-        var nextMatch = regex.Match(contentHighlighted); //todo: use matches with a control loop for performance?
-        while (nextMatch.Success)
+        return new CodexDiscordMessage()
         {
-            contentHighlighted = regex.Replace(contentHighlighted, "_$1_", 1);
-
-            regexString = regexString.Replace(nextMatch.Groups[1].Value + "|", "");
-            regex = new Regex(regexString, RegexOptions.IgnoreCase);
-            nextMatch = regex.Match(contentHighlighted);
-        }
-
-        Serilog.Log.Debug("Generated highlighted content for {rule}: {content}", rule.Title, contentHighlighted);
-
-        contentHighlighted = contentHighlighted
-            .Replace("[[", "**").Replace("]]", "**")
-            .Replace("((", "_").Replace("))", "_");
-
-        return contentHighlighted;
+            Embeds = [embed],
+            Components = component is not null ? [component] : null,
+        };
     }
 
-    private static List<IMessageComponentProperties> CreateCodexComponents(string content)
+    private static CodexSelectComponent? CreateCodexComponents(CodexEntry codex)
     {
-        var components = new List<IMessageComponentProperties>();
-        var stringMenu = new StringMenuProperties("referenceSelect");
+        var stringMenu = new CodexSelectComponent();
+        var content = codex.Content;
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
@@ -135,12 +105,26 @@ public static partial class CodexUiHelper
             stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}"));
         }
 
-        if (stringMenu.Any())
+        foreach (var subcodex in codex.Subcodexes)
         {
-            components.Add(stringMenu);
+            var components = CreateCodexComponents(subcodex);
+            if (components == null)
+            {
+                continue;
+            }
+
+            foreach (var component in components.Where(c => !stringMenu.Any(m => m.Label == c.Label)))
+            {
+                stringMenu.Add(component);
+            }
         }
 
-        return components;
+        if (stringMenu.Any())
+        {
+            return stringMenu;
+        }
+
+        return null;
     }
 
     [GeneratedRegex(@"([[*]{2})([^()[\]*@$%^&_+={}|\/<>]*?)[\]*]{2}")]
@@ -149,4 +133,52 @@ public static partial class CodexUiHelper
     [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|\/<>]*?)(\)\)|_)")]
     private static partial Regex CodexMentionsRegex();
 
+    private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
+    {
+        var contentHighlighted = rule.Content;
+        var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
+        var regex = new Regex(regexString, RegexOptions.IgnoreCase);
+
+        var nextMatch = regex.Match(contentHighlighted); //todo: use matches with a control loop for performance?
+        while (nextMatch.Success)
+        {
+            contentHighlighted = regex.Replace(contentHighlighted, "_$1_", 1);
+
+            //Todo: this doesn't remove the first or last entry, so all of the occurrences of them will be highlighted.
+            regexString = regexString.Replace("|" + nextMatch.Groups[1].Value + "|", "|", StringComparison.OrdinalIgnoreCase);
+
+            regex = new Regex(regexString, RegexOptions.IgnoreCase);
+            nextMatch = regex.Match(contentHighlighted);
+        }
+
+        contentHighlighted = contentHighlighted
+            .Replace("[[", "**").Replace("]]", "**")
+            .Replace("((", "_").Replace("))", "_");
+
+        return contentHighlighted;
+    }
+}
+
+public interface ICodexMessageService
+{
+    Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName);
+    Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex);
+}
+
+public class CodexDiscordMessage : InteractionMessageProperties
+{
+
+}
+
+public class CodexEmbed : EmbedProperties
+{
+
+}
+
+public class CodexSelectComponent : StringMenuProperties
+{
+    public CodexSelectComponent() : base("referenceSelect")
+    {
+        
+    }
 }

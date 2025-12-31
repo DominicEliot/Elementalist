@@ -23,4 +23,9 @@ public record CodexEntry
     public required string Content { get; init; }
 
     public List<CodexEntry> Subcodexes { get; init; } = [];
+
+    //public IEnumerable<CodexEntry> GetMentionedCodexes(IEnumerable<string> keywords)
+    //{
+
+    //}
 }

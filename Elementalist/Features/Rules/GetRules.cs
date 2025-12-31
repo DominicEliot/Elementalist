@@ -1,6 +1,6 @@
-﻿using Elementalist.Models;
+﻿using Elementalist.Infrastructure.DataAccess.Rules;
+using Elementalist.Models;
 using Elementalist.Shared;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
 using MediatR;
 
 namespace Elementalist.Features.Rules;

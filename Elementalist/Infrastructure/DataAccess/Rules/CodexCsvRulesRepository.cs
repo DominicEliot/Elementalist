@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using CsvHelper;
 using Elementalist.Models;
 
-namespace ElementalistBot.Infrastructure.DataAccess.Rules;
+namespace Elementalist.Infrastructure.DataAccess.Rules;
 
 public class CodexCsvRulesRepository : IRulesRepository
 {

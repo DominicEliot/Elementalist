@@ -1,8 +1,9 @@
 using Elementalist.DiscordUi;
+using Elementalist.DiscordUi.Rules;
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
+using Elementalist.Infrastructure.DataAccess.Rules;
 using Elementalist.Infrastructure.Logging;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
@@ -49,6 +50,7 @@ public class Program
             builder.Services.AddSingleton<IFaqRepository, CsvFaqRepository>();
             builder.Services.AddSingleton<CardArtService>();
             builder.Services.AddSingleton<IRulesRepository, CodexCsvRulesRepository>();
+            builder.Services.AddSingleton<ICodexMessageService, CodexMessageService>();
 
             builder.Services
                 .AddDiscordGateway(options =>
