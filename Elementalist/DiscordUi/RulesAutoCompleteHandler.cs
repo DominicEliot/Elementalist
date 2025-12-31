@@ -1,5 +1,5 @@
 ﻿using Elementalist.Infrastructure.DataAccess.CardData;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
+using Elementalist.Infrastructure.DataAccess.Rules;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
