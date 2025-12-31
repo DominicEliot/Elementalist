@@ -34,19 +34,16 @@ public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository) :
             var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, variant.Finish);
             var priceResponse = await _mediator.Send(priceQuery);
 
-            if (priceResponse.IsValid())
+            if (!priceResponse.Any())
             {
-                if (!priceResponse.Value.Any())
-                {
-                    await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
-                    return;
-                }
-
-                var embed = PriceUi.CardPriceEmbed(cardName, priceResponse.Value);
-
-                await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
+                await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
                 return;
             }
+
+            var embed = PriceUi.CardPriceEmbed(cardName, priceResponse);
+
+            await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
+            return;
         }
 
         await RespondAsync(InteractionCallback.Message(new() { Content = $"Couldn't find a price for {cardName}", Flags = MessageFlags.Ephemeral }));
@@ -63,12 +60,12 @@ public class PriceUiSlashCommand(IMediator mediator) : ApplicationCommandModule<
         var priceQuery = new Prices.CardPriceQuery(cardName);
         var priceResponse = await _mediator.Send(priceQuery);
 
-        if (priceResponse.IsError())
+        if (!priceResponse.Any())
         {
             await RespondAsync(InteractionCallback.Message(new() { Content = $"Couldn't find prices for card {cardName}", Flags = MessageFlags.Ephemeral }));
         }
 
-        var embed = PriceUi.CardPriceEmbed(cardName, priceResponse.Value);
+        var embed = PriceUi.CardPriceEmbed(cardName, priceResponse);
         await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed], Flags = ephemeral ? MessageFlags.Ephemeral : null }));
     }
 }

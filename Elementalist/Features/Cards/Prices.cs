@@ -10,13 +10,13 @@ namespace Elementalist.Features.Cards;
 
 public static class Prices
 {
-    public record CardPriceQuery(string CardName, string? Set = null, string? CardFinish = null) : IQuery<Result<IEnumerable<PriceData>>>;
+    public record CardPriceQuery(string CardName, string? Set = null, string? CardFinish = null) : IQuery<IEnumerable<PriceData>>;
 
-    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, Result<IEnumerable<PriceData>>>
+    public class CardPriceHandler(TcgPlayerDataProvider priceProvider) : IRequestHandler<CardPriceQuery, IEnumerable<PriceData>>
     {
         private readonly TcgPlayerDataProvider _priceProvider = priceProvider;
 
-        public async Task<Result<IEnumerable<PriceData>>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PriceData>> Handle(CardPriceQuery request, CancellationToken cancellationToken)
         {
             var prices = await _priceProvider.GetPriceData(request.CardName, request.Set, request.CardFinish);
 
@@ -31,7 +31,7 @@ public static class Prices
         private readonly HttpClient _httpClient = httpClient;
         private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
-        public async Task<Result<IEnumerable<PriceData>>> GetPriceData(string cardName, string? set, string? cardFinish)
+        public async Task<IEnumerable<PriceData>> GetPriceData(string cardName, string? set, string? cardFinish)
         {
             var cts = new CancellationTokenSource();
             var tcgPlayerCardData = (await GetTcgPlayerCards(cts.Token)).Where(c => c.ProductName.Contains(cardName)) ?? [];
@@ -55,7 +55,7 @@ public static class Prices
                 priceData.Add(data);
             }
 
-            return new Result<IEnumerable<PriceData>>(priceData);
+            return priceData;
         }
 
         public async Task<List<TcgPlayerSetResult>> GetSetsIdsAsync()
