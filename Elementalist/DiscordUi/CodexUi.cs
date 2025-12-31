@@ -88,6 +88,9 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         };
     }
 
+    private static EmojiProperties cardEmoji = EmojiProperties.Standard("🃏");
+    private static EmojiProperties codexEmoji = EmojiProperties.Standard("📖");
+
     private async Task<CodexSelectComponent?> CreateCodexComponents(CodexEntry codex)
     {
         var stringMenu = new CodexSelectComponent();
@@ -96,7 +99,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
             var cardName = cardMatch.Groups[2].Value;
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardName, $"card:{cardName}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardName, $"card:{cardName}").WithEmoji(cardEmoji));
         }
 
         foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
@@ -106,7 +109,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
             {
                 continue;
             }
-            stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}"));
+            stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}").WithEmoji(codexEmoji));
         }
 
         foreach (var subcodex in codex.Subcodexes)
