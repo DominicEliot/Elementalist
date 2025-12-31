@@ -26,7 +26,7 @@ public class BotStartupService : BackgroundService
         string data = arg.Data switch
         {
             ButtonInteractionData b => $"{b.ComponentType}:{b.CustomId}",
-            StringMenuInteractionData stringMenu => $"{stringMenu.ComponentType}:{stringMenu.CustomId}",
+            StringMenuInteractionData stringMenu => $"{stringMenu.ComponentType}:{stringMenu.CustomId} => {string.Join(",", stringMenu.SelectedValues)}",
             AutocompleteInteractionData autoCompleteData => $"{autoCompleteData.Type}:{autoCompleteData.Name}",
             SlashCommandInteractionData slashCommandData => $"{slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
             ModalInteractionData modalData => $"{nameof(ModalInteraction)}:{modalData.CustomId}",
