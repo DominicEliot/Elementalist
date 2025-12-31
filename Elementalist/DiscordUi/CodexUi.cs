@@ -102,6 +102,10 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
             var ruleName = codexMatch.Groups[2].Value;
+            if (string.IsNullOrEmpty(ruleName))
+            {
+                continue;
+            }
             stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}"));
         }
 
@@ -140,16 +144,12 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
         var regex = new Regex(regexString, RegexOptions.IgnoreCase);
 
-        var nextMatch = regex.Match(contentHighlighted); //todo: use matches with a control loop for performance?
-        while (nextMatch.Success)
+        var regexMatches = regex.Matches(contentHighlighted);
+
+        foreach(var keyword in regexMatches.Select(r => r.Value).Distinct())
         {
-            contentHighlighted = regex.Replace(contentHighlighted, "_$1_", 1);
-
-            //Todo: this doesn't remove the first or last entry, so all of the occurrences of them will be highlighted.
-            regexString = regexString.Replace("|" + nextMatch.Groups[1].Value + "|", "|", StringComparison.OrdinalIgnoreCase);
-
-            regex = new Regex(regexString, RegexOptions.IgnoreCase);
-            nextMatch = regex.Match(contentHighlighted);
+            var replacementRegex = new Regex(@$"\b({keyword})\b", RegexOptions.IgnoreCase);
+            contentHighlighted = replacementRegex.Replace(contentHighlighted, "_$1_", 1);
         }
 
         contentHighlighted = contentHighlighted

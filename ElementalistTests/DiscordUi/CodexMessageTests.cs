@@ -58,4 +58,18 @@ public class CodexMessageTests
         Assert.NotNull(minionMenuItem);
         Assert.NotNull(silenceMenuItem);
     }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task CreateCodexMessageLowercaseTest()
+    {
+        var codexRepo = new CodexCsvRulesRepository();
+        var codexMessageService = new CodexMessageService(codexRepo);
+
+        var message = await codexMessageService.CreateCodexMessageAsync("minion");
+        var selectOptions = message.Components?.FirstOrDefault() as CodexSelectComponent;
+
+        Assert.NotNull(selectOptions);
+        Assert.DoesNotContain(selectOptions, o => string.IsNullOrEmpty(o.Label));
+    }
 }
