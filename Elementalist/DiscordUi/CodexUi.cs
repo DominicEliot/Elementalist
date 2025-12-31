@@ -149,7 +149,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
 
         var regexMatches = regex.Matches(contentHighlighted);
 
-        foreach(var keyword in regexMatches.Select(r => r.Value).Distinct())
+        foreach(var keyword in regexMatches.Select(r => r.Value).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var replacementRegex = new Regex(@$"\b({keyword})\b", RegexOptions.IgnoreCase);
             contentHighlighted = replacementRegex.Replace(contentHighlighted, "_$1_", 1);
