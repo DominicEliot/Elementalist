@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ElementalistBot.Infrastructure.DataAccess.Rules;
+﻿using Elementalist.Infrastructure.DataAccess.Rules;
 using Xunit;
 
 namespace ElementalistTests.Features.Rules;
