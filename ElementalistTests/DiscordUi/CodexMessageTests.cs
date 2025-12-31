@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Elementalist.DiscordUi.Rules;
 using Elementalist.Infrastructure.DataAccess.Rules;
+using NetCord.Rest;
 using Xunit;
 
 namespace ElementalistTests.DiscordUi;
@@ -39,5 +40,22 @@ public class CodexMessageTests
 
         Assert.NotNull(carriedField?.Value);
         Assert.Contains("_carriable artifact_", carriedField.Value);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task CreateCodexMessageComponentTest()
+    {
+        var codexRepo = new CodexCsvRulesRepository();
+        var codexMessageService = new CodexMessageService(codexRepo);
+
+        var message = await codexMessageService.CreateCodexMessageAsync("Disabled");
+
+        var selectMenu = message?.Components?.FirstOrDefault() as CodexSelectComponent;
+        var minionMenuItem = selectMenu?.FirstOrDefault(item => item.Value == "codex:minion");
+        var silenceMenuItem = selectMenu?.FirstOrDefault(item => item.Value == "card:Silence");
+
+        Assert.NotNull(minionMenuItem);
+        Assert.NotNull(silenceMenuItem);
     }
 }

@@ -57,7 +57,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
     {
         var keywords = await codexRepository.GetKeywords();
 
-        var contentHighlighted = GetDiscordDescription(codex, keywords);
+        var contentHighlighted = await GetDiscordDescription(codex);
 
         var embed = new CodexEmbed()
             .WithTitle($"{codex.Title} Codex/Rules")
@@ -66,7 +66,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         foreach (var subCodex in codex.Subcodexes)
         {
             var continued = string.Empty;
-            var content = GetDiscordDescription(subCodex, keywords);
+            var content = await GetDiscordDescription(subCodex);
 
             foreach (var fieldContentChunk in content.ChunkStringOnWords(1024)) //1024 is discord's max field length
             {
@@ -79,7 +79,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
             }
         }
 
-        var component = CreateCodexComponents(codex);
+        var component = await CreateCodexComponents(codex);
 
         return new CodexDiscordMessage()
         {
@@ -88,10 +88,10 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         };
     }
 
-    private static CodexSelectComponent? CreateCodexComponents(CodexEntry codex)
+    private async Task<CodexSelectComponent?> CreateCodexComponents(CodexEntry codex)
     {
         var stringMenu = new CodexSelectComponent();
-        var content = codex.Content;
+        var content = await GetDiscordDescription(codex);
 
         foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
@@ -107,7 +107,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
 
         foreach (var subcodex in codex.Subcodexes)
         {
-            var components = CreateCodexComponents(subcodex);
+            var components = await CreateCodexComponents(subcodex);
             if (components == null)
             {
                 continue;
@@ -133,8 +133,9 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
     [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|\/<>]*?)(\)\)|_)")]
     private static partial Regex CodexMentionsRegex();
 
-    private static string GetDiscordDescription(CodexEntry rule, IEnumerable<string> keywords)
+    private async Task<string> GetDiscordDescription(CodexEntry rule)
     {
+        var keywords = await codexRepository.GetKeywords();
         var contentHighlighted = rule.Content;
         var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
         var regex = new Regex(regexString, RegexOptions.IgnoreCase);
