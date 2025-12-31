@@ -41,8 +41,7 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
 
         var cardDisplay = CardDisplay.CardInfoMessage([card], cardArtService).WithFlags(MessageFlags.Ephemeral);
 
-        var isOriginalEphemeral = Context.Message.Flags == MessageFlags.Ephemeral;
-        cardDisplay.Flags &= isOriginalEphemeral ? MessageFlags.Ephemeral : 0;
+        cardDisplay.Flags = (cardDisplay.Flags ?? 0) | MessageFlags.Ephemeral;
 
         await RespondAsync(InteractionCallback.Message(cardDisplay));
     }
@@ -51,8 +50,7 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
     {
         var codexMessage = await _codexService.CreateCodexMessageAsync(codexName);
 
-        var isOriginalEphemeral = Context.Message.Flags == MessageFlags.Ephemeral;
-        codexMessage.Flags &= isOriginalEphemeral ? MessageFlags.Ephemeral : 0;
+        codexMessage.Flags = (codexMessage.Flags ?? 0) | MessageFlags.Ephemeral;
 
         await RespondAsync(InteractionCallback.Message(codexMessage));
     }
