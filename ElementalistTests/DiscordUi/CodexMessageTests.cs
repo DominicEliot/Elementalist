@@ -72,4 +72,19 @@ public class CodexMessageTests
         Assert.NotNull(selectOptions);
         Assert.DoesNotContain(selectOptions, o => string.IsNullOrEmpty(o.Label));
     }
+
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task CreateCodexMaxedOutSelectTest()
+    {
+        var codexRepo = new CodexCsvRulesRepository();
+        var codexMessageService = new CodexMessageService(codexRepo);
+
+        var message = await codexMessageService.CreateCodexMessageAsync("Casting Spells");
+        var selectOptions = message.Components?.FirstOrDefault() as CodexSelectComponent;
+
+        Assert.NotNull(selectOptions);
+        Assert.Equal(25, selectOptions.Count());
+    }
 }

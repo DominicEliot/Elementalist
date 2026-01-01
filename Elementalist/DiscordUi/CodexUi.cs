@@ -109,6 +109,10 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
             {
                 continue;
             }
+            if (stringMenu.Count() >= 25)
+            {
+                break;
+            }
             stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}").WithEmoji(codexEmoji));
         }
 
@@ -122,6 +126,10 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
 
             foreach (var component in components.Where(c => !stringMenu.Any(m => m.Label == c.Label)))
             {
+                if (stringMenu.Count() >= 25)
+                {
+                    break;
+                }
                 stringMenu.Add(component);
             }
         }
