@@ -1,5 +1,4 @@
-﻿using static Elementalist.DiscordUi.CardDisplay;
-using Xunit;
+﻿using Xunit;
 using Elementalist.DiscordUi;
 using Elementalist.Features.Cards;
 
