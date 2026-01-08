@@ -20,7 +20,10 @@ public class CardAutoCompleteHandler(ICardRepository cardRepository) : IAutocomp
 
         var searchParams = value.Split(' ', '-', '&');
 
-        var suggestions = await _cardRepository.GetCardsMatching(c => searchParams.Any(sp => c.Name.Contains(sp, StringComparison.OrdinalIgnoreCase)));
-        return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Name, c.Name));
+        var suggestions = (await _cardRepository.GetCardsMatching(c => c.Name.StartsWith(value.Trim(), StringComparison.OrdinalIgnoreCase))).ToList();
+        suggestions.AddRange(await _cardRepository.GetCardsMatching(c => c.Name.Contains(value.Trim(), StringComparison.OrdinalIgnoreCase)));
+
+        suggestions.AddRange(await _cardRepository.GetCardsMatching(c => searchParams.Any(sp => sp.Trim().Length > 2 && c.Name.Contains(sp, StringComparison.OrdinalIgnoreCase))));
+        return suggestions.Distinct().Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Name, c.Name));
     }
 }
