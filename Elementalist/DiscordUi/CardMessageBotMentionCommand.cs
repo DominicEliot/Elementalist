@@ -9,11 +9,15 @@ using NetCord.Rest;
 
 namespace ElementalistBot.DiscordUi;
 
-public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtService cardArtService, ILogger<CardMessageBotMentionCommand> logger) : IMessageCreateGatewayHandler
+public partial class CardMessageBotMentionCommand(IMediator mediator,
+                                                  ILogger<CardMessageBotMentionCommand> logger,
+                                                  CardDisplayService cardDisplayService,
+                                                  GatewayClient client) : IMessageCreateGatewayHandler
 {
     private readonly IMediator _mediator = mediator;
-    private readonly CardArtService _cardArtService = cardArtService;
     private readonly ILogger<CardMessageBotMentionCommand> _logger = logger;
+    private readonly CardDisplayService _cardDisplayService = cardDisplayService;
+    private readonly GatewayClient _client = client;
 
     /// <summary>
     /// This is the message event handler so that we can respond when people @ the bot with cards in the message.
@@ -22,7 +26,7 @@ public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtSer
     /// <returns></returns>
     public async ValueTask HandleAsync(Message message)
     {
-        if (message.Author.IsBot)
+        if (message.Author.Id == _client.Id || message.Author.IsBot || message.Author.IsSystemUser == true)
         {
             return;
         }
@@ -35,7 +39,7 @@ public partial class CardMessageBotMentionCommand(IMediator mediator, CardArtSer
             return;
         }
 
-        var responseMessage = CardDisplay.CardInfoMessage(cardsToShow, _cardArtService);
+        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow);
 
         await message.ReplyAsync(new ReplyMessageProperties
         {

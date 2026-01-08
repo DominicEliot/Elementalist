@@ -4,14 +4,17 @@ using Elementalist.Infrastructure.Config;
 using Elementalist.Models;
 using MediatR;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi;
 
-public static class CardDisplay
+public class CardDisplayService(IFeatureManager featureManager, CardArtService cardArtService)
 {
-    public static InteractionMessageProperties CardInfoMessage(IEnumerable<Card> cards, CardArtService cardArtService, SetVariant? variant = null)
+    private readonly IFeatureManager _featureManager = featureManager;
+
+    public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
     {
         var message = new InteractionMessageProperties();
         var embeds = new List<EmbedProperties>();
@@ -23,13 +26,13 @@ public static class CardDisplay
 
         if (cards.Count() == 1)
         {
-            message.Components = CardComponentBuilder(cards.First(), variant);
+            message.Components = await CardComponentBuilder(cards.First(), variant);
         }
 
         return message;
     }
 
-    internal static List<IMessageComponentProperties> CardComponentBuilder(Card card, SetVariant? variant = null)
+    internal async Task<List<IMessageComponentProperties>> CardComponentBuilder(Card card, SetVariant? variant = null)
     {
         var components = new List<IMessageComponentProperties>();
         var buttonRow = new ActionRowProperties();
@@ -40,8 +43,13 @@ public static class CardDisplay
         }
 
         buttonRow.AddComponents(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
-                           new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary),
-                           new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
+                           new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary));
+
+        if (await _featureManager.IsEnabledAsync("prices"))
+        {
+            buttonRow.AddComponents(new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
+        }
+
         components.Add(buttonRow);
 
         return components;
@@ -70,10 +78,13 @@ public static class CardDisplay
     }
 }
 
-public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> config, CardArtService cardArtService) : ApplicationCommandModule<ApplicationCommandContext>
+public class CardSearchSlashCommand(IMediator mediator,
+                                    IOptions<BotConfig> config,
+                                    CardDisplayService cardDisplayService) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly BotConfig _config = config.Value;
     private readonly IMediator _mediator = mediator;
+    private readonly CardDisplayService _cardDisplayService = cardDisplayService;
 
     [SlashCommand("name", "Searches for and returns any matching sorcery cards")]
     public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
@@ -118,7 +129,7 @@ public class CardSearchSlashCommand(IMediator mediator, IOptions<BotConfig> conf
             return;
         }
 
-        message = CardDisplay.CardInfoMessage(cards, cardArtService);
+        message = await _cardDisplayService.CardInfoMessage(cards);
         if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))
@@ -227,7 +238,7 @@ public static class CardLookups
         var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
 
         Set? foundSet = null;
-        Variant? foundVariant = null;
+        Models.Variant? foundVariant = null;
 
         foreach (var set in sets)
         {

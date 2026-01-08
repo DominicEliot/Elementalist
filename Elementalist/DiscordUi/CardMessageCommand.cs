@@ -14,10 +14,10 @@ using NetCord.Services.Commands;
 
 namespace ElementalistBot.DiscordUi;
 
-public partial class CardMessageCommand(IMediator mediator, CardArtService cardArtService) : ApplicationCommandModule<ApplicationCommandContext>
+public partial class CardMessageCommand(IMediator mediator, CardDisplayService cardDisplayService) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly IMediator _mediator = mediator;
-    private readonly CardArtService _cardArtService = cardArtService;
+    private readonly CardDisplayService _cardDisplayService = cardDisplayService;
 
     [MessageCommand("show-card-info")]
     public async Task ShowCardsFromMessageCommand(RestMessage message)
@@ -29,7 +29,7 @@ public partial class CardMessageCommand(IMediator mediator, CardArtService cardA
             return; 
         }
 
-        var responseMessage = CardDisplay.CardInfoMessage(cardsToShow, _cardArtService);
+        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow);
 
         await RespondAsync(InteractionCallback.Message(responseMessage));
     }

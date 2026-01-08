@@ -4,6 +4,7 @@ using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using Elementalist.Infrastructure.DataAccess.Rules;
 using Elementalist.Infrastructure.Logging;
+using Microsoft.FeatureManagement;
 using NetCord;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
@@ -26,6 +27,8 @@ public class Program
         {
             var builder = Host.CreateApplicationBuilder(args);
             builder.Configuration.AddEnvironmentVariables();
+            builder.Services.AddFeatureManagement();
+
             builder.Services.Configure<TcgPlayerSettings>(builder.Configuration.GetRequiredSection("TcgPlayer"));
             builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
             builder.Services.Configure<CardImageOptions>(builder.Configuration.GetRequiredSection("CardImageOptions"));
@@ -49,6 +52,7 @@ public class Program
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
             builder.Services.AddSingleton<IFaqRepository, CsvFaqRepository>();
             builder.Services.AddSingleton<CardArtService>();
+            builder.Services.AddSingleton<CardDisplayService>();
             builder.Services.AddSingleton<IRulesRepository, CodexCsvRulesRepository>();
             builder.Services.AddSingleton<ICodexMessageService, CodexMessageService>();
 

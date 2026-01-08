@@ -6,10 +6,11 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class ReferenceSelect(ICodexMessageService codexService, ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<StringMenuInteractionContext>
+public class ReferenceSelect(ICodexMessageService codexService, ICardRepository cardRepository, CardDisplayService cardDisplayService) : ComponentInteractionModule<StringMenuInteractionContext>
 {
     private readonly ICodexMessageService _codexService = codexService;
     private readonly ICardRepository _cardRepository = cardRepository;
+    private readonly CardDisplayService _cardDisplayService = cardDisplayService;
 
     [ComponentInteraction("referenceSelect")]
     public async Task SelectReference()
@@ -39,7 +40,7 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
             return;
         }
 
-        var cardDisplay = CardDisplay.CardInfoMessage([card], cardArtService).WithFlags(MessageFlags.Ephemeral);
+        var cardDisplay = await _cardDisplayService.CardInfoMessage([card]);
 
         cardDisplay.Flags = (cardDisplay.Flags ?? 0) | MessageFlags.Ephemeral;
 

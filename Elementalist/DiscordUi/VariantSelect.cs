@@ -7,9 +7,10 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class VariantSelect(ICardRepository cardRepository, CardArtService cardArtService) : ComponentInteractionModule<StringMenuInteractionContext>
+public class VariantSelect(ICardRepository cardRepository, CardDisplayService cardDisplayService) : ComponentInteractionModule<StringMenuInteractionContext>
 {
     private readonly ICardRepository _cardRepository = cardRepository;
+    private readonly CardDisplayService _cardDisplayService = cardDisplayService;
 
     [ComponentInteraction("variantSelect")]
     public async Task SelectVariant()
@@ -27,7 +28,7 @@ public class VariantSelect(ICardRepository cardRepository, CardArtService cardAr
         var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
-        var message = CardDisplay.CardInfoMessage([card], cardArtService, setVariant);
+        var message = await _cardDisplayService.CardInfoMessage([card], setVariant);
 
         var callback = InteractionCallback.ModifyMessage(m =>
         {

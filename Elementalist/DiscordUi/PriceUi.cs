@@ -2,6 +2,7 @@
 using Elementalist.Features.Cards;
 using Elementalist.Infrastructure.DataAccess.CardData;
 using MediatR;
+using Microsoft.FeatureManagement;
 using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
@@ -50,13 +51,20 @@ public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository) :
     }
 }
 
-public class PriceUiSlashCommand(IMediator mediator) : ApplicationCommandModule<ApplicationCommandContext>
+public class PriceUiSlashCommand(IMediator mediator, IFeatureManager featureManager) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly IMediator _mediator = mediator;
+    private readonly IFeatureManager _featureManager = featureManager;
 
     [SlashCommand("price", "Shows the price of the specified card.")]
     public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
+        if (await _featureManager.IsEnabledAsync("prices") == false)
+        {
+            //todo: can we delete the slash command from the bot here?
+            await RespondAsync(InteractionCallback.Message(new() { Content = $"The price feature is disabled on this bot", Flags = MessageFlags.Ephemeral }));
+        }
+
         var priceQuery = new Prices.CardPriceQuery(cardName);
         var priceResponse = await _mediator.Send(priceQuery);
 
