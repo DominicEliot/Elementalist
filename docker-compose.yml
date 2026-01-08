@@ -1,0 +1,12 @@
+services:
+  elementalist:
+    image: 2masgllrpxbruv/elementalist-bot:latest
+
+    container_name: elementalist
+    environment:
+      DISCORD__TOKEN: ABCD-UnquotedDiscordBotTokenGoesHere-ABCD
+      CardImageOptions__UrlFormat: https://dominiceliot.github.io/sorcery-image-gallery/media/original/{0}.png
+      Serilog__MinimumLevel: Information
+      feature_management__feature_flags__0__id: prices
+      feature_management__feature_flags__0__enabled: true
+    restart: unless-stopped
