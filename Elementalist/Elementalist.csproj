@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
-    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="4.4.0" />
+    <PackageReference Include="Microsoft.FeatureManagement" Version="4.4.0" />
     <PackageReference Include="NetCord.Hosting.Services" Version="1.0.0-alpha.452" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
