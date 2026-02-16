@@ -21,4 +21,10 @@
     <ProjectReference Include="..\Elementalist\Elementalist.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Infrastructure\DataAccess\Rules\markdown\*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

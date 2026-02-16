@@ -25,12 +25,12 @@ public class BotStartupService : BackgroundService
     {
         string data = arg.Data switch
         {
-            ButtonInteractionData b => $"{b.ComponentType}:{b.CustomId}",
-            StringMenuInteractionData stringMenu => $"{stringMenu.ComponentType}:{stringMenu.CustomId} => {string.Join(",", stringMenu.SelectedValues)}",
-            AutocompleteInteractionData autoCompleteData => $"{autoCompleteData.Type}:{autoCompleteData.Name}",
-            SlashCommandInteractionData slashCommandData => $"{slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
-            ModalInteractionData modalData => $"{nameof(ModalInteraction)}:{modalData.CustomId}",
-            MessageCommandInteractionData messageData => $"{messageData.Type}:{messageData.Name}",
+            ButtonInteractionData b => $"button => {b.ComponentType}:{b.CustomId}",
+            StringMenuInteractionData stringMenu => $"stringMenu => {stringMenu.ComponentType}:{stringMenu.CustomId} => {string.Join(",", stringMenu.SelectedValues)}",
+            AutocompleteInteractionData autoCompleteData => $"autoComplete => {autoCompleteData.Type}:{autoCompleteData.Name}",
+            SlashCommandInteractionData slashCommandData => $"slashCommand => {slashCommandData.Type}:{slashCommandData.Name} {JsonSerializer.Serialize(slashCommandData.Options)}",
+            ModalInteractionData modalData => $"modalInteraction => {nameof(ModalInteraction)}:{modalData.CustomId}",
+            MessageCommandInteractionData messageData => $"messageCommand => {messageData.Type}:{messageData.Name}",
             _ => $"unknown interaction type {arg.Data.GetType().Name}"
         };
 

@@ -9,7 +9,7 @@ public class GetRules
     public async Task LoadCodexEntriesAsync()
     {
         var repo = new CodexCsvRulesRepository();
-        var rules = await repo.GetRules();
+        var rules = await repo.GetRules(CancellationToken.None);
 
         Assert.NotEmpty(rules);
     }
