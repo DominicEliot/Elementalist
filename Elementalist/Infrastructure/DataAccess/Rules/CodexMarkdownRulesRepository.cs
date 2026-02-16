@@ -1,44 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Elementalist.Models;
 
 namespace Elementalist.Infrastructure.DataAccess.Rules;
 
-internal partial class CodexMarkdownRulesRepository : IRulesRepository
+public partial class CodexMarkdownRulesRepository : IRulesRepository
 {
-    public Task<IEnumerable<string>> GetKeywords()
+    private IEnumerable<CodexEntry> _rules = [];
+    private IEnumerable<string> _keywords = [];
+
+    public async Task<IEnumerable<string>> GetKeywords(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (_keywords.Any())
+        {
+            return _keywords;
+        }
+
+        if (!_rules.Any())
+        {
+            await GetRules(cancellationToken);
+        }
+
+        var keywords = new List<string>(_rules.Select(r => r.Title));
+        keywords.AddRange(_rules.SelectMany(r => r.Subcodexes.Select(s => s.Title)));
+
+        _keywords = keywords;
+        return _keywords;
     }
 
-    public async Task<IEnumerable<CodexEntry>> GetRules()
+    public async Task<IEnumerable<CodexEntry>> GetRules(CancellationToken cancellationToken)
     {
-        var markDown = await File.ReadAllTextAsync("Full Codex.md");
-        var markdownDirectory = new DirectoryInfo("");
-        foreach(var file in markdownDirectory.EnumerateFiles(""))
+        if (_rules.Any())
         {
-
+            return _rules;
         }
 
-        var splits = LineStartsWithH1Regex().Split(markDown);
-
+        var markdownDirectory = new DirectoryInfo(Path.Combine(nameof(Infrastructure), nameof(DataAccess), nameof(Rules), "markdown"));
         var codex = new List<CodexEntry>();
-        foreach (var singleMarkdown in splits)
+
+        foreach(var file in markdownDirectory.EnumerateFiles("*.md"))
         {
-            if (string.IsNullOrWhiteSpace(singleMarkdown))
+            var content = await File.ReadAllTextAsync(file.FullName, cancellationToken);
+            var codexUrlMatch = Regex.Match(content, @"\[Codex Entry\]\((.*?)\)");
+
+            string? codexUrl = null;
+            if (codexUrlMatch.Success)
             {
-                continue;
+                codexUrl = codexUrlMatch.Groups[1].Value;
+                content = content.Remove(codexUrlMatch.Index, codexUrlMatch.Length);
             }
 
-            var title = GroupedCodexContentRegex().Match(singleMarkdown);
-            var entry = new CodexEntry { Content = singleMarkdown, Title = };
+            var subCodex = new List<CodexEntry>();
+            var textToRemove = new List<Tuple<int, int>>();
+            foreach (Match match in SubcodexRegex().Matches(content))
+            {
+                subCodex.Add(new CodexEntry
+                {
+                    Content =  match.Groups[3].Value.Trim(),
+                    Title = match.Groups[2].Value.Trim(),
+                    Subcodexes = [],
+                    Url = codexUrl
+                });
+
+                textToRemove.Add(new Tuple<int, int>(match.Index, match.Length));
+            }
+
+            foreach (var position in textToRemove.OrderByDescending(t => t.Item1))
+            {
+                content = content.Remove(position.Item1, position.Item2);
+            }
+
+            var title = file.Name.Replace(".md", "");
+            codex.Add(new CodexEntry()
+            {
+                Content = content.Replace($"# {title}", "").Trim(),
+                Title =  file.Name.Replace(".md", ""),
+                Subcodexes = subCodex,
+                Url = codexUrl
+            });
         }
+
+        _rules = codex;
+        return _rules;
     }
 
     [GeneratedRegex(@"^(?=# )")]
     private static partial Regex LineStartsWithH1Regex();
+
     [GeneratedRegex(@"^# (.*)\n(.*)")]
     private static partial Regex GroupedCodexContentRegex();
+
+    [GeneratedRegex(@"##((.*)\n([^#]*))")]
+    private static partial Regex SubcodexRegex();
 }

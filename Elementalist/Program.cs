@@ -53,7 +53,8 @@ public class Program
             builder.Services.AddSingleton<IFaqRepository, CsvFaqRepository>();
             builder.Services.AddSingleton<CardArtService>();
             builder.Services.AddSingleton<CardDisplayService>();
-            builder.Services.AddSingleton<IRulesRepository, CodexCsvRulesRepository>();
+            builder.Services.AddSingleton<IRulesRepository, CodexMarkdownRulesRepository>();
+            builder.Services.AddSingleton<PlainTextCodexMessageService>();
             builder.Services.AddSingleton<ICodexMessageService, CodexMessageService>();
 
             builder.Services

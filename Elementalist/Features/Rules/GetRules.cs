@@ -10,7 +10,7 @@ public class GetRulesQueryHandler(IRulesRepository rulesRepository) : IRequestHa
 {
     public async Task<IEnumerable<CodexEntry>> Handle(GetRulesQuery request, CancellationToken cancellationToken)
     {
-        return (await rulesRepository.GetRules())
+        return (await rulesRepository.GetRules(cancellationToken))
             .Where(r => r.Title.Equals(request.RuleName, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -9,12 +9,26 @@ using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi.Rules;
 
-public class CodexSlashCommand(ICodexMessageService codexMessageService) : ApplicationCommandModule<ApplicationCommandContext>
+public class CodexSlashCommand(ICodexMessageService codexMessageService, PlainTextCodexMessageService textCodexMessageService)
+    : ApplicationCommandModule<ApplicationCommandContext>
 {
     [SlashCommand("codex", "Shows any Rules/Codex entries for the provided input.")]
-    public async Task CodexSearchByTitle([SlashCommandParameter(AutocompleteProviderType = typeof(RulesAutoCompleteHandler))] string codexName, bool privateMessage = false)
+    public async Task CodexSearchByTitle(
+        [SlashCommandParameter(AutocompleteProviderType = typeof(RulesAutoCompleteHandler))]
+        string codexName,
+        bool privateMessage = false)
     {
-        var message = await codexMessageService.CreateCodexMessageAsync(codexName);
+        var service = codexMessageService;
+
+        if (Context.Channel is IInteractionChannel interactionChannel)
+        {
+            var allowedToPostEmbeds = (interactionChannel.Permissions & Permissions.EmbedLinks) != 0;
+            if (!allowedToPostEmbeds)
+            {
+                service = textCodexMessageService;
+            }
+        }
+        var message = await service.CreateCodexMessageAsync(codexName, CancellationToken.None);
 
         if (privateMessage)
         {
@@ -25,24 +39,24 @@ public class CodexSlashCommand(ICodexMessageService codexMessageService) : Appli
     }
 }
 
-public partial class CodexMessageService(IRulesRepository codexRepository) : ICodexMessageService
+public class PlainTextCodexMessageService(IRulesRepository codexRepository) : ICodexMessageService
 {
-    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName)
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName, CancellationToken cancellationToken)
     {
-        var codex = (await codexRepository.GetRules())
-            .Where(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) || c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
+        var codex = (await codexRepository.GetRules(cancellationToken))
+            .Where(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) ||
+                        c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
 
         if (codex.Count() == 1)
         {
-            return await CreateCodexMessageAsync(codex.First());
+            return await CreateCodexMessageAsync(codex.First(), cancellationToken);
         }
 
         if (!codex.Any())
         {
             return new CodexDiscordMessage()
             {
-                Flags = MessageFlags.Ephemeral,
-                Content = $"Couldn't find any codex entries with name '{codexName}'"
+                Flags = MessageFlags.Ephemeral, Content = $"Couldn't find any codex entries with name '{codexName}'"
             };
         }
 
@@ -53,20 +67,73 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         };
     }
 
-    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex)
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex, CancellationToken cancellationToken)
     {
-        var keywords = await codexRepository.GetKeywords();
+        var contentHighlighted = await CodexMessageService.GetDiscordDescription(codexRepository, codex, cancellationToken);
 
-        var contentHighlighted = await GetDiscordDescription(codex);
+        var message = $"# {codex.Title}\n{contentHighlighted}\n{codex.Url}";
+
+        if (message.Length > 2000)
+        {
+            var lengthToEnd = 1996 - codex.Url?.Length ?? 0;
+            message = $"{message[..lengthToEnd]}...\n{codex.Url}";
+        }
+
+        return new CodexDiscordMessage()
+        {
+            Content =  message
+        };
+    }
+}
+
+public partial class CodexMessageService(IRulesRepository codexRepository) : ICodexMessageService
+{
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName,
+        CancellationToken cancellationToken)
+    {
+        var codex = (await codexRepository.GetRules(cancellationToken))
+            .Where(c => c.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase) ||
+                        c.Subcodexes.Any(s => s.Title.Equals(codexName, StringComparison.OrdinalIgnoreCase)));
+
+        if (codex.Count() == 1)
+        {
+            return await CreateCodexMessageAsync(codex.First(), cancellationToken);
+        }
+
+        if (!codex.Any())
+        {
+            return new CodexDiscordMessage()
+            {
+                Flags = MessageFlags.Ephemeral, Content = $"Couldn't find any codex entries with name '{codexName}'"
+            };
+        }
+
+        return new CodexDiscordMessage()
+        {
+            Flags = MessageFlags.Ephemeral,
+            Content = $"Too many results: {string.Join(", ", codex.Select(c => c.Title))}"
+        };
+    }
+
+    public async Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex,
+        CancellationToken cancellationToken)
+    {
+        var contentHighlighted = await GetDiscordDescription(codexRepository, codex, cancellationToken);
+
+        if (contentHighlighted.Length > 2000)
+        {
+            contentHighlighted = contentHighlighted[..1996] + "...";
+        }
 
         var embed = new CodexEmbed()
-            .WithTitle($"{codex.Title} Codex/Rules")
+            .WithUrl(codex.Url)
+            .WithTitle(codex.Title + " - Codex")
             .WithDescription(contentHighlighted);
 
         foreach (var subCodex in codex.Subcodexes)
         {
             var continued = string.Empty;
-            var content = await GetDiscordDescription(subCodex);
+            var content = await GetDiscordDescription(codexRepository, subCodex, cancellationToken);
 
             foreach (var fieldContentChunk in content.ChunkStringOnWords(1024)) //1024 is discord's max field length
             {
@@ -79,7 +146,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
             }
         }
 
-        var component = await CreateCodexComponents(codex);
+        var component = await CreateCodexComponents(codex, cancellationToken);
 
         return new CodexDiscordMessage()
         {
@@ -91,34 +158,42 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
     private static EmojiProperties cardEmoji = EmojiProperties.Standard("🃏");
     private static EmojiProperties codexEmoji = EmojiProperties.Standard("📖");
 
-    private async Task<CodexSelectComponent?> CreateCodexComponents(CodexEntry codex)
+    private async Task<CodexSelectComponent?> CreateCodexComponents(CodexEntry codex,
+        CancellationToken cancellationToken)
     {
         var stringMenu = new CodexSelectComponent();
-        var content = await GetDiscordDescription(codex);
-
-        foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
-        {
-            var cardName = cardMatch.Groups[2].Value;
-            stringMenu.Add(new StringMenuSelectOptionProperties(cardName, $"card:{cardName}").WithEmoji(cardEmoji));
-        }
+        var content = await GetDiscordDescription(codexRepository, codex, cancellationToken);
 
         foreach (Match codexMatch in CodexMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
         {
             var ruleName = codexMatch.Groups[2].Value;
-            if (string.IsNullOrEmpty(ruleName))
+            if (string.IsNullOrWhiteSpace(ruleName))
             {
                 continue;
             }
+
             if (stringMenu.Count() >= 25)
             {
                 break;
             }
+
             stringMenu.Add(new StringMenuSelectOptionProperties(ruleName, $"codex:{ruleName}").WithEmoji(codexEmoji));
+        }
+
+        foreach (Match cardMatch in CardMentionsRegex().Matches(content).DistinctBy(m => m.Groups[2].Value))
+        {
+            if (stringMenu.Count() >= 25)
+            {
+                break;
+            }
+
+            var cardName = cardMatch.Groups[2].Value;
+            stringMenu.Add(new StringMenuSelectOptionProperties(cardName, $"card:{cardName}").WithEmoji(cardEmoji));
         }
 
         foreach (var subcodex in codex.Subcodexes)
         {
-            var components = await CreateCodexComponents(subcodex);
+            var components = await CreateCodexComponents(subcodex, cancellationToken);
             if (components == null)
             {
                 continue;
@@ -130,6 +205,7 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
                 {
                     break;
                 }
+
                 stringMenu.Add(component);
             }
         }
@@ -142,30 +218,39 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
         return null;
     }
 
-    [GeneratedRegex(@"([[*]{2})([^()[\]*@$%^&_+={}|\/<>]*?)[\]*]{2}")]
+    [GeneratedRegex(@"([[_]{2})([^()[\]*@$%^&_+={}|\/<>]*?)[\]_]{2}")]
     private static partial Regex CardMentionsRegex();
 
-    [GeneratedRegex(@"(\(\(|_)([^()[\]*@$%^&_+={}|\/<>]*?)(\)\)|_)")]
+    [GeneratedRegex(@"(\(\(|\*\*\*)([^()[\]*@$%^&_+={}|\/<>]*?)(\)\)|\*\*\*)")]
     private static partial Regex CodexMentionsRegex();
 
-    private async Task<string> GetDiscordDescription(CodexEntry rule)
+    public static async Task<string> GetDiscordDescription(IRulesRepository rulesRepository, CodexEntry rule,
+        CancellationToken cancellationToken)
     {
-        var keywords = await codexRepository.GetKeywords();
+        var keywords = await rulesRepository.GetKeywords(cancellationToken);
         var contentHighlighted = rule.Content;
-        var regexString = @$"\b({string.Join("|", keywords.Where(word => word != rule.Title))})\b";
+        var wordsToMatch = keywords.Where(word => !word.Equals(rule.Title, StringComparison.CurrentCultureIgnoreCase)
+                                                  && !word.Equals("you", StringComparison.CurrentCultureIgnoreCase));
+        var regexString = @$"\b({string.Join("|", wordsToMatch)})\b";
+
         var regex = new Regex(regexString, RegexOptions.IgnoreCase);
 
         var regexMatches = regex.Matches(contentHighlighted);
 
-        foreach(var keyword in regexMatches.Select(r => r.Value).Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            var replacementRegex = new Regex(@$"\b({keyword})\b", RegexOptions.IgnoreCase);
-            contentHighlighted = replacementRegex.Replace(contentHighlighted, "_$1_", 1);
-        }
-
         contentHighlighted = contentHighlighted
-            .Replace("[[", "**").Replace("]]", "**")
-            .Replace("((", "_").Replace("))", "_");
+            .Replace("[[", "__").Replace("]]", "__")
+            .Replace("((", "***").Replace("))", "***");
+
+        foreach (var keyword in regexMatches.Select(r => r.Value).Distinct(StringComparer.OrdinalIgnoreCase).OrderByDescending(k => k.Length))
+        {
+            if (keyword.Equals("Codex", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var replacementRegex = new Regex(@$"(?<!\*)\b({keyword})\b(?![,.]?\*)", RegexOptions.IgnoreCase);
+            contentHighlighted = replacementRegex.Replace(contentHighlighted, "***$1***", 1);
+        }
 
         return contentHighlighted;
     }
@@ -173,24 +258,21 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
 
 public interface ICodexMessageService
 {
-    Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName);
-    Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex);
+    Task<CodexDiscordMessage> CreateCodexMessageAsync(string codexName, CancellationToken cancellationToken);
+    Task<CodexDiscordMessage> CreateCodexMessageAsync(CodexEntry codex, CancellationToken cancellationToken);
 }
 
 public class CodexDiscordMessage : InteractionMessageProperties
 {
-
 }
 
 public class CodexEmbed : EmbedProperties
 {
-
 }
 
 public class CodexSelectComponent : StringMenuProperties
 {
     public CodexSelectComponent() : base("referenceSelect")
     {
-        
     }
 }
