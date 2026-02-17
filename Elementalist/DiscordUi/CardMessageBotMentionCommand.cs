@@ -39,7 +39,7 @@ public partial class CardMessageBotMentionCommand(IMediator mediator,
             return;
         }
 
-        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow);
+        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow, null, message.GuildId ?? 0);
 
         await message.ReplyAsync(new ReplyMessageProperties
         {

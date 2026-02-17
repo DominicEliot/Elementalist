@@ -40,7 +40,7 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
             return;
         }
 
-        var cardDisplay = await _cardDisplayService.CardInfoMessage([card]);
+        var cardDisplay = await _cardDisplayService.CardInfoMessage([card], null, Context.Guild?.Id ?? 0);
 
         cardDisplay.Flags = (cardDisplay.Flags ?? 0) | MessageFlags.Ephemeral;
 

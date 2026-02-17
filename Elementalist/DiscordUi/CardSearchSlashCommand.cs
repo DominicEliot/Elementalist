@@ -10,9 +10,9 @@ using NetCord.Services.ApplicationCommands;
 
 namespace Elementalist.DiscordUi;
 
-public class CardDisplayService(IFeatureManager featureManager, CardArtService cardArtService)
+public class CardDisplayService(PriceEnabledService priceEnabledService, CardArtService cardArtService)
 {
-    public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
+    public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant, ulong GuildId)
     {
         var message = new InteractionMessageProperties();
         var embeds = new List<EmbedProperties>();
@@ -24,13 +24,13 @@ public class CardDisplayService(IFeatureManager featureManager, CardArtService c
 
         if (cards.Count() == 1)
         {
-            message.Components = await CardComponentBuilder(cards.First(), variant);
+            message.Components = await CardComponentBuilder(cards.First(), variant, GuildId);
         }
 
         return message;
     }
 
-    internal async Task<List<IMessageComponentProperties>> CardComponentBuilder(Card card, SetVariant? variant = null)
+    internal async Task<List<IMessageComponentProperties>> CardComponentBuilder(Card card, SetVariant? variant, ulong guildId)
     {
         var components = new List<IMessageComponentProperties>();
         var buttonRow = new ActionRowProperties();
@@ -43,7 +43,7 @@ public class CardDisplayService(IFeatureManager featureManager, CardArtService c
         buttonRow.AddComponents(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
                            new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary));
 
-        if (await featureManager.IsEnabledAsync("prices"))
+        if (await priceEnabledService.IsPriceEnabledOnServer(guildId))
         {
             buttonRow.AddComponents(new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
         }
@@ -127,7 +127,7 @@ public class CardSearchSlashCommand(IMediator mediator,
             return;
         }
 
-        message = await _cardDisplayService.CardInfoMessage(cards);
+        message = await _cardDisplayService.CardInfoMessage(cards, null, Context.Guild?.Id ?? 0);
         if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))

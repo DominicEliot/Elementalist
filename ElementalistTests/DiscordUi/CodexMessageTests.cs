@@ -39,7 +39,7 @@ public class CodexMessageTests
 
         var message = await codexMessageService.CreateCodexMessageAsync("Element", CancellationToken.None);
 
-        var count = message?.Embeds?.First().Fields?.Select(f => f.Value).Count(s => s.Contains("dabbling")) ?? 0;
+        var count = message?.Embeds?.First().Fields?.Select(f => f.Value).Count(s => s?.Contains("dabbling") == true) ?? 0;
         count += message?.Embeds?.First().Description?.Contains("dabbling") == true ? 1 : 0;
 
         Assert.Equal(1, count);

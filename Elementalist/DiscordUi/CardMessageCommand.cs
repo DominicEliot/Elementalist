@@ -26,10 +26,10 @@ public partial class CardMessageCommand(IMediator mediator, CardDisplayService c
         if (!cardsToShow.Any())
         {
             await RespondAsync(InteractionCallback.Message(new() { Content = $"No cards found in text. Make sure they are either [bracketed] or in (parenthesis).", Flags = NetCord.MessageFlags.Ephemeral } ));
-            return; 
+            return;
         }
 
-        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow);
+        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow, null, Context.Guild?.Id ?? 0);
 
         await RespondAsync(InteractionCallback.Message(responseMessage));
     }

@@ -28,7 +28,7 @@ public class VariantSelect(ICardRepository cardRepository, CardDisplayService ca
         var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
         var setVariant = new SetVariant() { Set = set, Variant = variant };
 
-        var message = await _cardDisplayService.CardInfoMessage([card], setVariant);
+        var message = await _cardDisplayService.CardInfoMessage([card], setVariant, Context.Guild?.Id ?? 0);
 
         var callback = InteractionCallback.ModifyMessage(m =>
         {
