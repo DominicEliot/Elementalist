@@ -12,8 +12,6 @@ namespace Elementalist.DiscordUi;
 
 public class CardDisplayService(IFeatureManager featureManager, CardArtService cardArtService)
 {
-    private readonly IFeatureManager _featureManager = featureManager;
-
     public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant = null)
     {
         var message = new InteractionMessageProperties();
@@ -45,7 +43,7 @@ public class CardDisplayService(IFeatureManager featureManager, CardArtService c
         buttonRow.AddComponents(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
                            new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary));
 
-        if (await _featureManager.IsEnabledAsync("prices"))
+        if (await featureManager.IsEnabledAsync("prices"))
         {
             buttonRow.AddComponents(new ButtonProperties($"price:{card.Name}", "Price", NetCord.ButtonStyle.Primary));
         }

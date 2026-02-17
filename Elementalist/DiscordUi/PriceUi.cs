@@ -10,12 +10,14 @@ using NetCord.Services.ComponentInteractions;
 
 namespace Elementalist.DiscordUi;
 
-public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository) : ComponentInteractionModule<ButtonInteractionContext>
+public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository, IServiceProvider sp) : ComponentInteractionModule<ButtonInteractionContext>
 {
     private readonly IMediator _mediator = mediator;
     private readonly ICardRepository _cardRepository = cardRepository;
+    private readonly IServiceProvider _sp = sp;
 
     [ComponentInteraction("price")]
+    [CheckForDisabledPriceServer<ButtonInteractionContext>()]
     public async Task ShowPrice(string cardName)
     {
         var message = Context.Interaction.Message;
@@ -57,6 +59,7 @@ public class PriceUiSlashCommand(IMediator mediator, IFeatureManager featureMana
     private readonly IFeatureManager _featureManager = featureManager;
 
     [SlashCommand("price", "Shows the price of the specified card.")]
+    [CheckForDisabledPriceServer<ApplicationCommandContext>()]
     public async Task CardPriceByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
     {
         if (await _featureManager.IsEnabledAsync("prices") == false)

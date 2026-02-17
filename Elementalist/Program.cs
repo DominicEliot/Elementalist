@@ -11,6 +11,7 @@ using NetCord.Hosting.Gateway;
 using NetCord.Hosting.Services;
 using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Hosting.Services.ComponentInteractions;
+using NetCord.Services.ApplicationCommands;
 using NetCord.Services.ComponentInteractions;
 using Serilog;
 using static Elementalist.Features.Cards.Prices;
@@ -33,6 +34,7 @@ public class Program
             builder.Services.Configure<ActivityOptions>(builder.Configuration.GetRequiredSection("ActivityOptions"));
             builder.Services.Configure<CardImageOptions>(builder.Configuration.GetRequiredSection("CardImageOptions"));
             builder.Services.Configure<DataRefreshOptions>(builder.Configuration.GetRequiredSection("DataRefreshOptions"));
+            builder.Services.Configure<PerServerConfig>(builder.Configuration.GetRequiredSection("PerServerConfig"));
 
             builder.Services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(builder.Configuration)
@@ -55,6 +57,7 @@ public class Program
             builder.Services.AddSingleton<CardDisplayService>();
             builder.Services.AddSingleton<IRulesRepository, CodexCsvRulesRepository>();
             builder.Services.AddSingleton<ICodexMessageService, CodexMessageService>();
+            builder.Services.AddSingleton<PriceEnabledService>();
 
             builder.Services
                 .AddDiscordGateway(options =>
@@ -73,7 +76,9 @@ public class Program
                 .AddComponentInteractions<ButtonInteraction, ButtonInteractionContext>()
                 .AddComponentInteractions<StringMenuInteraction, StringMenuInteractionContext>()
                 //.AddComponentInteractions<ModalInteraction, ModalInteractionContext>()
-                .AddApplicationCommands()
+                .AddApplicationCommands(o =>
+                    o.ResultHandler = new ApplicationCommandResultHandler<ApplicationCommandContext>(MessageFlags.Ephemeral)
+                )
                 .AddGatewayHandlers(typeof(Program).Assembly);
 
             builder.Services.AddMediatR(cfg =>
