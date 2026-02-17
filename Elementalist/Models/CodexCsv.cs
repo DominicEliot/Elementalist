@@ -24,6 +24,8 @@ public record CodexEntry
 
     public List<CodexEntry> Subcodexes { get; init; } = [];
 
+    public string? Url { get; init; }
+
     //public IEnumerable<CodexEntry> GetMentionedCodexes(IEnumerable<string> keywords)
     //{
 

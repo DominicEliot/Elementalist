@@ -11,7 +11,7 @@ public class CodexCsvRulesRepository : IRulesRepository
     private IEnumerable<CodexEntry> _rules = [];
     private IEnumerable<string> _keywords = [];
 
-    public async Task<IEnumerable<string>> GetKeywords()
+    public async Task<IEnumerable<string>> GetKeywords(CancellationToken cancellationToken)
     {
         if (_keywords.Any())
         {
@@ -20,7 +20,7 @@ public class CodexCsvRulesRepository : IRulesRepository
 
         if (!_rules.Any())
         {
-            await GetRules();
+            await GetRules(cancellationToken);
         }
 
         var keywords = new List<string>(_rules.Select(r => r.Title));
@@ -30,7 +30,7 @@ public class CodexCsvRulesRepository : IRulesRepository
         return _keywords;
     }
 
-    public async Task<IEnumerable<CodexEntry>> GetRules()
+    public async Task<IEnumerable<CodexEntry>> GetRules(CancellationToken cancellationToken)
     {
         if (_rules.Any())
         {
@@ -77,7 +77,7 @@ public class CodexCsvRulesRepository : IRulesRepository
 
 public interface IRulesRepository
 {
-    Task<IEnumerable<CodexEntry>> GetRules();
+    Task<IEnumerable<CodexEntry>> GetRules(CancellationToken cancellationToken);
 
-    Task<IEnumerable<string>> GetKeywords();
+    Task<IEnumerable<string>> GetKeywords(CancellationToken cancellationToken);
 }

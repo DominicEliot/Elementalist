@@ -21,7 +21,7 @@ public class RulesAutoCompleteHandler(IRulesRepository rulesRepository) : IAutoc
 
         var searchParams = value.Split(' ', '-', '&');
 
-        var suggestions = (await _rulesRepository.GetRules()).Where(rule => searchParams.Any(sp => rule.Title.Contains(sp, StringComparison.OrdinalIgnoreCase)));
+        var suggestions = (await _rulesRepository.GetRules(CancellationToken.None)).Where(rule => searchParams.Any(sp => rule.Title.Contains(sp, StringComparison.OrdinalIgnoreCase)));
         return suggestions.Take(25).Select(c => new ApplicationCommandOptionChoiceProperties(c.Title, c.Title));
     }
 }

@@ -23,7 +23,7 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
 
         if (Context.SelectedValues[0].StartsWith("codex:"))
         {
-            await respondWithCodex(Context.SelectedValues[0].Replace("codex:", ""));
+            await respondWithCodex(Context.SelectedValues[0].Replace("codex:", ""), CancellationToken.None);
             return;
         }
 
@@ -47,9 +47,9 @@ public class ReferenceSelect(ICodexMessageService codexService, ICardRepository 
         await RespondAsync(InteractionCallback.Message(cardDisplay));
     }
 
-    private async Task respondWithCodex(string codexName)
+    private async Task respondWithCodex(string codexName, CancellationToken cancellationToken)
     {
-        var codexMessage = await _codexService.CreateCodexMessageAsync(codexName);
+        var codexMessage = await _codexService.CreateCodexMessageAsync(codexName, cancellationToken);
 
         codexMessage.Flags = (codexMessage.Flags ?? 0) | MessageFlags.Ephemeral;
 
