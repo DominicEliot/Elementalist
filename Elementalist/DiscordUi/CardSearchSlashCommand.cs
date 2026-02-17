@@ -127,7 +127,7 @@ public class CardSearchSlashCommand(IMediator mediator,
             return;
         }
 
-        message = await _cardDisplayService.CardInfoMessage(cards, null, Context.Guild?.Id ?? 0);
+        message = await _cardDisplayService.CardInfoMessage(cards, null, Context.GetGuildId() ?? 0);
         if (ephemeral) message.WithFlags(NetCord.MessageFlags.Ephemeral);
 
         if (cards.Count() > 1 || string.IsNullOrWhiteSpace(query.CardNameContains))

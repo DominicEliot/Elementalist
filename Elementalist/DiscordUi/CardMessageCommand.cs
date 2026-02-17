@@ -29,7 +29,7 @@ public partial class CardMessageCommand(IMediator mediator, CardDisplayService c
             return;
         }
 
-        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow, null, Context.Guild?.Id ?? 0);
+        var responseMessage = await _cardDisplayService.CardInfoMessage(cardsToShow, null, Context.GetGuildId() ?? 0);
 
         await RespondAsync(InteractionCallback.Message(responseMessage));
     }
