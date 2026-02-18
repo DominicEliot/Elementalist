@@ -1,3 +1,4 @@
+using Elementalist.DiscordUi;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using NetCord.Services;
@@ -9,7 +10,8 @@ public class CheckForDisabledPriceServer<TContext> : PreconditionAttribute<TCont
     public override async ValueTask<PreconditionResult> EnsureCanExecuteAsync(TContext context, IServiceProvider? serviceProvider)
     {
         var priceFeatureService = serviceProvider!.GetRequiredService<PriceEnabledService>();
-        if (!await priceFeatureService.IsPriceEnabledOnServer(context.Guild?.Id ?? 0))
+
+        if (!await priceFeatureService.IsPriceEnabledOnServer(context.GetGuildId() ?? 0))
         {
             return PreconditionResult.Fail("Prices are disabled on this server.");
         }
