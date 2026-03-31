@@ -1,5 +1,5 @@
 # Card
-When you are instructed to draw a **card**, you may choose to draw a spell from your spellbook or a site from your atlas. If you draw multiple cards at once (e.g. [[Pact with the Devil]]), choose how many of each you'll draw, then draw all of them simultaneously.
+Cards are the sites, spells, and avatars that are used to play a game of Sorcery. At the beginning of the game, all of your spell cards will be in your Spellbook, your site cards will be in your Atlas, and your collection will consist of cards you have selected to begin the game in that zone. The only card that begins in play is the Avatar you have selected to represent you during the game.
 
 If a game effect or rule references a **card** in the realm, it includes tokens as well.
 

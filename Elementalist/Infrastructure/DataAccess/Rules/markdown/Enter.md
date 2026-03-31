@@ -16,7 +16,7 @@ Further notes:
 - If a minion moves between levels of a site (e.g. surface to subsurface, or subsurface to surface), it does not enter the site, since it was already occupying the site. (It does enter the specific location of surface or subsurface.)
 - For oversized units, they only enter a location or site if they didn't previously occupy it. For example:
 
-_Click the title link to see the table_
+_See live codex for table_
 
 The [[Mountain Giant]] occupies the four left squares, and then takes a step to the east. It enters the two sites in the right column, but it does not enter the two sites in the middle column, since it already occupied those sites before the move. See the "((Oversized Units))" codex entry for more details.
 

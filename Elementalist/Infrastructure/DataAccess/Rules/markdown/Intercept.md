@@ -17,14 +17,14 @@ If multiple allied units intercept the same enemy, they all fight that enemy tog
 Only the enemy's final location is relevant for interception. See the examples below for more details.
 
 ## Intercept as a Deterrent
-_Click the title link to see the table_
+_See live codex for table_
 
 I have an [[Apprentice Wizard]] on site D. You have an untapped [[Bosk Troll]] on site C, and both [[Queen of Midland]] and [[Queen Guinevere]] on site B. I would love to cast my [[Poison Nova]] to kill all your minions, but I need to get my Apprentice Wizard to site C first. If I use the Move and Attack ability to move my Apprentice Wizard to site C and then attack, your Bosk Troll will be able to defend. If I move to site C but don't attack, your Bosk Troll will be able to intercept. Either way, my Apprentice Wizard would die before being able to cast the Poison Nova on site C.
 
 In the end, I will probably not choose to move to site C, and instead do something else. Intercept is a deterrent to certain basic movement, even if you don't actually use the intercept ability during a game.
 
 ## Intercept vs. Movement +X
-_Click the title link to see the table_
+_See live codex for table_
 
 You have [[Rimland Nomads]] on site D. I have an untapped [[Bosk Troll]] on site C. You tap your Nomads, using the Move and Attack ability. As the ability resolves, you declare the following movement path:
 
@@ -36,7 +36,7 @@ Rimland Nomads have Movement +1, so you resolve that movement normally and they'
 Even though your Rimland Nomads didn't attack, my Bosk Troll cannot intercept since it doesn't share the final location with your Rimland Nomads.
 
 ## The Final Location is Key
-_Click the title link to see the table_
+_See live codex for table_
 
 You have a Foot Soldier token on site C. I have an untapped [[Bosk Troll]] on site C as well. You tap your Foot Soldier, using the Move and Attack ability. As the ability resolves, you declare the following movement path:
 
@@ -54,7 +54,7 @@ Remember, the two things that are relevant for intercept are:
 At the moment they choose not to attack, that's the moment you can tap to intercept, at that location.
 
 ## Only "Move and Attack" can Trigger Intercept
-_Click the title link to see the table_
+_See live codex for table_
 
 You have an [[Apprentice Wizard]] on site D. I have an untapped [[Bosk Troll]] on site C. You cast [[Blink]] to teleport your Wizard to site C. My Bosk Troll cannot intercept since you didn't Move and Attack. I can only intercept if you use Move and Attack, then don't attack.
 

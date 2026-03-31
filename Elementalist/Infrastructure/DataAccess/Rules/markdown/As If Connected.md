@@ -11,7 +11,7 @@ Most forced movement effects require proximity and thus won't work across the to
 
 An example of a forced movement effect that would work is [[Maelström]]:
 
-_Click the title link to see the table_
+_See live codex for table_
 
 [[Maelström]] is at M, and [[Polar Bears]] are at P. The whole area is a giant body of water. You could pull normally to X, or could pull "as if connected" to M since pulling is a form of movement.
 

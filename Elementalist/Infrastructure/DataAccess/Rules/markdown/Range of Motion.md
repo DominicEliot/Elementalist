@@ -5,7 +5,7 @@ When determining which locations the unit can reach (and thus Defend there, or b
 
 **Example 1**
 
-_Click the title link to see the table_
+_See live codex for table_
 
 An [[Apprentice Wizard]] is in square A and the attack is happening in square E. The game foresees that the Apprentice Wizard can't reach square E and thus he can't tap to Defend.
 
@@ -20,7 +20,7 @@ The attack's location is [[Bottomless Pit]] and the Bosk Troll is adjacent. The 
 
 **Example 5**
 
-_Click the title link to see the table_
+_See live codex for table_
 
 The attack is happening at A. I have [[Rimland Nomads]] at N. There is a [[Giant Shark]] at S, which is a water site. As soon as the Rimland Nomads move toward A to Defend, the Shark will fight them at S via its mandatory triggered ability. There is no way that the Nomads could actually reach A in two steps. Nonetheless, the game _will_ _allow _the Rimland Nomads to use the Defend ability because when the game looks ahead to see which locations the Nomads can reach, the game ignores all triggered abilities.
 

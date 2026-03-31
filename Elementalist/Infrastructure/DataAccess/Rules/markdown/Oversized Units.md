@@ -20,17 +20,17 @@ If the destination of the teleportation is a single location, the controller of 
 
 For example, [[Mountain Giant]] is chosen as the ally for [[Blink]]:
 
-_Click the title link to see the table_
+_See live codex for table_
 
 As the "nearby location," I choose X. Now, the Mountain Giant can end up in any of these positions:
 
-_Click the title link to see the table_
+_See live codex for table_
 
-_Click the title link to see the table_
+_See live codex for table_
 
-_Click the title link to see the table_
+_See live codex for table_
 
-_Click the title link to see the table_
+_See live codex for table_
 
 Since the Mountain Giant is a square shape, its orientation doesn't typically matter, but if it were carrying something, it could also be rotated as desired from the teleportation.
 

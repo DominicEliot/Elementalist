@@ -8,7 +8,7 @@ A unit can combine free steps with regular steps, up to its movement limit. See 
 ## Examples of Moves Freely
 **Example 1**
 
-_Click the title link to see the table_
+_See live codex for table_
 
 w1, w2, and w3 are water sites. A and B are land sites. [[Sir Pelleas]] starts underwater at w1. He can take 1 step normally with the Move and Attack ability, so he declares the following movement path:
 

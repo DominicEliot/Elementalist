@@ -22,7 +22,7 @@ As some events are resolving from the storyline, they split up into smaller even
 
 For example, let's say the realm looks like this:
 
-_Click the title link to see the table_
+_See live codex for table_
 
 I have an allied at [[Azuridge Caravan]] at A. Site R is a [[Summer River]]. There's an enemy [[Lady Iseult]] at I.
 

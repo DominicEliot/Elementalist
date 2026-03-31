@@ -39,7 +39,7 @@ After applying all the damage modification, proceed to damage prevention.
 Damage prevention uses the words "prevent" or "immune," or the phrase "takes less damage," and applies after all other damage modification. Examples include:
 
 - Takes less damage, e.g. [[Shield Maidens]].
-- Prevent damage, e.g. [[Goswhit Helmet]].
+- Prevent damage, e.g. [[Goswhit Helmet]], ((Ward)).
 - Immune to damage, e.g. [[Lava Salamander]].
 
 After applying all damage modification effects, then apply damage prevention effects in the same way:

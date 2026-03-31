@@ -11,6 +11,6 @@ If a Deathrite ability causes more cards to die, they are also marked for death,
   
 Players cannot choose to sacrifice or kill a card that is already marked for death. A card that is already marked for death cannot be marked for death again, and any effect that attempts to destroy or sacrifice that card fails. That card still only triggers its Deathrite ability once.  
   
-Cards that are sacrificed also count as being destroyed. They are marked for death following the same process outlined above.
+Cards that are sacrificed also count as being destroyed. They are marked for death following the same process outlined ))above((.
 
 [Codex Entry](https://curiosa.io/codex?id=56de42f7-3d67-4437-826c-6a89cd356458)

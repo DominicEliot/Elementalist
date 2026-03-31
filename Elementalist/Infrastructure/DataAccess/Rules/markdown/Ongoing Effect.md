@@ -18,7 +18,7 @@ If ongoing effects overlap or conflict, apply them in the order listed here by l
 1. Copy effects, e.g. [[Mirror Realm]], [[Selfsame Simulacrum]]
 2. Disabling effects, silencing effects, e.g. [[Root Spider]], [[Iron Shackles]], [[Silence]], [[Sisters of Silence]]
 3. Control effects, e.g. [[King of the Realm]], [[Mesmerism]]
-4. Type changing effects, e.g. [[Bower of Bliss]], [[Island Leviathan]]
+4. Type changing effects, e.g. [[Bower of Bliss]], [[Corruptor]]
 5. Ability adding and removing effects, and affinity changing effects, e.g. [[Power of Flight]], [[Watchtower]], [[Tide Naiads]], [[Drought]]
 6. Power setting effects, e.g. [[Shrink]]
 7. Power addition and subtraction effects, e.g. [[Overpower]], [[Wicked Witch]]
