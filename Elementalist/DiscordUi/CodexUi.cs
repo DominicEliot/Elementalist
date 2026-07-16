@@ -229,8 +229,12 @@ public partial class CodexMessageService(IRulesRepository codexRepository) : ICo
     {
         var keywords = await rulesRepository.GetKeywords(cancellationToken);
         var contentHighlighted = rule.Content;
-        var wordsToMatch = keywords.Where(word => !word.Equals(rule.Title, StringComparison.CurrentCultureIgnoreCase)
-                                                  && !word.Equals("you", StringComparison.CurrentCultureIgnoreCase));
+        var wordsToMatch = keywords
+            .Select(word => word.Replace("## ", "").Replace("##", "").Replace("+", "\\+").Replace(".", "\\.").Replace("?", "\\?").Replace("(", "\\(").Replace(")", "\\)"))
+            .Where(word => !word.Equals(rule.Title, StringComparison.CurrentCultureIgnoreCase)
+                && !string.IsNullOrWhiteSpace(word)
+                && !word.Equals("you", StringComparison.CurrentCultureIgnoreCase));
+
         var regexString = @$"\b({string.Join("|", wordsToMatch)})\b";
 
         var regex = new Regex(regexString, RegexOptions.IgnoreCase);

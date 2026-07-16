@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Elementalist.DiscordUi.Rules;
 using Elementalist.Infrastructure.DataAccess.Rules;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using NetCord.Rest;
 using Xunit;
 
@@ -17,7 +19,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CreateCodexMessageTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Attack", CancellationToken.None);
@@ -34,7 +36,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CheckDuplicatingTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Element", CancellationToken.None);
@@ -49,7 +51,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CheckKeywordFormatting()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Airborne", CancellationToken.None);
@@ -64,7 +66,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CreateCodexMessageWithSubcodexTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Casting Spells", CancellationToken.None);
@@ -79,7 +81,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CreateCodexMessageComponentTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Disabled", CancellationToken.None);
@@ -96,7 +98,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CreateCodexMessageLowercaseTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("minion", CancellationToken.None);
@@ -111,7 +113,7 @@ public class CodexMessageTests
     [Trait("Category", "Integration")]
     public async Task CreateCodexMaxedOutSelectTest()
     {
-        var codexRepo = new CodexMarkdownRulesRepository();
+        var codexRepo = new CodexMarkdownRulesRepository(new HttpClient(), null!, TestHelpers.MemoryCache);
         var codexMessageService = new CodexMessageService(codexRepo);
 
         var message = await codexMessageService.CreateCodexMessageAsync("Casting Spells", CancellationToken.None);
