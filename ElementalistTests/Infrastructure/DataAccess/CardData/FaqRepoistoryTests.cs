@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using ElementalistTests;
+using Xunit;
 
 namespace Elementalist.Infrastructure.DataAccess.CardData.Tests;
 
@@ -7,8 +8,8 @@ public class FaqRepoistoryTests
     [Fact]
     public async Task FaqRepoistoryTestAsync()
     {
-        var repo = new CsvFaqRepository();
-        var faqs = await repo.GetFaqs();
+        var repo = new CsvFaqRepository(TestHelpers.MemoryCache, TestHelpers.RefreshOptions);
+        var faqs = await repo.GetFaqs(CancellationToken.None);
 
         var wallOfIceFaq = faqs["Wall of Ice"];
 

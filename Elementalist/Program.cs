@@ -48,6 +48,7 @@ public class Program
 
             builder.Services.AddHostedService<CardDataService>();
             builder.Services.AddHostedService<CardPriceService>();
+            builder.Services.AddHostedService<CodexFetchService>();
             builder.Services.AddHostedService<BotActivityChangingService>();
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, CuriosaApiCardRepository>();
