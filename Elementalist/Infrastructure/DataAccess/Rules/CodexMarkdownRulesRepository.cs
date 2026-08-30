@@ -43,7 +43,7 @@ public partial class CodexMarkdownRulesRepository(HttpClient httpClient, ILogger
             return codexEntries;
         }
 
-        await _semaphore.WaitAsync();
+        await _semaphore.WaitAsync(cancellationToken);
         try
         {
             var github = new GitHubClient(new ProductHeaderValue(nameof(Elementalist)));

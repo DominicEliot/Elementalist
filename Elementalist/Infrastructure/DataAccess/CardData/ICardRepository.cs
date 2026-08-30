@@ -13,7 +13,7 @@ public interface ICardRepository
     Task<IEnumerable<Card>> GetCardsMatching(Func<Card, bool> predicate);
 }
 
-public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefreshOptions> dataRefreshOptions) : ICardRepository
+public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefreshOptions> dataRefreshOptions, ILogger<CuriosaApiCardRepository> logger) : ICardRepository
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly IOptions<DataRefreshOptions> _dataRefreshOptions = dataRefreshOptions;
@@ -23,8 +23,28 @@ public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefres
     {
         //todo move this into an IOptions
         var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
+        if (!cardsFromApi.IsSuccessStatusCode)
+        {
+            if (_cards.Count == 0)
+            {
+                _cards = await GetCardsFromBackupSource();
+                logger.LogWarning("Tried to refresh card data but https://api.sorcerytcg.com/api/cards returned with a status code of {httpStatus}. Loaded {cardsCount} cards from file instead",  cardsFromApi.StatusCode, _cards.Count);
+                return;
+            }
+
+            logger.LogWarning("Tried to refresh card data but https://api.sorcerytcg.com/api/cards returned with a status code of {httpStatus}. There are currently {cardsCount} cards cached from the last successful fetch.",  cardsFromApi.StatusCode, _cards.Count);
+            return;
+        }
+
         var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
-        _cards = cardResults ?? [];
+        _cards = cardResults ?? await GetCardsFromBackupSource();
+    }
+
+    private async Task<List<Card>> GetCardsFromBackupSource()
+    {
+        var fileRepo = new FileCardRepository();
+        var cards = await fileRepo.GetCards();
+        return new List<Card>(cards);
     }
 
     public async Task<IEnumerable<Card>> GetCards()
