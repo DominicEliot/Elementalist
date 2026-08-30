@@ -31,22 +31,27 @@ public class PriceUiSelect(IMediator mediator, ICardRepository cardRepository, I
 
         if (card is not null && uniqueCardId is not null)
         {
-            var set = card.Sets.First(s => s.Name == uniqueCardId.Set);
-            var variant = set.Variants.First(v => v.Finish == uniqueCardId.Finish && v.Product == uniqueCardId.Product);
+            var printing = card.Printings.FirstOrDefault(p =>
+                p.Set.Name == uniqueCardId.Set
+                && p.Meta.Product == uniqueCardId.Product
+                && p.Meta.Finish.ToString() ==  uniqueCardId.Finish);
 
-            var priceQuery = new Prices.CardPriceQuery(card.Name, set.Name, variant.Finish);
-            var priceResponse = await _mediator.Send(priceQuery);
-
-            if (!priceResponse.Any())
+            if (printing is not null)
             {
-                await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
+                var priceQuery = new Prices.CardPriceQuery(card.Name, printing.Set.Name, printing.Meta.Finish.ToString());
+                var priceResponse = await _mediator.Send(priceQuery);
+
+                if (!priceResponse.Any())
+                {
+                    await RespondAsync(InteractionCallback.Message(new() { Content = $"No prices for {uniqueCardId}", Flags = MessageFlags.Ephemeral }));
+                    return;
+                }
+
+                var embed = PriceUi.CardPriceEmbed(cardName, priceResponse);
+
+                await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
                 return;
             }
-
-            var embed = PriceUi.CardPriceEmbed(cardName, priceResponse);
-
-            await RespondAsync(InteractionCallback.Message(new() { Embeds = [embed] }));
-            return;
         }
 
         await RespondAsync(InteractionCallback.Message(new() { Content = $"Couldn't find a price for {cardName}", Flags = MessageFlags.Ephemeral }));

@@ -21,6 +21,7 @@ public class CuriosaApiCardRepository(HttpClient httpClient, IOptions<DataRefres
 
     public async Task RefreshData()
     {
+        //todo move this into an IOptions
         var cardsFromApi = await _httpClient.GetAsync("https://api.sorcerytcg.com/api/cards");
         var cardResults = await cardsFromApi.Content.ReadFromJsonAsync<List<Card>>();
         _cards = cardResults ?? [];

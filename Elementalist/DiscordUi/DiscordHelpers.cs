@@ -28,25 +28,22 @@ public static class DiscordHelpers
     public const int WaterColor = 0x19cce3;
     public const int ColorlessColor = 0xdcdcdc;
 
-    internal static Color GetCardColor(string elements)
+    internal static Color GetCardColor(IEnumerable<Element> elements)
     {
-        if (elements.Contains(","))
+        var elementList = elements as IReadOnlyList<Element> ?? elements.ToList();
+
+        if (elementList.Count > 1)
             return new Color(0xb28950);
 
-        if (elements.Contains("Fire"))
-            return new Color(FireColor);
-
-        if (elements.Contains("Air"))
-            return new Color(AirColor);
-
-        if (elements.Contains("Earth"))
-            return new Color(EarthColor);
-
-        if (elements.Contains("Water"))
-            return new Color(WaterColor);
-
-        // Colorless
-        return new Color(ColorlessColor);
+        var element = elementList.FirstOrDefault();
+        return element switch
+        {
+            Element.Fire => new Color(FireColor),
+            Element.Air => new Color(AirColor),
+            Element.Earth => new Color(EarthColor),
+            Element.Water => new Color(WaterColor),
+            _ => new Color(ColorlessColor)
+        };
     }
 
     public static string ReplaceManaTokensWithEmojis(string input)
@@ -66,23 +63,23 @@ public static class DiscordHelpers
         return input;
     }
 
-    public static string GetThresholdEmojis(Thresholds thresholds)
+    public static string GetThresholdEmojis(CardEngine cardEngine)
     {
-        return string.Concat(Enumerable.Repeat(EarthEmoji, thresholds.Earth))
-                + string.Concat(Enumerable.Repeat(FireEmoji, thresholds.Fire))
-                + string.Concat(Enumerable.Repeat(WaterEmoji, thresholds.Water))
-                + string.Concat(Enumerable.Repeat(AirEmoji, thresholds.Air));
+        return string.Concat(Enumerable.Repeat(EarthEmoji, cardEngine.Earth ?? 0))
+               + string.Concat(Enumerable.Repeat(FireEmoji, cardEngine.Fire ?? 0))
+               + string.Concat(Enumerable.Repeat(WaterEmoji, cardEngine.Water ?? 0))
+               + string.Concat(Enumerable.Repeat(AirEmoji, cardEngine.Air ?? 0));
     }
 
     public static string GetManaEmojis(Card card)
     {
         // Unfortunately curiosa's format doesn't have a good meta data around X spells
-        if (Regex.IsMatch(card.Guardian.RulesText, @"\bX\b"))
+        if (card.Engine.Rules is not null && Regex.IsMatch(card.Engine.Rules, @"\bX\b"))
         {
             return ManaXEmoji;
         }
 
-        return card.Guardian.Cost switch
+        return card.Engine.Cost switch
         {
             0 => Mana0Emoji,
             1 => Mana1Emoji,

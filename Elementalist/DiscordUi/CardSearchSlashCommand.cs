@@ -12,7 +12,8 @@ namespace Elementalist.DiscordUi;
 
 public class CardDisplayService(PriceEnabledService priceEnabledService, CardArtService cardArtService)
 {
-    public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, SetVariant? variant, ulong GuildId)
+    public async Task<InteractionMessageProperties> CardInfoMessage(IEnumerable<Card> cards, CardPrinting? variant,
+        ulong GuildId)
     {
         var message = new InteractionMessageProperties();
         var embeds = new List<EmbedProperties>();
@@ -20,6 +21,7 @@ public class CardDisplayService(PriceEnabledService priceEnabledService, CardArt
         {
             embeds.Add(new EmbedCardDetailAdapter(card, cardArtService, variant));
         }
+
         message.Embeds = embeds;
 
         if (cards.Count() == 1)
@@ -30,18 +32,19 @@ public class CardDisplayService(PriceEnabledService priceEnabledService, CardArt
         return message;
     }
 
-    internal async Task<List<IMessageComponentProperties>> CardComponentBuilder(Card card, SetVariant? variant, ulong guildId)
+    internal async Task<List<IMessageComponentProperties>> CardComponentBuilder(Card card, CardPrinting? variant,
+        ulong guildId)
     {
         var components = new List<IMessageComponentProperties>();
         var buttonRow = new ActionRowProperties();
 
-        if (card.Sets.Count() > 1 || card.Sets.Any(s => s.Variants.Count() > 1))
+        if (card.Printings.Count() > 1)
         {
             AddVariantsMenu(card, components, variant);
         }
 
         buttonRow.AddComponents(new ButtonProperties($"art:{card.Name}", "Art", NetCord.ButtonStyle.Primary),
-                           new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary));
+            new ButtonProperties($"faq:{card.Name}", "Faq", NetCord.ButtonStyle.Primary));
 
         if (await priceEnabledService.IsPriceEnabledOnServer(guildId))
         {
@@ -53,21 +56,20 @@ public class CardDisplayService(PriceEnabledService priceEnabledService, CardArt
         return components;
     }
 
-    private static void AddVariantsMenu(Card card, List<IMessageComponentProperties> componentsList, SetVariant? defaultVariant)
+    private static void AddVariantsMenu(Card card, List<IMessageComponentProperties> componentsList,
+        CardPrinting? defaultVariant)
     {
         var menuBuilder = new StringMenuProperties("variantSelect");
 
         defaultVariant ??= CardLookups.GetDefaultVariant(card);
 
         var selectMenuOptions = new List<StringMenuSelectOptionProperties>();
-        foreach (var set in card.Sets)
+        foreach (var printing in card.Printings)
         {
-            foreach (var variant in set.Variants)
-            {
-                var isDefault = (defaultVariant.Variant == variant && defaultVariant.Set == set);
-                var uniqueCardId = new UniqueCardIdentifier(card.Name, set.Name, variant.Product, variant.Finish);
-                selectMenuOptions.Add(new(uniqueCardId.ToNamelessString(), uniqueCardId.ToJson()) { Default = isDefault });
-            }
+            var isDefault = printing.Id == defaultVariant.Id;
+            //Todo use the new builtin printing snowflake
+            var uniqueCardId = new UniqueCardIdentifier(card.Name, printing.Set.Name, printing.Meta.Product, printing.Meta.Finish.ToString());
+            selectMenuOptions.Add(new(uniqueCardId.ToNamelessString(), uniqueCardId.ToJson()) { Default = isDefault });
         }
 
         menuBuilder.AddOptions(selectMenuOptions);
@@ -76,16 +78,19 @@ public class CardDisplayService(PriceEnabledService priceEnabledService, CardArt
     }
 }
 
-public class CardSearchSlashCommand(IMediator mediator,
-                                    IOptions<BotConfig> config,
-                                    CardDisplayService cardDisplayService) : ApplicationCommandModule<ApplicationCommandContext>
+public class CardSearchSlashCommand(
+    IMediator mediator,
+    IOptions<BotConfig> config,
+    CardDisplayService cardDisplayService) : ApplicationCommandModule<ApplicationCommandContext>
 {
     private readonly BotConfig _config = config.Value;
     private readonly IMediator _mediator = mediator;
     private readonly CardDisplayService _cardDisplayService = cardDisplayService;
 
     [SlashCommand("name", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool ephemeral = false)
+    public async Task CardSearchByName(
+        [SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName,
+        bool ephemeral = false)
     {
         var query = new GetCardsQuery() { CardNameContains = cardName };
         var cards = await _mediator.Send(query);
@@ -94,20 +99,20 @@ public class CardSearchSlashCommand(IMediator mediator,
     }
 
     [SlashCommand("text", "Searches for and returns any matching sorcery cards")]
-    public async Task CardSearchByRulesText(string? cardText = null, string? element = null, string? cardTypes = null, bool ephemeral = false)
+    public async Task CardSearchByRulesText(string? cardText = null, string? element = null, string? cardTypes = null,
+        bool ephemeral = false)
     {
         var query = new GetCardsQuery()
         {
-            TextContains = cardText,
-            ElementsContain = element,
-            TypeContains = cardTypes,
+            TextContains = cardText, ElementsContain = element, TypeContains = cardTypes,
         };
         var cards = await _mediator.Send(query);
 
         await SendDiscordResponse(cardText, cards, ephemeral: ephemeral, query);
     }
 
-    private async Task SendDiscordResponse(string? cardNameOrText, IEnumerable<Card> cards, bool ephemeral, GetCardsQuery query)
+    private async Task SendDiscordResponse(string? cardNameOrText, IEnumerable<Card> cards, bool ephemeral,
+        GetCardsQuery query)
     {
         var message = new InteractionMessageProperties();
 
@@ -121,7 +126,8 @@ public class CardSearchSlashCommand(IMediator mediator,
 
         if (cards.Count() > _config.MaxCardEmbedsPerMessage)
         {
-            message.WithContent($"Too many matches to display your search results,\nplease see {GetRealmsAppUrl(query)}");
+            message.WithContent(
+                $"Too many matches to display your search results,\nplease see {GetRealmsAppUrl(query)}");
 
             await RespondAsync(InteractionCallback.Message(message));
             return;
@@ -156,7 +162,8 @@ public class CardSearchSlashCommand(IMediator mediator,
 
         foreach (var cardType in query.TypeContains?.Replace(",", "").Split(' ') ?? [])
         {
-            var cardTypeSyntaxOption = _hiddenCardTypes.Contains(cardType, StringComparer.OrdinalIgnoreCase) ? "t:" : "l:";
+            var cardTypeSyntaxOption =
+                _hiddenCardTypes.Contains(cardType, StringComparer.OrdinalIgnoreCase) ? "t:" : "l:";
             queryParams.Add($"{cardTypeSyntaxOption}{cardType}");
         }
 
@@ -170,34 +177,37 @@ public class CardSearchSlashCommand(IMediator mediator,
 
 internal class EmbedCardDetailAdapter : EmbedProperties
 {
-    public EmbedCardDetailAdapter(Card card, CardArtService cardArtService, SetVariant? setVariant = null)
+    public EmbedCardDetailAdapter(Card card, CardArtService cardArtService, CardPrinting? setVariant = null)
     {
         setVariant ??= CardLookups.GetDefaultVariant(card);
 
         var cardCostSymbols = DiscordHelpers.GetManaEmojis(card);
-        var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Guardian.Thresholds);
+        var thresholdSymbols = DiscordHelpers.GetThresholdEmojis(card.Engine);
 
         WithTitle($"{card.Name} {cardCostSymbols} {thresholdSymbols}");
         WithUrl($"https://curiosa.io/cards/{card.Name.ToLower().Replace(' ', '_')}");
-        WithColor(DiscordHelpers.GetCardColor(card.Elements));
+        WithColor(DiscordHelpers.GetCardColor(card.Engine.Elements));
         WithThumbnail(new(cardArtService.GetUrl(setVariant)));
-        WithDescription(setVariant.Variant.TypeText);
+        WithDescription(setVariant.Meta.Typeline);
 
-        var powerText = (card.Guardian.Attack > 0) ? $"Attack: {card.Guardian.Attack} " : string.Empty;
-        var defenseText = (card.Guardian.Defence > 0 && card.Guardian.Defence != card.Guardian.Attack) ? $"Defence: {card.Guardian.Defence} " : string.Empty;
-        var rulesTextField = $"{powerText}{defenseText}\n{DiscordHelpers.ReplaceManaTokensWithEmojis(card.Guardian.RulesText)}".Trim();
+        var powerText = (card.Engine.Attack > 0) ? $"Attack: {card.Engine.Attack} " : string.Empty;
+        var defenseText = (card.Engine.Defense > 0 && card.Engine.Defense != card.Engine.Attack)
+            ? $"Defence: {card.Engine.Defense} "
+            : string.Empty;
+        var rulesTextField =
+            $"{powerText}{defenseText}\n{DiscordHelpers.ReplaceManaTokensWithEmojis(card.Engine.Rules ?? "")}".Trim();
 
-        var subtypeText = (!string.IsNullOrEmpty(card.SubTypes)) ? $" - {card.SubTypes}" : string.Empty;
+        var subtypeText = (card.Engine.Subtypes.Any()) ? $" - {string.Join(", ", card.Engine.Subtypes)}" : string.Empty;
 
-        AddFields(new EmbedFieldProperties().WithName(card.Guardian.Type + subtypeText).WithValue(rulesTextField));
+        AddFields(new EmbedFieldProperties().WithName(card.Engine.Type + subtypeText).WithValue(rulesTextField));
     }
 }
 
 public partial class CardArtService(IOptions<CardImageOptions> imageOptions)
 {
-    public string GetUrl(SetVariant setVariant)
+    public string GetUrl(CardPrinting setVariant)
     {
-        return GetUrl(setVariant.Variant.Slug, setVariant.Set.Name);
+        return GetUrl(setVariant.Slug, setVariant.Set.Name);
     }
 
     public string GetUrl(string cardSlug, string setName)
@@ -206,6 +216,7 @@ public partial class CardArtService(IOptions<CardImageOptions> imageOptions)
         {
             setName = setName.Replace(" ", string.Empty);
         }
+
         var escapedSet = Uri.EscapeDataString(setName);
 
         var imageSlug = cardSlug.Substring(4); //slugs are in the format set_image-slug, for now...
@@ -231,28 +242,12 @@ public class CardImageOptions
 
 public static class CardLookups
 {
-    public static SetVariant GetDefaultVariant(Models.Card card)
+    public static CardPrinting GetDefaultVariant(Models.Card card)
     {
-        var sets = card.Sets.OrderByDescending(s => s.ReleasedAt);
-
-        Set? foundSet = null;
-        Models.Variant? foundVariant = null;
-
-        foreach (var set in sets)
-        {
-            var variant = set.Variants.FirstOrDefault(s => s.Finish == "Standard");
-            if (variant?.Product == "Booster") return new SetVariant { Variant = variant, Set = set };
-
-            foundVariant ??= variant;
-            foundSet = set;
-        }
-
-        if (foundSet is null || foundVariant is null)
-        {
-            foundVariant = sets.First().Variants.First();
-            foundSet = sets.First();
-        }
-
-        return new SetVariant { Set = foundSet, Variant = foundVariant };
+        return card.Printings
+            .OrderByDescending(p => p.PrintedAt)
+            .ThenBy(p => p.Meta.Finish)
+            .ThenBy(p => p.Meta.Product switch { "Booster" => 1, "PreconstructedDeck" => 2, _ => 9})
+            .First();
     }
 }

@@ -22,7 +22,7 @@ public class FaqSlashCommand(IFaqRepository faqRepository) : ApplicationCommandM
     private readonly IFaqRepository _faqRepository = faqRepository;
 
     [SlashCommand("faq", "Shows any FAQs for the input card.")]
-    public async Task CardSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
+    public async Task FaqSearchByName([SlashCommandParameter(AutocompleteProviderType = typeof(CardAutoCompleteHandler))] string cardName, bool privateMessage = false)
     {
         var message = await FaqUiHelper.CreateFaqMessage(cardName, _faqRepository, CancellationToken.None, privateMessage);
         await RespondAsync(InteractionCallback.Message(message));
@@ -33,6 +33,11 @@ public static class FaqUiHelper
 {
     internal static async Task<InteractionMessageProperties> CreateFaqMessage(string cardName, IFaqRepository faqRepository, CancellationToken ct, bool privateMessage = false)
     {
+        var tempDownmessage = new InteractionMessageProperties()
+            .WithContent("Faqs on the bot are temporarily disabled until they are rewritten for the new sorcerytcg API.\nSorry, but it shouldn't be long until it's fixed.\nIn the mean time use the official page: https://sorcerytcg.com/cards")
+            .WithFlags(NetCord.MessageFlags.Ephemeral);
+        return  tempDownmessage;
+
         var message = new InteractionMessageProperties();
         if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;
 

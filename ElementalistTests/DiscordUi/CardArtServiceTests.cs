@@ -25,6 +25,6 @@ public class CardArtServiceTests
 
         var url = service.GetUrl(variant);
 
-        Assert.Equal("https://dominiceliot.github.io/sorcery-image-gallery/media/original/bet-hounds_of_ondaros-b-s.png", url);
+        Assert.Equal("https://dominiceliot.github.io/sorcery-image-gallery/media/original/002-hounds_of_ondaros-b-s.png", url);
     }
 }

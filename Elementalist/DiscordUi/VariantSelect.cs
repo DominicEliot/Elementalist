@@ -24,11 +24,11 @@ public class VariantSelect(ICardRepository cardRepository, CardDisplayService ca
         }
 
         var card = (await _cardRepository.GetCardsMatching(c => c.Name == uniqueCard.Name)).First();
-        var set = card.Sets.First(s => s.Name == uniqueCard.Set);
-        var variant = set.Variants.First(v => v.Product == uniqueCard.Product && v.Finish == uniqueCard.Finish);
-        var setVariant = new SetVariant() { Set = set, Variant = variant };
+        var printing = card.Printings.First(p => p.Set.Name == uniqueCard.Set
+            && p.Meta.Finish.ToString() == uniqueCard.Finish
+            && p.Meta.Product == uniqueCard.Product);
 
-        var message = await _cardDisplayService.CardInfoMessage([card], setVariant, Context.GetGuildId() ?? 0);
+        var message = await _cardDisplayService.CardInfoMessage([card], printing, Context.GetGuildId() ?? 0);
 
         var callback = InteractionCallback.ModifyMessage(m =>
         {

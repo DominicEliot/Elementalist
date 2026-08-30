@@ -32,12 +32,12 @@ public class UniqueCardIdentifier
         Finish = finish;
     }
 
-    public UniqueCardIdentifier(string cardName, SetVariant setVariant)
+    public UniqueCardIdentifier(string cardName, CardPrinting setVariant)
     {
         Name = cardName;
         Set = setVariant.Set.Name;
-        Product = setVariant.Variant.Product;
-        Finish = setVariant.Variant.Finish;
+        Product = setVariant.Meta.Product;
+        Finish = setVariant.Meta.Finish.ToString();
     }
 
     public override string ToString() => $"{Name} - {Set} - {Product} - {Finish}";

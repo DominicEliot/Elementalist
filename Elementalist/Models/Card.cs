@@ -2,132 +2,163 @@
 
 namespace Elementalist.Models;
 
-public class Card
-{
-    [JsonConstructor]
-    public Card(string name, Guardian guardian, string elements, string subTypes, IEnumerable<Set> sets)
-    {
-        Name = name;
-        Guardian = guardian;
-        Elements = elements;
-        SubTypes = subTypes;
-        Sets = sets;
-    }
+/// <summary>
+/// The JSON shape returned by GET /api/cards.
+/// </summary>
+public sealed record Card(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("slug")] string Slug,
+    [property: JsonPropertyName("engine")] CardEngine Engine,
+    [property: JsonPropertyName("printings")]
+    IReadOnlyList<CardPrinting> Printings
+);
 
-    public string Name { get; init; }
-    public Guardian Guardian { get; init; }
-    public string Elements { get; init; }
-    public string SubTypes { get; init; }
-    public IEnumerable<Set> Sets { get; init; }
+public sealed record CardEngine(
+    [property: JsonPropertyName("type")] CardType Type,
+    [property: JsonPropertyName("category")]
+    CardCategory Category,
+    [property: JsonPropertyName("rarity")] RaritySlot? Rarity,
+    [property: JsonPropertyName("slot")] RaritySlot? Slot,
+    [property: JsonPropertyName("rules")] string? Rules,
+    [property: JsonPropertyName("cost")] int? Cost,
+    [property: JsonPropertyName("attack")] int? Attack,
+    [property: JsonPropertyName("defense")]
+    int? Defense,
+    [property: JsonPropertyName("life")] int? Life,
+    [property: JsonPropertyName("water")] int? Water,
+    [property: JsonPropertyName("earth")] int? Earth,
+    [property: JsonPropertyName("fire")] int? Fire,
+    [property: JsonPropertyName("air")] int? Air,
+    [property: JsonPropertyName("elements")]
+    IReadOnlyList<Element> Elements,
+    [property: JsonPropertyName("subtypes")]
+    IReadOnlyList<string> Subtypes,
+    [property: JsonPropertyName("keywords")]
+    IReadOnlyList<string> Keywords,
+    [property: JsonPropertyName("umbrellas")]
+    IReadOnlyList<string> Umbrellas,
+    [property: JsonPropertyName("back")] CardEngineBack? Back
+);
+
+/// <summary>
+/// Mirrors CardEngine but without a nested "back"
+/// </summary>
+public sealed record CardEngineBack(
+    [property: JsonPropertyName("type")] CardType Type,
+    [property: JsonPropertyName("category")]
+    CardCategory Category,
+    [property: JsonPropertyName("rarity")] RaritySlot? Rarity,
+    [property: JsonPropertyName("slot")] RaritySlot? Slot,
+    [property: JsonPropertyName("rules")] string? Rules,
+    [property: JsonPropertyName("cost")] int? Cost,
+    [property: JsonPropertyName("attack")] int? Attack,
+    [property: JsonPropertyName("defense")]
+    int? Defense,
+    [property: JsonPropertyName("life")] int? Life,
+    [property: JsonPropertyName("water")] int? Water,
+    [property: JsonPropertyName("earth")] int? Earth,
+    [property: JsonPropertyName("fire")] int? Fire,
+    [property: JsonPropertyName("air")] int? Air,
+    [property: JsonPropertyName("elements")]
+    IReadOnlyList<Element> Elements,
+    [property: JsonPropertyName("subtypes")]
+    IReadOnlyList<string> Subtypes,
+    [property: JsonPropertyName("keywords")]
+    IReadOnlyList<string> Keywords,
+    [property: JsonPropertyName("umbrellas")]
+    IReadOnlyList<string> Umbrellas
+);
+
+public sealed record CardPrinting(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("slug")] string Slug,
+    [property: JsonPropertyName("printedAt")]
+    DateTimeOffset PrintedAt,
+    [property: JsonPropertyName("set")] CardSet Set,
+    [property: JsonPropertyName("meta")] CardPrintingMeta Meta
+);
+
+public sealed record CardSet(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("code")] string Code,
+    [property: JsonPropertyName("releasedAt")]
+    DateTimeOffset ReleasedAt
+);
+
+public sealed record CardPrintingMeta(
+    [property: JsonPropertyName("finish")] Finish Finish,
+    [property: JsonPropertyName("product")]
+    string Product,
+    [property: JsonPropertyName("typeline")]
+    string Typeline,
+    [property: JsonPropertyName("flavor")] string? Flavor,
+    [property: JsonPropertyName("artist")] CardArtist Artist,
+    [property: JsonPropertyName("back")] CardPrintingMetaBack? Back
+);
+
+/// <summary>
+/// Mirrors CardPrintingMeta but without a nested "back".
+/// </summary>
+public sealed record CardPrintingMetaBack(
+    [property: JsonPropertyName("finish")] Finish Finish,
+    [property: JsonPropertyName("product")]
+    string Product,
+    [property: JsonPropertyName("typeline")]
+    string Typeline,
+    [property: JsonPropertyName("flavor")] string? Flavor,
+    [property: JsonPropertyName("artist")] CardArtist Artist
+);
+
+public sealed record CardArtist(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("slug")] string Slug
+);
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum CardType
+{
+    Avatar,
+    Minion,
+    Magic,
+    Aura,
+    Artifact,
+    Site
 }
 
-public class Guardian
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum CardCategory
 {
-    [JsonConstructor]
-    public Guardian(string rarity, string type, string rulesText, int? cost, int? attack, int? defence, int? life, Thresholds thresholds)
-    {
-        Rarity = rarity;
-        Type = type;
-        RulesText = rulesText;
-        Cost = cost;
-        Attack = attack;
-        Defence = defence;
-        Life = life;
-        Thresholds = thresholds;
-    }
-
-    public string Rarity { get; init; }
-    public string Type { get; init; }
-    public string RulesText { get; init; }
-    public int? Cost { get; init; }
-    public int? Attack { get; init; }
-    public int? Defence { get; init; }
-    public int? Life { get; init; }
-    public Thresholds Thresholds { get; init; }
+    Avatar,
+    Spell,
+    Site,
+    Token
 }
 
-public class Thresholds
+/// <summary>Shared by both "rarity" and "slot" in the original TS union.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum RaritySlot
 {
-    [JsonConstructor]
-    public Thresholds(int air, int earth, int fire, int water)
-    {
-        Air = air;
-        Earth = earth;
-        Fire = fire;
-        Water = water;
-    }
-
-    public int Air { get; init; }
-    public int Earth { get; init; }
-    public int Fire { get; init; }
-    public int Water { get; init; }
+    Unique,
+    Elite,
+    Exceptional,
+    Ordinary
 }
 
-public class Set
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum Element
 {
-    [JsonConstructor]
-    public Set(string name, DateTime releasedAt, Metadata metadata, IEnumerable<Variant> variants)
-    {
-        Name = name;
-        ReleasedAt = releasedAt;
-        Metadata = metadata;
-        Variants = variants;
-    }
-
-    public string Name { get; init; }
-    public DateTime ReleasedAt { get; init; }
-    public Metadata Metadata { get; init; }
-    public IEnumerable<Variant> Variants { get; init; }
+    Earth,
+    Fire,
+    Water,
+    Air,
+    None
 }
 
-public class Metadata
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum Finish
 {
-    [JsonConstructor]
-    public Metadata(string rarity, string type, string rulesText, int? cost, int? attack, int? defence, int? life, Thresholds thresholds)
-    {
-        Rarity = rarity;
-        Type = type;
-        RulesText = rulesText;
-        Cost = cost;
-        Attack = attack;
-        Defence = defence;
-        Life = life;
-        Thresholds = thresholds;
-    }
-
-    public string Rarity { get; init; }
-    public string Type { get; init; }
-    public string RulesText { get; init; }
-    public int? Cost { get; init; }
-    public int? Attack { get; init; }
-    public int? Defence { get; init; }
-    public int? Life { get; init; }
-    public Thresholds Thresholds { get; init; }
-}
-
-public class SetVariant
-{
-    public required Set Set { get; init; }
-    public required Variant Variant { get; init; }
-}
-
-public class Variant
-{
-    [JsonConstructor]
-    public Variant(string slug, string finish, string product, string artist, string flavorText, string typeText)
-    {
-        Slug = slug;
-        Finish = finish;
-        Product = product;
-        Artist = artist;
-        FlavorText = flavorText;
-        TypeText = typeText;
-    }
-
-    public string Slug { get; init; }
-    public string Finish { get; init; }
-    public string Product { get; init; }
-    public string Artist { get; init; }
-    public string FlavorText { get; init; }
-    public string TypeText { get; init; }
+    Standard,
+    Foil,
+    Rainbow
 }

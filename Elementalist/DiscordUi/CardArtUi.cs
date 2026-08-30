@@ -32,19 +32,19 @@ public class CardArtUi(ICardRepository cardRepository, CardArtService cardArtSer
 
         var card = (await _cardRepo.GetCardsMatching(c => c.Name == cardName)).Single();
 
-        var set = card.Sets.FirstOrDefault(s => s.Name == cardVersionMetadata.Set);
-        var variant = set?.Variants.FirstOrDefault(v => v.Product == cardVersionMetadata.Product && v.Finish == cardVersionMetadata.Finish);
+        var printing = card.Printings.FirstOrDefault(p =>
+            p.Set.Name == cardVersionMetadata.Set
+            && p.Meta.Product == cardVersionMetadata.Product
+            && p.Meta.Finish.ToString() ==  cardVersionMetadata.Finish);
 
-        if (set is null || variant is null)
+        if (printing is null)
         {
             message.WithContent($"Couldn't load art for {uniqueCardJson}").WithFlags(MessageFlags.Ephemeral);
             await RespondAsync(InteractionCallback.Message(message));
             return;
         }
 
-        var setVariant = new SetVariant() { Set = set, Variant = variant };
-
-        var cardArtEmbed = new EmbedCardArtAdapter(card, cardArtService, setVariant);
+        var cardArtEmbed = new EmbedCardArtAdapter(card, cardArtService, printing);
         message.Embeds = [cardArtEmbed];
 
         await RespondAsync(InteractionCallback.Message(message));
@@ -52,15 +52,15 @@ public class CardArtUi(ICardRepository cardRepository, CardArtService cardArtSer
 
     internal class EmbedCardArtAdapter : EmbedProperties
     {
-        public EmbedCardArtAdapter(Card card, CardArtService cardArtService, SetVariant? setVariant = null)
+        public EmbedCardArtAdapter(Card card, CardArtService cardArtService, CardPrinting? setVariant = null)
         {
             setVariant ??= CardLookups.GetDefaultVariant(card);
 
             //sample style: https://message.style/app/editor/share/KYfJ50a5
             WithAuthor(new() { Name = card.Name });
-            WithColor(DiscordHelpers.GetCardColor(card.Elements));
+            WithColor(DiscordHelpers.GetCardColor(card.Engine.Elements));
             WithImage(new(cardArtService.GetUrl(setVariant)));
-            WithFooter(new() { Text = $"Art @ {setVariant.Variant.Artist}" });
+            WithFooter(new() { Text = $"Art @ {setVariant.Meta.Artist.Name}" });
         }
     }
 }

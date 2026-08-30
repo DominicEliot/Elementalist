@@ -56,7 +56,7 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
 
         if (request.ElementsContain != null)
         {
-            cards = cards.Where(c => c.Elements.Contains(request.ElementsContain, StringComparison.OrdinalIgnoreCase));
+            cards = cards.Where(c => c.Engine.Elements.Any(e => e.ToString().Equals(request.ElementsContain, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (request.TextContains != null)
@@ -78,15 +78,15 @@ public class GetCardsQueryHandler(ICardRepository cardRepository) : IRequestHand
 
     private static bool DoesCardHaveAllTerms(Models.Card card, string[] searchTerms)
     {
-        var matchCount = searchTerms.Count(singleWord => card.Guardian?.RulesText.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
+        var matchCount = searchTerms.Count(singleWord => card.Engine.Rules?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
 
         return matchCount >= searchTerms.Length;
     }
 
     private static bool DoesCardHaveAllTypes(Models.Card card, string[] searchTerms)
     {
-        var matchCount = searchTerms.Count(singleWord => card.Guardian?.Type?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true)
-            + searchTerms.Count(singleWord => card.SubTypes?.Contains(singleWord, StringComparison.OrdinalIgnoreCase) == true);
+        var matchCount = searchTerms.Count(singleWord => card.Engine.Type.ToString().Contains(singleWord, StringComparison.OrdinalIgnoreCase))
+            + searchTerms.Count(singleWord => card.Engine.Subtypes.Any(st => st.Contains(singleWord, StringComparison.OrdinalIgnoreCase)));
 
         return matchCount >= searchTerms.Length;
     }

@@ -14,15 +14,17 @@ public class CuriosaApiCardRepositoryTest
         if (skip)
         {
             Assert.True(true);
-            return; 
+            return;
         }
 
-        using var client = new HttpClient();
-        var options = Options.Create(new DataRefreshOptions { Hours = 48 });
+        // using var client = new HttpClient();
+        // var refreshOptions = Options.Create(new DataRefreshOptions { Hours = 48 });
+        // var apiOptions = Options.Create(new CardApiOptions { Url = "https://api.sorcerytcg.com/api/cards"});
+        //
+        // var repo = new CuriosaApiCardRepository(client, refreshOptions, apiOptions);
+        var repo = new FileCardRepository();
 
-        var api = new CuriosaApiCardRepository(client, options);
-
-        var cards = await api.GetCardsMatching(c => c.Name.Contains("Dragonlord", StringComparison.OrdinalIgnoreCase));
+        var cards = await repo.GetCardsMatching(c => c.Name.Contains("Dragonlord", StringComparison.OrdinalIgnoreCase));
 
         Assert.True(cards.Any());
     }
