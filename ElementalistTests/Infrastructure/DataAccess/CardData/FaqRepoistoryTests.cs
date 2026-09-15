@@ -8,8 +8,7 @@ public class FaqRepoistoryTests
     [Fact]
     public async Task FaqRepoistoryTestAsync()
     {
-        return; //todo: re-enable this test
-        var repo = new CsvFaqRepository(TestHelpers.MemoryCache, TestHelpers.RefreshOptions);
+        var repo = new GithubFaqRepository(TestHelpers.MemoryCache, TestHelpers.RefreshOptions, TestHelpers.HttpClient);
         var faqs = await repo.GetFaqs(CancellationToken.None);
 
         var wallOfIceFaq = faqs["Wall of Ice"];

@@ -53,7 +53,7 @@ public class Program
             builder.Services.AddHostedService<BotStartupService>();
             builder.Services.AddSingleton<ICardRepository, CuriosaApiCardRepository>();
             builder.Services.AddSingleton<TcgPlayerDataProvider>();
-            builder.Services.AddSingleton<IFaqRepository, CsvFaqRepository>();
+            builder.Services.AddSingleton<IFaqRepository, GithubFaqRepository>();
             builder.Services.AddSingleton<CardArtService>();
             builder.Services.AddSingleton<CardDisplayService>();
             builder.Services.AddSingleton<IRulesRepository, CodexMarkdownRulesRepository>();

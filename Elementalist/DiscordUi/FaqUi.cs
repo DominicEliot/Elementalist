@@ -33,11 +33,6 @@ public static class FaqUiHelper
 {
     internal static async Task<InteractionMessageProperties> CreateFaqMessage(string cardName, IFaqRepository faqRepository, CancellationToken ct, bool privateMessage = false)
     {
-        var tempDownmessage = new InteractionMessageProperties()
-            .WithContent("Faqs on the bot are temporarily disabled until they are rewritten for the new sorcerytcg API.\nSorry, but it shouldn't be long until it's fixed.\nIn the mean time use the official page: https://sorcerytcg.com/cards")
-            .WithFlags(NetCord.MessageFlags.Ephemeral);
-        return  tempDownmessage;
-
         var message = new InteractionMessageProperties();
         if (privateMessage) message.Flags = NetCord.MessageFlags.Ephemeral;
 
