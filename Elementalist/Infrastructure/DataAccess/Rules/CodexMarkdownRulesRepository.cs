@@ -1,8 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Data;
 using System.Text.RegularExpressions;
 using Elementalist.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Octokit;
+using Serilog;
 
 namespace Elementalist.Infrastructure.DataAccess.Rules;
 
@@ -46,6 +48,8 @@ public partial class CodexMarkdownRulesRepository(HttpClient httpClient, ILogger
         await _semaphore.WaitAsync(cancellationToken);
         try
         {
+            Log.Information("Fetching codex data from GitHub.");
+
             var github = new GitHubClient(new ProductHeaderValue(nameof(Elementalist)));
             var markDownFiles = await github.Repository.Content.GetAllContents("DominicEliot", "sorcery-markdown-codex", "markdown");
             var codex = new ConcurrentBag<CodexEntry>();
@@ -62,12 +66,17 @@ public partial class CodexMarkdownRulesRepository(HttpClient httpClient, ILogger
             {
                 ct.ThrowIfCancellationRequested();
 
-                var response = await httpClient.GetAsync(file.DownloadUrl, ct);
-                if (!response.IsSuccessStatusCode)
+                var content = file.Content;
+                if (content is null)
                 {
-                    cts.Cancel();
+                    var response = await httpClient.GetAsync(file.DownloadUrl, ct);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        cts.Cancel();
+                    }
+                    content = await response.Content.ReadAsStringAsync(ct); 
                 }
-                var content = await response.Content.ReadAsStringAsync(ct);
+
                 var codexUrlMatch = Regex.Match(content, @"\[Codex Entry\]\((.*?)\)");
 
                 string? codexUrl = null;
@@ -107,6 +116,8 @@ public partial class CodexMarkdownRulesRepository(HttpClient httpClient, ILogger
                 });
             });
             cache.Set("CodexEntries", codex.AsEnumerable(), TimeSpan.FromHours(12));
+
+            Log.Information("Loaded {count} codex entries.", codex.Count);
 
             return codex;
         }

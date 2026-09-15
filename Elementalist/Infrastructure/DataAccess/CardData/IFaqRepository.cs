@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Data;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -7,21 +8,23 @@ using CsvHelper;
 using CsvHelper.Configuration.Attributes;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Octokit;
+using Serilog;
 
 namespace Elementalist.Infrastructure.DataAccess.CardData;
 
 public interface IFaqRepository
 {
-    Task<Dictionary<string, List<CardFaq>>> GetFaqs(CancellationToken ct);
+    Task<Dictionary<string, IEnumerable<CardFaq>>> GetFaqs(CancellationToken ct);
 }
 
-public class CsvFaqRepository(IMemoryCache _cache, IOptions<DataRefreshOptions> _options) : IFaqRepository
+public class GithubFaqRepository(IMemoryCache _cache, IOptions<DataRefreshOptions> _options, HttpClient _httpClient) : IFaqRepository
 {
     private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
-    public async Task<Dictionary<string, List<CardFaq>>> GetFaqs(CancellationToken ct)
+    public async Task<Dictionary<string, IEnumerable<CardFaq>>> GetFaqs(CancellationToken ct)
     {
-        if (_cache.TryGetValue("FaqEntries", out Dictionary<string, List<CardFaq>>? faqs) && faqs?.Count > 0)
+        if (_cache.TryGetValue("FaqEntries", out Dictionary<string, IEnumerable<CardFaq>>? faqs) && faqs?.Count > 0)
         {
             return faqs;
         }
@@ -44,42 +47,53 @@ public class CsvFaqRepository(IMemoryCache _cache, IOptions<DataRefreshOptions> 
         }
     }
 
-    private static async Task<Dictionary<string, List<CardFaq>>> DownloadFaqs(CancellationToken ct)
+    private async Task<Dictionary<string, IEnumerable<CardFaq>>> DownloadFaqs(CancellationToken ct)
     {
+        Log.Information("Fetching faq data from GitHub.");
+
         var responsePayload = await GetFaqJson(ct);
-        return [];
+        if (responsePayload == null)
+        {
+            if (_cache.TryGetValue("FaqEntries", out Dictionary<string, IEnumerable<CardFaq>>? faqs) && faqs?.Count > 0)
+            {
+                return faqs;
+            }
+            return [];
+        }
+
+        var dict = JsonSerializer.Deserialize<Dictionary<string, IEnumerable<MarkdownFaqEntry>>>(responsePayload);
+
+        Log.Information("Loaded {count} faq entries.", dict?.Sum(kvp => kvp.Key.Length) ?? 0);
+
+        return dict?.ToDictionary(kvp =>
+            kvp.Key.Replace('_', ' '),
+            kvp => kvp.Value.Select(v => new CardFaq()
+            {
+                AnswerText = v.answer,
+                QuestionText = v.question,
+                HasTable = false
+            }),
+            StringComparer.OrdinalIgnoreCase
+        ) ?? [];
     }
 
-    private static async Task<string> GetFaqJson(CancellationToken ct)
+    private async Task<string?> GetFaqJson(CancellationToken ct)
     {
-        return await File.ReadAllTextAsync(Path.Combine("Infrastructure", "DataAccess", "CardData", "rawfaq.json"), ct);
 
-        using var client = new HttpClient();
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        var github = new GitHubClient(new Octokit.ProductHeaderValue(nameof(Elementalist)));
+        var files = await github.Repository.Content.GetAllContents("DominicEliot", "sorcery-markdown-codex", "generatedFaqs.json");
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://sorcerytcg.com/api/trpc/cms.faqs?batch=1");
-        request.Headers.Add("Referer", "https://sorcerytcg.com/cards");
-        // request.Headers.Add("trpc-accept", "application/jsonl");
-        request.Headers.Add("x-trpc-source", "nextjs-react");
-        request.Headers.Add("Sec-GPC", "1");
-        request.Headers.Add("Sec-Fetch-Dest", "document");
-        request.Headers.Add("Sec-Fetch-Site", "none");
-
-        var postResults = await client.SendAsync(request, ct);
-        if (!postResults.IsSuccessStatusCode)
+        if (files.Count == 0)
         {
             return null;
         }
 
-        var responsePayload = await postResults.Content.ReadAsStringAsync(ct);
-        // await File.WriteAllTextAsync(Path.Combine("Infrastructure", "DataAccess", "CardData", "rawfaq.json"), responsePayload, ct);
-        return responsePayload;
+        return files[0].Content;
     }
 
-    private class FaqCsvEntry
+    private class MarkdownFaqEntry
     {
-        [Name("card name")] public required string card_name { get; init; }
+        public required IEnumerable<string> cards { get; init; } = [];
         public required string question { get; init; }
         public required string answer { get; init; }
     }
@@ -102,8 +116,8 @@ public class CsvFaqRepository(IMemoryCache _cache, IOptions<DataRefreshOptions> 
 
 public class CardFaq
 {
-    public string QuestionText { get; set; } = "";
-    public string AnswerText { get; set; } = "";
+    public required string QuestionText { get; init; }
+    public required string AnswerText { get; init; }
     public bool HasTable { get; set; }
 
     public override string ToString()

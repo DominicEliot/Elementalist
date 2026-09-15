@@ -11,9 +11,7 @@ public class CodexFetchService(IRulesRepository rulesRepo, IOptions<DataRefreshO
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            Log.Information("Fetching curiosa codex data from GitHub.");
             var rules = await rulesRepo.GetRules(stoppingToken);
-            Log.Information("Loaded {count} codex entries.", rules.Count());
 
             try
             {
